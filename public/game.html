@@ -3455,7 +3455,10 @@
       $("#aiPanelBody").find(".ai-msg-pending").first().remove();
 
       // 将用户提问加入 messages（用 [Chat] 前缀与 Game State 区分）
-      player.messages.push({ role: "user", content: "[Chat] " + text });
+      player.messages.push({
+        role: "user",
+        content: "[Chat] " + text + "\n\n" + t("（提示：用户说话时提到的数字或字母（如「2」「9」「A」「K」）指的是牌面点数，不是 view_hand 里的牌摞编号/索引。需要精确定位手牌时，请先调用 view_hand 查看牌面与对应索引。）")
+      });
       if (aiPanelPlayerIdx === playerIdx) {
         renderAIPanel();
         const $body = $("#aiPanelBody");

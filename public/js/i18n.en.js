@@ -372,6 +372,7 @@ window.I18N_EN = {
   "请提供要记录的经验内容（content 参数不能为空）。": "Provide the experience content to record (content must not be empty).",
   "请用一段话总结你从这个座位提炼出的经验教训。如果觉得没什么可记录的，直接回复「无」即可。": "Summarize the lessons you drew from this seat in one passage. If there's nothing worth recording, just reply \"none\".",
   "请先调用 view_hand 工具查看手牌和索引，然后决定如何出牌。": "First call view_hand to see your hand and indices, then decide what to play.",
+  "（提示：用户说话时提到的数字或字母（如「2」「9」「A」「K」）指的是牌面点数，不是 view_hand 里的牌摞编号/索引。需要精确定位手牌时，请先调用 view_hand 查看牌面与对应索引。）": "(Note: numbers or letters the user mentions (e.g. \"2\", \"9\", \"A\", \"K\") refer to the card ranks printed on the cards, not the pile indices in view_hand. To locate cards precisely, call view_hand first to see the ranks and their indices.)",
   "请先粘贴 {label} 的 API Key": "Paste {label}'s API Key first",
   "请重点思考以下问题：": "Focus on these questions:",
   "确定清空本机战绩吗？将删除全部对局统计（胜率、模型胜场、最长对局等）。\nAI 经验记忆、座位配置和 API Key 不受影响。": "Clear the local stats? This deletes all game statistics (win rate, per-model wins, longest game, etc.).\nAI experience memory, seat config and API Keys are unaffected.",
