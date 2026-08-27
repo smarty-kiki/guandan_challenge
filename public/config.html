@@ -170,8 +170,9 @@
     .page-head .lead { font-size: 0.98rem; color: var(--ink-soft); margin: 0; }
 
     /* ---------- 两栏 ---------- */
-    .two-col { display: grid; grid-template-columns: 380px 1fr; gap: 2rem; align-items: start; }
-    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+    .two-col { display: grid; grid-template-columns: minmax(290px, 380px) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+    @media (max-width: 900px) { .two-col { gap: 1.25rem; } }
+    @media (max-width: 740px) { .two-col { grid-template-columns: 1fr; gap: 1.5rem; } }
 
     .panel {
       background: #fff;
