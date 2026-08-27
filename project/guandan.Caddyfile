@@ -3,15 +3,4 @@ guandan.yao-yang.cn {
     root * /var/www/guandan_challenge/public
     file_server
     encode gzip
-
-    # 备用：若 DeepSeek 座位调用失败（浏览器 CORS 受限），
-    # 把 js/common.js 里 deepseek 的 apiUrl 改成 /deepseek-api/chat/completions 即可
-    handle_path /deepseek-api/* {
-        reverse_proxy https://api.deepseek.com {
-            header_up Host api.deepseek.com
-            header_up Authorization {header.Authorization}
-            header_up Content-Type {header.Content-Type}
-            header_up Accept {header.Accept}
-        }
-    }
 }
