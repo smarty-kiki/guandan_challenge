@@ -1,6 +1,6 @@
 guandan.yao-yang.cn {
     tls 378031327@qq.com
-    root * /var/www/guandan/public
+    root * /var/www/guandan_challenge/public
     file_server
     encode gzip
 
