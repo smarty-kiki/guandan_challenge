@@ -438,6 +438,25 @@
     @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
 
     /* ---------- 03 跨局记忆 ---------- */
+    .why-grid {
+      display: flex;
+      gap: 1.1rem;
+      flex-wrap: wrap;
+      margin-top: 2.2rem;
+    }
+    .why-card {
+      flex: 1;
+      min-width: 280px;
+      background: var(--cream);
+      border: 1.5px solid var(--line);
+      border-top: 4px solid var(--gold);
+      border-radius: 14px;
+      padding: 1.5rem 1.6rem 1.6rem;
+    }
+    .why-card.raise { border-top-color: var(--purple); }
+    .why-card .why-emoji { font-size: 1.9rem; line-height: 1; }
+    .why-card h3 { font-size: 1.12rem; font-weight: 900; margin: 0.55rem 0 0.55rem; }
+    .why-card p { font-size: 0.88rem; color: var(--ink-soft); line-height: 1.75; margin: 0; }
     .memory-flow {
       display: flex;
       align-items: stretch;
@@ -633,6 +652,7 @@
 <nav class="top-nav page-shell">
   <a class="brand" href="index.html"><span class="mark">♠</span>大模型掼蛋挑战赛</a>
   <div class="nav-links">
+    <a href="#why" class="nav-link">项目出发点</a>
     <a href="#roster" class="nav-link">参赛阵容</a>
     <a href="#rules" class="nav-link">规则简介</a>
     <a href="config.html" class="btn-ghost" style="padding:0.5rem 1.2rem;font-size:0.85rem;">配置模型 Key</a>
@@ -649,6 +669,7 @@
       <p class="subtitle">
         这里是属于大模型的牌桌：每位 AI 都是会用工具的 Agent——自己看牌、自己理牌、自己出牌，
         每局打完还会复盘、沉淀经验。座位随意换模型，真人也能上场，一桌之内，人机混战。
+        这张桌既能评测各家模型的牌技，也能一局局养成只属于你的牌神。
       </p>
       <div class="cta-row">
         <a href="game.html" class="btn-solid btn-solid-lg">开始对战</a>
@@ -717,6 +738,37 @@
   </div>
 </header>
 
+<!-- ==================== 00 出发点 ==================== -->
+<section class="section" id="why" style="padding-top:2.5rem;">
+  <div class="page-shell">
+    <div class="sec-head">
+      <div class="sec-kicker">00 出发点</div>
+      <h2>这个项目，能拿来干什么</h2>
+      <p class="lead">一张牌桌，两种玩法——它既是模型的评测场，也是你私人的牌神养成场。</p>
+    </div>
+    <div class="why-grid">
+      <div class="why-card bench">
+        <div class="why-emoji">🥊</div>
+        <h3>模型评测场：谁牌技硬，打一局就知道</h3>
+        <p>
+          把不同模型换上桌：同一个牌桌、同一副牌、同一套规则，风格打法高下立判。
+          每个决策全程可见，不是黑箱；经验记忆随时可清空，保证各家公平起跑。
+          战绩自动入账——打一晚上，谁的胜率最高，一目了然。
+        </p>
+      </div>
+      <div class="why-card raise">
+        <div class="why-emoji">🧠</div>
+        <h3>牌神养成场：在你的电脑上越练越强</h3>
+        <p>
+          不用服务器、不写训练脚本，就在这台电脑上。锁住一个模型，一局局陪它打：
+          每局结束自动复盘、把得失提炼成经验，越打越有牌感——
+          练久了，它就成了一位只属于你的牌神 agent。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ==================== 01 参赛阵容 ==================== -->
 <section class="section" id="roster">
   <div class="page-shell">
@@ -726,6 +778,7 @@
       <p class="lead">
         每个座位都可以接入不同厂商的大模型：南座用 DeepSeek、东座用 Kimi、北座放 MiniMax、
         西座让 StepFun 上场——一局牌里，四家 AI 同台对弈。也支持人机混战：想练手，就让自己坐进一个座位。
+        想评测某家模型？把它换上桌打几局——每个决策全程可见，打法风格一望即知；记忆随时可清空，保证各家公平起跑。
       </p>
     </div>
 
@@ -848,7 +901,8 @@
         <div class="f-note">经验自动跟随 <span class="gold">✓</span> 开局就能用</div>
       </div>
     </div>
-    <p class="memory-caption"><b>经验按模型独立保存</b>：同一个模型，换到任何座位都记得住；想给某家 AI 换打法，把它的经验清掉重练即可。</p>
+    <p class="memory-caption"><b>经验按模型独立保存</b>：同一个模型，换到任何座位都记得住；想给某家 AI 换打法，把它的经验清掉重练即可。
+      这也是一座养成场——锁住一个模型，在这台电脑上一局局陪它打，越打越有牌感，直到它成为你的牌神。</p>
   </div>
 </section>
 
@@ -941,12 +995,12 @@
     <div class="cta-band">
       <div class="kicker">♠ 四位选手已经就位</div>
       <h2>现在，开局？</h2>
-      <p>一桌 108 张牌，胜负交给它们。谁家模型牌技最好，打一局就知道。</p>
+      <p>一桌 108 张牌，胜负交给它们——测一测谁家模型牌技最硬，或亲手养出一个越打越强的牌神。</p>
       <div class="cta-row" style="display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;">
         <a href="game.html" class="btn-solid btn-solid-lg">进入牌桌</a>
         <a href="config.html" class="btn-ghost btn-ghost-lg">先配置模型 Key</a>
       </div>
-      <div class="mini">牌桌上随时可以换模型、换座位 · 战绩自动记录</div>
+      <div class="mini">牌桌上随时可以换模型、换座位 · 战绩自动记录 · 经验越打越厚</div>
     </div>
   </div>
 </section>
