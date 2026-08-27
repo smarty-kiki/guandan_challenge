@@ -97,8 +97,8 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 0.35rem;
-      margin: 0.2rem 0;
+      gap: 0.55rem;
+      margin: 0.35rem 0;
     }
     .seat-config-row .config-label {
       font-size: 0.75rem;
@@ -107,17 +107,31 @@
       white-space: nowrap;
     }
     .seat-cfg-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(330px, 1fr));
-      gap: 0.35rem 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
     }
-    @media (max-width: 860px) {
-      .seat-cfg-grid { grid-template-columns: 1fr; }
+    .seat-cfg-team {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .seat-team-tag {
+      font-size: 0.68rem;
+      font-weight: 800;
+      line-height: 1;
+      padding: 4px 10px;
+      border-radius: 9px;
+      white-space: nowrap;
+    }
+    @media (max-width: 900px) {
+      .seat-cfg-team { gap: 0.55rem; }
     }
     .seat-cfg-item {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
+      gap: 8px;
       font-size: 0.72rem;
       font-weight: 700;
       color: var(--text);
@@ -145,8 +159,8 @@
       color: var(--text);
     }
     .seat-cfg-select.seat-type { width: 46px; }
-    .seat-cfg-select.seat-provider { width: 112px; }
-    .seat-cfg-select.seat-model { width: 176px; }
+    .seat-cfg-select.seat-provider { width: 132px; }
+    .seat-cfg-select.seat-model { width: 216px; }
     .game-topbar .right-col {
       display: flex;
       flex-direction: column;
@@ -1074,26 +1088,32 @@
       <div class="seat-config-row">
         <span class="config-label" data-i18n="座位配置（每个 AI 座位可独立选不同模型）：">座位配置（每个 AI 座位可独立选不同模型）：</span>
         <div class="seat-cfg-grid">
-          <label class="seat-cfg-item"><span class="seat-name" data-i18n="南">南</span>
-            <select id="cfgSeat0" class="form-select form-select-sm seat-cfg-select seat-type"><option value="human" data-i18n="人">人</option><option value="ai">AI</option></select>
-            <select id="cfgSeat0Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
-            <select id="cfgSeat0Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
-          </label>
-          <label class="seat-cfg-item"><span class="seat-name" data-i18n="东">东</span>
-            <select id="cfgSeat1" class="form-select form-select-sm seat-cfg-select seat-type" disabled data-i18n-title="东/北/西座位只能使用 AI（真人无法操作）" title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
-            <select id="cfgSeat1Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
-            <select id="cfgSeat1Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
-          </label>
-          <label class="seat-cfg-item"><span class="seat-name" data-i18n="北">北</span>
-            <select id="cfgSeat2" class="form-select form-select-sm seat-cfg-select seat-type" disabled data-i18n-title="东/北/西座位只能使用 AI（真人无法操作）" title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
-            <select id="cfgSeat2Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
-            <select id="cfgSeat2Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
-          </label>
-          <label class="seat-cfg-item"><span class="seat-name" data-i18n="西">西</span>
-            <select id="cfgSeat3" class="form-select form-select-sm seat-cfg-select seat-type" disabled data-i18n-title="东/北/西座位只能使用 AI（真人无法操作）" title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
-            <select id="cfgSeat3Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
-            <select id="cfgSeat3Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
-          </label>
+          <div class="seat-cfg-team">
+            <span class="seat-team-tag team-a" data-i18n="A组">A组</span>
+            <label class="seat-cfg-item"><span class="seat-name" data-i18n="南">南</span>
+              <select id="cfgSeat0" class="form-select form-select-sm seat-cfg-select seat-type"><option value="human" data-i18n="人">人</option><option value="ai">AI</option></select>
+              <select id="cfgSeat0Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
+              <select id="cfgSeat0Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
+            </label>
+            <label class="seat-cfg-item"><span class="seat-name" data-i18n="北">北</span>
+              <select id="cfgSeat2" class="form-select form-select-sm seat-cfg-select seat-type" disabled data-i18n-title="东/北/西座位只能使用 AI（真人无法操作）" title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
+              <select id="cfgSeat2Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
+              <select id="cfgSeat2Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
+            </label>
+          </div>
+          <div class="seat-cfg-team">
+            <span class="seat-team-tag team-b" data-i18n="B组">B组</span>
+            <label class="seat-cfg-item"><span class="seat-name" data-i18n="东">东</span>
+              <select id="cfgSeat1" class="form-select form-select-sm seat-cfg-select seat-type" disabled data-i18n-title="东/北/西座位只能使用 AI（真人无法操作）" title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
+              <select id="cfgSeat1Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
+              <select id="cfgSeat1Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
+            </label>
+            <label class="seat-cfg-item"><span class="seat-name" data-i18n="西">西</span>
+              <select id="cfgSeat3" class="form-select form-select-sm seat-cfg-select seat-type" disabled data-i18n-title="东/北/西座位只能使用 AI（真人无法操作）" title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
+              <select id="cfgSeat3Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
+              <select id="cfgSeat3Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
+            </label>
+          </div>
         </div>
       </div>
       <p class="status-line" id="gameStatus" data-i18n="等待开始">等待开始</p>
@@ -4070,7 +4090,7 @@
     // Show/hide per-seat action buttons
     $(".seat-actions").each(function() {
       const pos = parseInt($(this).data("position"));
-      const isHumanSeat = seatConfig[pos] === "human";
+      const isHumanSeat = seatConfig[pos] && seatConfig[pos].type === "human";
       const isMyTurn = pos === game.currentPlayer;
       const gameActive = !game.finished && game.started;
       // Always show for human seat during game; play/pass only when it's their turn
@@ -4092,7 +4112,7 @@
     });
 
     // Always update pile/play buttons for human bottom seat during game
-    if (game.started && !game.finished && seatConfig[0] === "human") {
+    if (game.started && !game.finished && seatConfig[0] && seatConfig[0].type === "human") {
       updatePileButtons();
       updatePlayButton();
     }
