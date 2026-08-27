@@ -1541,9 +1541,10 @@
       try {
         while (true) {
           try {
-          const onChunk = aiPanelPlayerIdx === this.position
-            ? (chunk) => { renderStreamingChunk(chunk); }
-            : null;
+          // 始终传回调以便流式请求；是否显示在分块到达时判断（面板中途打开也能接上）
+          const onChunk = (chunk) => {
+            if (aiPanelPlayerIdx === this.position) renderStreamingChunk(chunk);
+          };
           const response = await callLLMWithMessages(
             this._buildAPIMessages(game), GUANDAN_TOOLS, this.providerId, this.modelName, onChunk
           );
@@ -1666,8 +1667,7 @@
         turnCount++;
         try {
           const response = await callLLMWithMessages(
-            this._buildAPIMessages(game), GUANDAN_TOOLS, this.providerId, this.modelName,
-            aiPanelPlayerIdx === this.position ? onChunk : null
+            this._buildAPIMessages(game), GUANDAN_TOOLS, this.providerId, this.modelName, onChunk
           );
           const msg = response.message;
 
@@ -3627,13 +3627,14 @@
     const config = getProviderConfig(providerId);
     if (!config) throw new Error("未知 Provider: " + providerId);
 
-    const useStream = !!onChunk;
+    // 始终流式请求；是否实时显示由 onChunk 决定（面板未打开时丢弃块，
+    // 中途打开面板也能从下一块接上完整内容，因为每块都带累计全文）
     const body = {
       model: modelName,
       messages: messages,
       tools: tools,
       max_tokens: 4096,
-      stream: useStream
+      stream: true
     };
 
     const controller = new AbortController();
@@ -3654,13 +3655,6 @@
 
       // 使用即续期：本次调用成功，把该服务商的 API Key Cookie 有效期重新延长到 30 天
       touchProviderCookie(providerId);
-
-      if (!useStream) {
-        const payload = await response.json();
-        const choice = payload && payload.choices && payload.choices[0] ? payload.choices[0] : null;
-        if (!choice || !choice.message) throw new Error("模型返回为空");
-        return { message: choice.message, finishReason: choice.finish_reason };
-      }
 
       // --- Streaming mode ---
       const reader = response.body.getReader();
@@ -3690,7 +3684,7 @@
             // Content delta
             if (delta.content) {
               accumulatedContent += delta.content;
-              onChunk({ content: accumulatedContent, tool_calls: null });
+              if (onChunk) onChunk({ content: accumulatedContent, tool_calls: null });
             }
 
             // Tool call delta
@@ -3703,7 +3697,7 @@
                   if (tc.function.name) toolCalls[idx].function.name += tc.function.name;
                   if (tc.function.arguments) toolCalls[idx].function.arguments += tc.function.arguments;
                 }
-                onChunk({
+                if (onChunk) onChunk({
                   content: accumulatedContent,
                   tool_calls: Object.values(toolCalls).filter(tc => tc.function.name)
                 });
