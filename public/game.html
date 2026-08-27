@@ -1290,6 +1290,7 @@
     t("- 判断顺子时，把 J 读作 11、Q 读作 12、K 读作 13、A 读作 14，然后看是否为5个连续数字即可"),
     t("- 「同点」指多张牌的牌面点数相同（如两张K、三张7）。大王只能和大王同点，小王只能和小王同点"),
     t("- 级牌大小介于小王和A之间：大王(17) > 小王(16) > 级牌(15) > A(14) > K(13) > ... > 2(2)"),
+    t("- 级牌在顺子/连对/钢板/同花顺中按本身牌面点数参与连续与比较（如打4时 34567 合法；顶张是级牌时也按牌面点数，如打10时 6,7,8,9,10 按 10 比较，不按15）"),
     t("- 逢人配：红心级牌，每局最多2张。单独出时代表级牌本身，组合出时可替代任意非王牌凑牌型"),
     "",
     "---",
@@ -1298,11 +1299,11 @@
     t("2. 对子：同点2张（含对大王/对小王）"),
     t("3. 三张：同点3张"),
     t("4. 三带二：同点3张 + 一个对子（对子点数必须与三张不同。如 999+QQ 合法，不能是 999+99）"),
-    t("5. 顺子：5张连续单张（不限花色）。即5张牌的底层数字依次递增1。包括 10JQKA（10~14）和 A2345（A视为1，1~5）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字凑连续"),
-    t("6. 连对：3对连续对子（不限花色）。即3个对子的点数数字依次递增1。包括 QQKKAA（12~14）和 AA2233（A视为1，1~3）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字凑连续"),
-    t("7. 钢板：2个连续三同张（不限花色，如333444）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字凑连续"),
+    t("5. 顺子：5张连续单张（不限花色）。即5张牌的底层数字依次递增1。包括 10JQKA（10~14）和 A2345（A视为1，1~5）。普通级牌（非红心）按本身牌面点数参与连续（如打4时 34567 合法）；逢人配（红心级牌）可替代任意数字凑连续"),
+    t("6. 连对：3对连续对子（不限花色）。即3个对子的点数数字依次递增1。包括 QQKKAA（12~14）和 AA2233（A视为1，1~3）。普通级牌（非红心）按本身牌面点数参与连续；逢人配（红心级牌）可替代任意数字凑连续"),
+    t("7. 钢板：2个连续三同张（不限花色，如333444）。普通级牌（非红心）按本身牌面点数参与连续；逢人配（红心级牌）可替代任意数字凑连续"),
     t("8. 炸弹：4张及以上同点，张数越多越大"),
-    t("9. 同花顺：同花色连续5张。即5张同花色牌的底层数字依次递增1。包括 10JQKA（10~14）和 A2345（A视为1，1~5）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字且花色可任意适配凑连续"),
+    t("9. 同花顺：同花色连续5张。即5张同花色牌的底层数字依次递增1。包括 10JQKA（10~14）和 A2345（A视为1，1~5）。普通级牌（非红心）按本身牌面点数参与连续；逢人配（红心级牌）可替代任意数字且花色可任意适配凑连续"),
     t("10. 天王炸：2大王+2小王，全场最大"),
     "",
     "---",
@@ -2695,7 +2696,8 @@
         const baseVals = ranks.map(r => this.getBaseRankValue(r)).sort((a,b) => a-b);
         if (baseVals.length === 2 && this.isConsecutive(baseVals) && baseVals[1] <= 14) {
           const highestRank = ranks.reduce((a, b) => this.getBaseRankValue(a) > this.getBaseRankValue(b) ? a : b);
-          return { type: "consecutive_triples", power: this.getRankValue(highestRank), length: 2 };
+          // 级牌在钢板中按本身牌面点数比较（顶张是级牌也不加 15）
+          return { type: "consecutive_triples", power: this.getBaseRankValue(highestRank), length: 2 };
         }
       }
 
@@ -2706,39 +2708,29 @@
         if (baseVals.length === 3) {
           if (this.isConsecutive(baseVals) && baseVals[2] <= 14) {
             const highestRank = ranks.reduce((a, b) => this.getBaseRankValue(a) > this.getBaseRankValue(b) ? a : b);
-            return { type: "consecutive_pairs", power: this.getRankValue(highestRank), length: 3 };
+            // 级牌在连对中按本身牌面点数比较（顶张是级牌也不加 15）
+            return { type: "consecutive_pairs", power: this.getBaseRankValue(highestRank), length: 3 };
           }
           if (baseVals[0] === 2 && baseVals[2] === 14 && baseVals[1] === 3) {
-            return { type: "consecutive_pairs", power: this.getRankValue("3"), length: 3 };
+            return { type: "consecutive_pairs", power: this.getBaseRankValue("3"), length: 3 };
           }
         }
       }
 
-      // Straight: exactly 5, including A2345
+      // Straight / straight flush: exactly 5, including A2345
+      // （同花顺 = 同花色的顺子，必须先判定，否则 2731 之后的同花顺分支永远执行不到）
       if (n === 5 && counts.every(c => c === 1)) {
         const ranks = Object.keys(rankCounts);
         const baseVals = ranks.map(r => this.getBaseRankValue(r)).sort((a,b) => a-b);
+        const sameSuit = cards[0].suit && cards.every(c => c.suit === cards[0].suit);
+        const type = sameSuit ? "straight_flush" : "straight";
         if (this.isConsecutive(baseVals) && baseVals[4] <= 14) {
           const highestRank = ranks.reduce((a, b) => this.getBaseRankValue(a) > this.getBaseRankValue(b) ? a : b);
-          return { type: "straight", power: this.getRankValue(highestRank), length: 5 };
+          // 级牌在序列中按本身牌面点数比较（顶张是级牌也不加 15）
+          return { type, power: this.getBaseRankValue(highestRank), length: 5 };
         }
         if (baseVals[0] === 2 && baseVals[4] === 14 && this.isConsecutive(baseVals.slice(0, 4))) {
-          return { type: "straight", power: this.getRankValue("5"), length: 5 };
-        }
-      }
-
-      // Straight flush: exactly 5, including A2345
-      if (n === 5) {
-        const suit = cards[0].suit;
-        if (suit && cards.every(c => c.suit === suit)) {
-          const baseVals = cards.map(c => this.getBaseRankValue(c.rank)).sort((a,b) => a-b);
-          if (this.isConsecutive(baseVals) && baseVals[4] <= 14) {
-            const highestRank = cards.reduce((a, b) => this.getBaseRankValue(a.rank) > this.getBaseRankValue(b.rank) ? a : b).rank;
-            return { type: "straight_flush", power: this.getRankValue(highestRank), length: 5 };
-          }
-          if (baseVals[0] === 2 && baseVals[4] === 14 && this.isConsecutive(baseVals.slice(0, 4))) {
-            return { type: "straight_flush", power: this.getRankValue("5"), length: 5 };
-          }
+          return { type, power: this.getBaseRankValue("5"), length: 5 };
         }
       }
 
@@ -2769,93 +2761,75 @@
 
       let bestResult = null;
 
-      // Check if wilds can complete a bomb
+      // 炸弹：所有常牌必须同点（配子全部并入炸弹），杜绝「7张当5炸」这类子集出牌
       const maxCount = Math.max(...Object.values(rankCounts));
-      if (maxCount + wildCount >= 4) {
-        let bestRank = null;
-        let bestCnt = 0;
-        for (const [r, cnt] of Object.entries(rankCounts)) {
-          const rv = this.getRankValue(r);
-          if (cnt > bestCnt || (cnt === bestCnt && rv > (bestRank ? this.getRankValue(bestRank) : 0))) {
-            bestCnt = cnt;
-            bestRank = r;
-          }
-        }
-        const totalBomb = bestCnt + wildCount;
-        if (totalBomb >= 4) {
-          const result = { type: "bomb", power: this.getRankValue(bestRank), length: totalBomb, wildUsed: wildCount };
-          if (totalBomb >= 5 && (!bestResult || result.power > bestResult.power)) {
-            bestResult = result;
-          } else if (totalBomb === 4 && !bestResult) {
-            bestResult = result;
-          }
-        }
+      if (maxCount === regulars.length && maxCount + wildCount >= 4) {
+        const bombRank = Object.keys(rankCounts)[0];
+        bestResult = { type: "bomb", power: this.getRankValue(bombRank), length: maxCount + wildCount, wildUsed: wildCount };
       }
 
-      // Straight with wilds
-      if (regulars.length >= 4 && wildCount >= 1) {
-        const ranks = [...new Set(regulars.map(c => this.getBaseRankValue(c.rank)))].sort((a,b) => a-b);
-        for (let start = 0; start < ranks.length; start++) {
-          for (let len = 5; len <= 5; len++) {
-            const needed = [];
-            let val = ranks[start];
-            for (let i = 0; i < len; i++) {
-              if (!ranks.includes(val + i)) needed.push(val + i);
-            }
-            if (needed.length <= wildCount && val + len - 1 <= 14) {
-              const highestBaseVal = val + len - 1;
-              const highestRank = Object.keys(RANK_ORDER).find(r => RANK_ORDER[r] === highestBaseVal) || String(highestBaseVal);
-              const power = this.getRankValue(highestRank);
-              if (!bestResult || highestBaseVal > (bestResult._baseHighest || 0)) {
-                bestResult = { type: "straight", power, length: len, wildUsed: needed.length, _baseHighest: highestBaseVal };
-              }
-            }
+      // 顺子/同花顺 with wilds：配子可补任意缺口（含顶张以下的空位，如 JQKA+配=10JQKA）；
+      // 总张数必须恰好5张（同花顺 = 常牌同花色的顺子）
+      if (total === 5 && wildCount >= 1) {
+        const ranks = [...new Set(regulars.map(c => this.getBaseRankValue(c.rank)))];
+        const sameSuit = regulars[0].suit && regulars.every(c => c.suit === regulars[0].suit);
+        const type = sameSuit ? "straight_flush" : "straight";
+        for (let startVal = 2; startVal <= 10; startVal++) {
+          const needed = [];
+          for (let i = 0; i < 5; i++) {
+            if (!ranks.includes(startVal + i)) needed.push(startVal + i);
+          }
+          if (needed.length > wildCount) continue;
+          const highestBaseVal = startVal + 4;
+          const highestRank = Object.keys(RANK_ORDER).find(r => RANK_ORDER[r] === highestBaseVal) || String(highestBaseVal);
+          // 级牌在序列中按本身牌面点数比较（顶张是级牌也不加 15）
+          const power = this.getBaseRankValue(highestRank);
+          const wildsNeeded = needed.length;
+          if (!bestResult || highestBaseVal > (bestResult._baseHighest || 0) ||
+              (highestBaseVal === (bestResult._baseHighest || 0) && wildsNeeded < (bestResult.wildUsed || 999))) {
+            bestResult = { type, power, length: 5, wildUsed: wildsNeeded, _baseHighest: highestBaseVal };
           }
         }
-        // A2345 straight with wilds
+        // A2345（A视为1，1~5）
         const regVals = [...new Set(regulars.map(c => this.getBaseRankValue(c.rank)))];
         const a2345Set = [2, 3, 4, 5, 14];
         const covered = a2345Set.filter(v => regVals.includes(v));
         const extras = regVals.filter(v => !a2345Set.includes(v));
         if (extras.length === 0 && covered.length + wildCount >= 5) {
           const wildsNeeded = 5 - covered.length;
-          const a2345power = this.getRankValue("5");
           const baseHighest = 5;
           const lessWilds = wildsNeeded < (bestResult ? bestResult.wildUsed || 0 : 0);
           if (!bestResult || baseHighest > ((bestResult && bestResult._baseHighest) || 0) || (baseHighest === ((bestResult && bestResult._baseHighest) || 0) && lessWilds)) {
-            bestResult = { type: "straight", power: a2345power, length: 5, wildUsed: wildsNeeded, _baseHighest: baseHighest };
+            bestResult = { type, power: this.getBaseRankValue("5"), length: 5, wildUsed: wildsNeeded, _baseHighest: baseHighest };
           }
         }
       }
 
-      // Consecutive pairs with wilds
-      if (regulars.length >= 4 && wildCount >= 1) {
-        // Collect all ranks that appear in hand (including singles)
+      // 连对 with wilds：总张数必须恰好6张
+      if (total === 6 && wildCount >= 1) {
         const handRanks = Object.keys(rankCounts).map(r => this.getBaseRankValue(r));
-        // Try every possible starting value from 2 to 12 (max start for 3 pairs ending at A=14)
         for (let startVal = 2; startVal <= 12; startVal++) {
-          const endVal = startVal + 2; // 3 consecutive pairs: start, start+1, start+2
+          const endVal = startVal + 2;
           if (endVal > 14) continue;
-          // Check if any card in this range exists in hand
           const hasAny = handRanks.some(v => v >= startVal && v <= endVal);
           if (!hasAny) continue;
           let wildsNeeded = 0;
           for (let v = startVal; v <= endVal; v++) {
             const rank = Object.keys(RANK_ORDER).find(r => RANK_ORDER[r] === v);
             const cnt = rank ? (rankCounts[rank] || 0) : 0;
-            wildsNeeded += Math.max(0, 2 - cnt); // Need (2 - cnt) wilds to complete a pair
+            wildsNeeded += Math.max(0, 2 - cnt);
           }
           if (wildsNeeded > 0 && wildsNeeded <= wildCount) {
             const highestRank = Object.keys(RANK_ORDER).find(r => RANK_ORDER[r] === endVal);
             if (highestRank) {
-              const power = this.getRankValue(highestRank);
+              const power = this.getBaseRankValue(highestRank);
               if (!bestResult || endVal > (bestResult._baseHighest || 0) || (endVal === (bestResult._baseHighest || 0) && wildsNeeded < (bestResult.wildUsed || 999))) {
                 bestResult = { type: "consecutive_pairs", power, length: 3, wildUsed: wildsNeeded, _baseHighest: endVal };
               }
             }
           }
         }
-        // AA2233 special: handles 2-3-14 sequence
+        // AA2233 special（A视为1，1~3）
         const aa2233Ranks = { "2": 2, "3": 3, "A": 14 };
         let aaWildsNeeded = 0;
         for (const [r, v] of Object.entries(aa2233Ranks)) {
@@ -2865,13 +2839,13 @@
         if (aaWildsNeeded > 0 && aaWildsNeeded <= wildCount) {
           const baseHighest = 3;
           if (!bestResult || baseHighest > (bestResult._baseHighest || 0) || (baseHighest === (bestResult._baseHighest || 0) && aaWildsNeeded < (bestResult.wildUsed || 999))) {
-            bestResult = { type: "consecutive_pairs", power: this.getRankValue("3"), length: 3, wildUsed: aaWildsNeeded, _baseHighest: baseHighest };
+            bestResult = { type: "consecutive_pairs", power: this.getBaseRankValue("3"), length: 3, wildUsed: aaWildsNeeded, _baseHighest: baseHighest };
           }
         }
       }
 
-      // 钢板 with wilds
-      if (!bestResult && regulars.length >= 3 && wildCount >= 1) {
+      // 钢板 with wilds：总张数必须恰好6张
+      if (total === 6 && wildCount >= 1) {
         const rankEntries = Object.entries(rankCounts).map(([r, cnt]) => ({
           rank: r, cnt, baseVal: this.getBaseRankValue(r)
         }));
@@ -2886,47 +2860,11 @@
           if (wildsNeeded > 0 && wildsNeeded <= wildCount) {
             const highestRank = nextEntry ? nextEntry.rank : Object.keys(RANK_ORDER).find(r => RANK_ORDER[r] === val1 + 1);
             if (highestRank) {
-              const power = this.getRankValue(highestRank);
+              const power = this.getBaseRankValue(highestRank);
               const baseHighest = val1 + 1;
               if (!bestResult || baseHighest > (bestResult._baseHighest || 0)) {
                 bestResult = { type: "consecutive_triples", power, length: 2, wildUsed: wildsNeeded, _baseHighest: baseHighest };
               }
-            }
-          }
-        }
-      }
-
-      // Straight flush with wilds
-      if (!bestResult && regulars.length >= 4 && wildCount >= 1) {
-        const suits = [...new Set(regulars.map(c => c.suit))];
-        if (suits.length === 1 && suits[0]) {
-          const ranks = [...new Set(regulars.map(c => this.getBaseRankValue(c.rank)))].sort((a,b) => a-b);
-          for (let start = 0; start < ranks.length; start++) {
-            const needed = [];
-            const val = ranks[start];
-            for (let i = 0; i < 5; i++) {
-              if (!ranks.includes(val + i)) needed.push(val + i);
-            }
-            if (needed.length <= wildCount && val + 4 <= 14) {
-              const highestBaseVal = val + 4;
-              const highestRank = Object.keys(RANK_ORDER).find(r => RANK_ORDER[r] === highestBaseVal) || String(highestBaseVal);
-              const power = this.getRankValue(highestRank);
-              if (!bestResult || highestBaseVal > (bestResult._baseHighest || 0)) {
-                bestResult = { type: "straight_flush", power, length: 5, wildUsed: needed.length, _baseHighest: highestBaseVal };
-              }
-            }
-          }
-          // A2345 straight flush with wilds
-          const a2345SFSet = [2, 3, 4, 5, 14];
-          const sfCovered = a2345SFSet.filter(v => ranks.includes(v));
-          const sfExtras = ranks.filter(v => !a2345SFSet.includes(v));
-          if (sfExtras.length === 0 && sfCovered.length + wildCount >= 5) {
-            const wildsNeeded = 5 - sfCovered.length;
-            const sfPower = this.getRankValue("5");
-            const baseHighest = 5;
-            const lessWilds = wildsNeeded < (bestResult ? bestResult.wildUsed || 0 : 0);
-            if (!bestResult || baseHighest > ((bestResult && bestResult._baseHighest) || 0) || (baseHighest === ((bestResult && bestResult._baseHighest) || 0) && lessWilds)) {
-              bestResult = { type: "straight_flush", power: sfPower, length: 5, wildUsed: wildsNeeded, _baseHighest: baseHighest };
             }
           }
         }
@@ -2937,22 +2875,32 @@
         const regularRanks = regulars.map(c => c.rank);
         const uniqueRegRanks = [...new Set(regularRanks)];
         const totalCount = regulars.length + wildCount;
-        // 三带二 with wilds: triple + pair from 5 cards
+        // 三带二 with wilds：三张 + 对子，恰好5张；剩余常牌必须同点且与三张不同点，配子补足对子
         if (totalCount === 5 && wildCount >= 1) {
           for (const rank of uniqueRegRanks) {
             const cnt = regularRanks.filter(r => r === rank).length;
             const wildsForTriple = Math.max(0, 3 - cnt);
             if (wildsForTriple > wildCount) continue;
             const wildsLeft = wildCount - wildsForTriple;
-            const regularsLeft = regulars.length - cnt;
-            // Remaining cards + wilds must form a pair (2 cards)
-            if (regularsLeft + wildsLeft >= 2) {
-              bestResult = { type: "triple_plus_2", power: this.getRankValue(rank), wildUsed: wildsForTriple + Math.max(0, 2 - regularsLeft) };
-              break;
+            const leftoverCount = regulars.length - cnt;
+            const leftoverRanks = uniqueRegRanks.filter(r => r !== rank);
+            if (leftoverCount === 0) {
+              // 剩余全为配子：2张配 = 级牌对子
+              if (wildsLeft >= 2) {
+                bestResult = { type: "triple_plus_2", power: this.getRankValue(rank), wildUsed: wildsForTriple + 2 };
+                break;
+              }
+            } else if (leftoverCount <= 2 && leftoverRanks.length === 1) {
+              // 剩余常牌同点，配子补足对子
+              const pairWildsNeeded = 2 - leftoverCount;
+              if (pairWildsNeeded <= wildsLeft) {
+                bestResult = { type: "triple_plus_2", power: this.getRankValue(rank), wildUsed: wildsForTriple + pairWildsNeeded };
+                break;
+              }
             }
           }
         }
-        // Pair with 1 wild
+        // Pair with 1 wild / triple with wilds
         if (!bestResult) {
           for (const rank of uniqueRegRanks) {
             const cnt = regularRanks.filter(r => r === rank).length;
@@ -2966,10 +2914,6 @@
               break;
             }
           }
-        }
-        if (!bestResult && regulars.length === 0) {
-          if (wildCount === 2) bestResult = { type: "pair", power: 15, wildUsed: 2 };
-          else if (wildCount === 1) bestResult = { type: "single", power: 15, wildUsed: 1 };
         }
         if (!bestResult) return null;
       }
