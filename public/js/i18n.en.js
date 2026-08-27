@@ -445,6 +445,7 @@ window.I18N_EN = {
   "新一局开始！{level}{name} 有 {n} 张逢人配（红心{rank}）。": "New game! {level}{name} has {n} wild cards (heart {rank}).",
   "新一局开始！{level}全部 AI 自动对战。": "New game! {level}All AI autoplay.",
   "续期 30 天": "Renew 30 days",
+  "更新 Key": "Update key",
   "要拆散的牌摞编号数组，如 [0] 拆散第0个牌摞，[0,2] 同时拆散牌摞0和牌摞2。编号必须来自 view_hand 中显示的当前牌摞列表。": "Array of pile numbers to split: [0] splits pile 0, [0,2] splits piles 0 and 2. Numbers must come from view_hand's current pile list.",
   "要出的手牌索引数组": "Indices of the hand cards to play",
   "要记录的经验内容。不要记具体的某手牌，应从策略层面总结：组牌优先级、出牌节奏、博弈判断准则、逢人配使用原则等可复用的规律。": "The experience to record. Don't record specific cards — summarize reusable principles from a strategic level: arranging priority, play rhythm, judgment criteria, wild-card usage, etc.",

@@ -276,6 +276,22 @@
       white-space: nowrap;
     }
     .provider-status.ok { color: var(--green); border-color: #bcdcc9; background: #e7f5ee; }
+    .provider-status.missing { border-style: dashed; }
+
+    /* 已配置 / 未配置 卡片整体区分：
+       未配置 = 虚线框 + 灰 pill，只有「保存」一个实心按钮；
+       已配置 = 绿色边框底色 + 绿 pill，输入框默认显示掩码 Key，
+       按钮变为「更新 Key」+「续期 30 天」+「清除」 */
+    .provider-card { transition: border-color 0.2s, background 0.2s; }
+    .provider-card.configured {
+      border-color: #bcdcc9;
+      background: linear-gradient(180deg, #fdfdfd, #f3faf5);
+    }
+    .provider-card.unconfigured { border-style: dashed; }
+    .provider-card.unconfigured .btn-toggle,
+    .provider-card.unconfigured .btn-touch,
+    .provider-card.unconfigured .btn-clear { display: none; }
+    .provider-card.unconfigured .input-group > .form-control { border-radius: 10px !important; }
 
     .input-group-text {
       background: var(--cream-deep);
@@ -630,10 +646,18 @@
       const $status = $("#status-" + id);
       const $input = $("#" + cfg.cookieName);
       const $exp = $("#exp-" + id);
+      const $card = $("#card-" + id);
+      const $save = $card.find(".btn-save");
+      const $toggle = $card.find(".btn-toggle");
       if (key) {
+        // 已配置：绿色卡片，输入框默认显示掩码 Key，主按钮转为「更新 Key」
         $status.text(t("✓ {label} 已配置", { label: cfg.shortLabel })).attr("class", "provider-status ok");
-        $input.val(key);
+        $card.addClass("configured").removeClass("unconfigured");
+        $input.val(maskValue(key));
         $input.attr("placeholder", maskValue(key));
+        $input.attr("type", "password");
+        $toggle.text(t("显示"));
+        $save.addClass("btn-ghost").removeClass("btn-solid").text(t("更新 Key"));
         const exp = getExpiryTime(cfg.cookieName);
         if (exp > Date.now()) {
           const days = Math.max(1, Math.ceil((exp - Date.now()) / 86400000));
@@ -644,10 +668,13 @@
           $exp.html(t('已过期，建议 <b>续期</b> 或重新保存'));
         }
       } else {
+        // 未配置：虚线灰卡，输入框待粘贴，只有「保存」一个实心按钮
         $status.text(t("未配置")).attr("class", "provider-status missing");
+        $card.addClass("unconfigured").removeClass("configured");
         $input.val("");
         $input.attr("placeholder", "sk-...");
         $exp.text("");
+        $save.addClass("btn-solid").removeClass("btn-ghost").text(t("保存"));
       }
     }
   }
@@ -655,7 +682,17 @@
   function saveProvider(id) {
     const cfg = getProviderConfig(id);
     const value = $("#" + cfg.cookieName).val().trim();
+    const existing = getProviderApiKey(id);
     if (!value) { showToast(t("请先粘贴 {label} 的 API Key", { label: cfg.label }), true); return; }
+    // 输入框仍是掩码（Key 未改动）：只把过期时间续上，避免用掩码覆盖真实 Key
+    if (existing && value === maskValue(existing)) {
+      touchProviderCookie(id);
+      setExpiryNow(cfg.cookieName);
+      refreshProviderStatus();
+      renderAll();
+      showToast(t("{label} 的 Key 已续期，重新满 30 天 ✓", { label: cfg.shortLabel }));
+      return;
+    }
     setCookie(cfg.cookieName, value, API_KEY_COOKIE_DAYS);
     setExpiryNow(cfg.cookieName);
     refreshProviderStatus();
@@ -755,9 +792,25 @@
       refreshProviderStatus(); renderAll();
     });
 
-    // 明文切换
+    // 明文切换：已配置时输入框默认显示掩码，切换显示/隐藏真实 Key；
+    // 未配置时仅切换输入框类型
     $(".btn-toggle").on("click", function () {
       const $input = $("#" + $(this).data("target"));
+      const $card = $input.closest(".provider-card");
+      const id = $card.attr("id").replace("card-", "");
+      const raw = getProviderApiKey(id);
+      if (raw) {
+        if ($input.attr("type") === "password") {
+          $input.attr("type", "text").val(raw);
+          $(this).text(t("隐藏"));
+        } else {
+          $input.attr("type", "password");
+          // 用户若已修改内容，保留其输入，不回填掩码
+          if ($input.val() === raw) $input.val(maskValue(raw));
+          $(this).text(t("显示"));
+        }
+        return;
+      }
       const type = $input.attr("type") === "password" ? "text" : "password";
       $input.attr("type", type);
       $(this).text(type === "password" ? t("显示") : t("隐藏"));
@@ -769,6 +822,14 @@
         const $card = $(this).closest(".provider-card");
         $card.find(".btn-save").trigger("click");
       }
+    });
+
+    // 已配置的掩码输入框：聚焦即清空掩码，方便直接粘贴新 Key（placeholder 仍显示掩码提示）
+    $(".form-control").on("focus", function () {
+      const $card = $(this).closest(".provider-card");
+      if (!$card.hasClass("configured")) return;
+      const id = $card.attr("id").replace("card-", "");
+      if ($(this).val() === maskValue(getProviderApiKey(id))) $(this).val("");
     });
 
     // 记忆删除（事件委托：各家卡内记忆区）
