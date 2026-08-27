@@ -666,6 +666,111 @@
     .player-name .ai-badge:hover {
       transform: scale(1.1);
     }
+    /* ---------- 结局仪式弹层 ---------- */
+    .victory-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(8, 10, 18, 0.78);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    .victory-overlay.show { display: flex; }
+    .victory-card {
+      position: relative;
+      z-index: 1002;
+      width: 460px;
+      max-width: 92vw;
+      background: linear-gradient(180deg, #21283a, #161a26);
+      border: 1px solid rgba(226, 176, 82, 0.5);
+      border-radius: 24px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.65), 0 0 80px rgba(226, 176, 82, 0.15);
+      padding: 2rem 2rem 1.4rem;
+      text-align: center;
+      animation: victoryPop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1);
+    }
+    @keyframes victoryPop {
+      from { transform: scale(0.7) translateY(30px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .victory-trophy {
+      font-size: 4rem;
+      line-height: 1;
+      display: inline-block;
+      animation: trophyFloat 1.6s ease-in-out infinite;
+      filter: drop-shadow(0 8px 20px rgba(226, 176, 82, 0.5));
+    }
+    @keyframes trophyFloat {
+      0%, 100% { transform: translateY(0) rotate(-5deg) scale(1); }
+      50% { transform: translateY(-10px) rotate(5deg) scale(1.08); }
+    }
+    .victory-title {
+      font-size: 1.7rem;
+      font-weight: 900;
+      margin: 0.5rem 0 0.3rem;
+      letter-spacing: 3px;
+    }
+    .victory-team-badge {
+      display: inline-block;
+      padding: 0.25rem 1.3rem;
+      border-radius: 999px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    .victory-team-badge.team-a { background: #e8f6ef; color: #0f8a5f; }
+    .victory-team-badge.team-b { background: #fde8d0; color: #c06d2b; }
+    .victory-headline {
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 0.9rem;
+      margin: 0.7rem 0 0.2rem;
+    }
+    .victory-level {
+      color: #e2b052;
+      font-weight: 800;
+      font-size: 1.05rem;
+      margin: 0.4rem 0 1rem;
+    }
+    .victory-order {
+      margin: 0 auto 1rem;
+      width: fit-content;
+      text-align: left;
+      font-size: 0.85rem;
+      line-height: 2;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .victory-order .place {
+      display: inline-block;
+      width: 3em;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.45);
+    }
+    .victory-record {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.75rem;
+      margin-bottom: 1.1rem;
+    }
+    .victory-btns {
+      display: flex;
+      gap: 0.7rem;
+      justify-content: center;
+    }
+    .victory-btns .btn { min-width: 130px; }
+    .confetti-piece {
+      position: fixed;
+      top: -30px;
+      z-index: 1001;
+      pointer-events: none;
+      animation-name: confettiFall;
+      animation-timing-function: linear;
+      animation-iteration-count: 1;
+      animation-fill-mode: forwards;
+    }
+    @keyframes confettiFall {
+      to { transform: translateY(115vh) rotate(720deg); opacity: 0.5; }
+    }
     /* ---------- AI conversation panel ---------- */
     .ai-conversation-panel {
       display: none;
@@ -1057,6 +1162,23 @@
     <div class="ai-panel-chat" id="aiPanelChat">
       <input type="text" id="aiPanelChatInput" placeholder="向 AI 提问…" maxlength="500" />
       <button id="aiPanelChatSend">发送</button>
+    </div>
+  </div>
+
+  <!-- 结局仪式弹层 -->
+  <div class="victory-overlay" id="victoryOverlay">
+    <div class="victory-card" id="victoryCard">
+      <div class="victory-trophy">🏆</div>
+      <div class="victory-title" id="victoryTitle"></div>
+      <div id="victoryTeamBadge" class="victory-team-badge"></div>
+      <div class="victory-headline" id="victoryHeadline"></div>
+      <div class="victory-level" id="victoryLevel"></div>
+      <div class="victory-order" id="victoryOrder"></div>
+      <div class="victory-record" id="victoryRecord"></div>
+      <div class="victory-btns">
+        <button class="btn btn-success" id="victoryRestartBtn">再来一局</button>
+        <button class="btn btn-outline-light" id="victoryCloseBtn">关闭</button>
+      </div>
     </div>
   </div>
 </main>
@@ -2902,6 +3024,7 @@
     }
 
     endGame() {
+      if (this.finished) return; // 幂等：防止重复结算/重复弹层
       this.finished = true;
 
       for (let i = 0; i < 4; i++) {
@@ -2977,6 +3100,11 @@
       renderLevelBadge();
       renderAll();
 
+      // 结局仪式弹层（稍等一拍，让最后一手牌先呈现）
+      setTimeout(() => {
+        showVictoryModal(this, winTeam, upgradeLevels);
+      }, 400);
+
       // 触发 AI 玩家复盘
       setTimeout(() => {
         this.players.forEach(p => {
@@ -2999,6 +3127,65 @@
         player.prepareHand(this, "post_play").catch(() => {});
       }
     }
+  }
+
+  // ==================== 结局仪式弹层 ====================
+  function spawnConfetti() {
+    const colors = ["#e2b052", "#0f8a5f", "#34d399", "#c06d2b", "#fbbf24", "#f87171", "#60a5fa", "#a78bfa"];
+    const overlay = document.getElementById("victoryOverlay");
+    for (let i = 0; i < 40; i++) {
+      const piece = document.createElement("div");
+      piece.className = "confetti-piece";
+      piece.style.left = (Math.random() * 100) + "vw";
+      piece.style.width = (6 + Math.random() * 6) + "px";
+      piece.style.height = (8 + Math.random() * 8) + "px";
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      if (Math.random() > 0.5) piece.style.borderRadius = "50%";
+      piece.style.animationDuration = (2.4 + Math.random() * 1.8) + "s";
+      piece.style.animationDelay = (Math.random() * 0.9) + "s";
+      overlay.appendChild(piece);
+      (function(el) { setTimeout(function() { el.remove(); }, 5200); })(piece);
+    }
+  }
+
+  function showVictoryModal(game, winTeam, upgradeLevels) {
+    const winTeamLabel = winTeam === "A" ? "A组" : "B组";
+
+    // 标题：有真人对局时以「你」的视角祝贺/安慰
+    const humanOnWinTeam = game.players[0] && game.players[0].isHuman && winTeam === "A";
+    const hasHuman = game.players.some(p => p.isHuman);
+    $("#victoryTitle").text(
+      !hasHuman ? "本局结束"
+        : humanOnWinTeam ? "🎉 恭喜你获胜！"
+        : "本局结束，对手获胜"
+    );
+
+    $("#victoryTeamBadge")
+      .text(winTeamLabel)
+      .attr("class", "victory-team-badge " + (winTeam === "A" ? "team-a" : "team-b"));
+
+    const winNames = [0, 1, 2, 3]
+      .filter(i => game.players[i].team === winTeam)
+      .map(i => game.players[i].name);
+    const headPlayer = game.players[game.finishedOrder[0]];
+    $("#victoryHeadline").text(winNames.join(" · ") + " 联手拿下本局，" + headPlayer.name + " 率先出完牌");
+
+    $("#victoryLevel").text("连升 " + upgradeLevels + " 级 → 下一局打 " + game.levelRank);
+
+    const placeNames = ["头游", "二游", "三游", "末游"];
+    $("#victoryOrder").html(game.finishedOrder.map((pIdx, i) =>
+      '<div><span class="place">' + placeNames[i] + '</span>' + game.players[pIdx].name + '</div>'
+    ).join(""));
+
+    const stats = lsGetJSON("guandan_challenge_stats", { games: 0, teamA: 0, teamB: 0 });
+    $("#victoryRecord").text("本机战绩：A组 " + (stats.teamA || 0) + " 胜 · B组 " + (stats.teamB || 0) + " 胜 · 共 " + (stats.games || 0) + " 局");
+
+    $("#victoryOverlay").addClass("show");
+    spawnConfetti();
+  }
+
+  function hideVictoryModal() {
+    $("#victoryOverlay").removeClass("show").find(".confetti-piece").remove();
   }
 
   // ==================== 座位配置 ====================
@@ -4099,6 +4286,21 @@
 
       // Auto-start
       setTimeout(async () => { await game.aiPlay(); }, 600);
+    });
+
+    // --- 结局仪式弹层 ---
+    $("#victoryRestartBtn").on("click", function() {
+      hideVictoryModal();
+      $("#newGameBtn").trigger("click");
+    });
+    $("#victoryCloseBtn").on("click", hideVictoryModal);
+    // 点击遮罩（卡片以外）关闭
+    $("#victoryOverlay").on("click", function(e) {
+      if (e.target === this) hideVictoryModal();
+    });
+    // Esc 关闭
+    $(document).on("keydown", function(e) {
+      if (e.key === "Escape" && $("#victoryOverlay").hasClass("show")) hideVictoryModal();
     });
 
     // --- AI conversation panel ---
