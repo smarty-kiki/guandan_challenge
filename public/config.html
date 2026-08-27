@@ -351,19 +351,6 @@
     .mem-item .mem-meta { font-size: 0.7rem; color: var(--ink-soft); white-space: nowrap; }
     .mem-empty { font-size: 0.75rem; color: #b4ac99; padding: 0.35rem 0.1rem; }
 
-    /* ---------- 全局操作 ---------- */
-    .global-actions { margin-top: 1.6rem; border-top: 2px solid var(--ink); padding-top: 1.1rem; }
-    .global-title {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.95rem;
-      font-weight: 900;
-      margin-bottom: 0.7rem;
-    }
-    .global-title::before { content: ""; width: 26px; height: 2px; background: var(--gold); border-radius: 2px; }
-    .storage-actions { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
-
     /* ---------- toast（与牌桌页同款醒目样式） ---------- */
     #gd-toast {
       position: fixed;
@@ -586,16 +573,6 @@
           </div>
         </div>
       </div>
-
-      <!-- ==================== 全局操作 ==================== -->
-      <div class="global-actions">
-        <div class="global-title" data-i18n="全局操作">全局操作</div>
-        <div class="storage-actions">
-          <button class="btn-ghost btn-sm" id="refreshAllBtn" type="button" data-i18n="全部续期（重新满 30 天）">全部续期（重新满 30 天）</button>
-          <button class="btn-danger-ghost btn-sm" id="deleteAllCookiesBtn" type="button" data-i18n="删除全部 Key 缓存">删除全部 Key 缓存</button>
-          <button class="btn-danger-ghost btn-sm" id="deleteAllLsBtn" type="button" data-i18n="清空全部记忆与配置">清空全部记忆与配置</button>
-        </div>
-      </div>
     </div>
   </div>
 </main>
@@ -703,14 +680,7 @@
     setTimeout(() => { $btn.text(old).prop("disabled", false); }, 1200);
   }
 
-  // ==================== 数据管理表格 ====================
-  // guandan_* 为游戏数据；gd_* 为 Key 过期时间登记等页面自身数据
-  const RELATED_LS_PREFIXES = ["guandan_", "gd_"];
-
-  function isRelatedLsKey(key) {
-    return RELATED_LS_PREFIXES.some(p => key.indexOf(p) === 0);
-  }
-
+  // ==================== 内部存储 key 友好名称 ====================
   // 把内部存储 key 翻译成友好名称（经验按「模型」存储：guandan_exp_<服务商>_<模型>）
   function friendlyLsKeyLabel(key) {
     if (key.indexOf("guandan_exp_") === 0) {
@@ -837,37 +807,6 @@
       const key = $(this).data("ls");
       lsRemove(key);
       showToast(t("{label} 已删除", { label: friendlyLsKeyLabel(key) }));
-      renderAll();
-    });
-
-    // 批量操作
-    $("#refreshAllBtn").on("click", function () {
-      const n = touchAllProviderCookies();
-      for (const id of PROVIDER_ORDER) {
-        const cfg = getProviderConfig(id);
-        if (getProviderApiKey(id)) setExpiryNow(cfg.cookieName);
-      }
-      showToast(t("已续期 {n} 个 API Key（重新满 30 天）✓", { n }));
-      refreshProviderStatus(); renderAll();
-    });
-    $("#deleteAllCookiesBtn").on("click", function () {
-      if (!confirm(t("确定删除全部 Key 缓存吗？（游戏将无法调用大模型，需重新配置）"))) return;
-      for (const id of PROVIDER_ORDER) {
-        deleteCookie(getProviderConfig(id).cookieName);
-        clearExpiry(getProviderConfig(id).cookieName);
-      }
-      showToast(t("已删除全部 Key 缓存"));
-      refreshProviderStatus(); renderAll();
-    });
-    $("#deleteAllLsBtn").on("click", function () {
-      if (!confirm(t("确定清空全部记忆与配置吗？（将删除所有 AI 经验、座位配置、对局战绩）"))) return;
-      const keys = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (isRelatedLsKey(k)) keys.push(k);
-      }
-      keys.forEach(k => lsRemove(k));
-      showToast(t("已清空 {n} 项记忆与配置数据", { n: keys.length }));
       renderAll();
     });
 
