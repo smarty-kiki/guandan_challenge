@@ -1491,6 +1491,14 @@
     }
   ];
 
+  // 复盘工具：每个座位视角复盘只允许用本人上下文 + 桌上公开出牌（view_history）+
+  // 共享记忆（read_experience）。不包含 record_experience —— 各视角结论统一在
+  // 同模型所有座位复盘完成后整合，再一次性写入，避免多座位并发覆盖同一经验记忆
+  const REVIEW_TOOLS = GUANDAN_TOOLS.filter(t => {
+    const n = t.function.name;
+    return n === "view_history" || n === "read_experience";
+  });
+
   // ==================== LLMAIPlayerFactory AI 初始化类 ====================
   class LLMAIPlayerFactory {
     constructor(providerId, modelName, systemPrompt) {
@@ -2277,20 +2285,66 @@
     }
 
     // ---------- 复盘 ----------
-    async reviewGame(game) {
-      // 循环等待，直到聊天和组牌都完成（每次 await 后重新检查，防止等待期间新操作插入）
-      while (this._chatPromise || (this.preparing && this._prepPromise)) {
-        if (this._chatPromise) await this._chatPromise;
-        if (this.preparing && this._prepPromise) await this._prepPromise;
+    // ---------- 复盘（同模型去重） ----------
+    // finishGame 对每个 (服务商, 模型) 组合只触发一次复盘，mates = 该模型的所有 AI 座位。
+    // 复盘原则：全局视角在打牌过程中并不存在，所以每个座位只用它自己的单视角复盘
+    // （自己的手牌 + 自己的决策记录，即该座位自己的 messages），再把各视角的结论
+    // 整合成一份经验一次性写回共享记忆 key，避免多座位并发覆盖同一记忆。
+    async reviewGame(game, mates) {
+      const waitIdle = async (p) => {
+        while (p._chatPromise || (p.preparing && p._prepPromise)) {
+          if (p._chatPromise) await p._chatPromise;
+          if (p.preparing && p._prepPromise) await p._prepPromise;
+        }
+      };
+      await waitIdle(this);
+
+      // 各座位各自单视角的复盘结论
+      const fragments = [];
+      const labels = [];
+      for (const mate of mates) {
+        await waitIdle(mate);
+        try {
+          const text = await this._runReviewPass(mate, game);
+          if (text && !this._isNothing(text)) {
+            fragments.push(text.trim());
+            labels.push(mate.name);
+          }
+        } catch (e) {
+          addLog(t("{name} 复盘出错：{e}", { name: mate.name, e: e.message }));
+        }
       }
 
-      this.thinking = true;
+      if (fragments.length === 0) {
+        addLog(t("{name} 复盘完成：{n} 个座位均无可记录的经验", { name: this.name, n: mates.length }));
+        return;
+      }
+
+      // 统一整合：旧经验 + 全部视角结论 → 一次全量写入共享记忆
+      try {
+        const oldExp = localStorage.getItem(this._expMemoryKey()) || "";
+        const merged = await this._mergeExperience(fragments, labels, oldExp);
+        const res = this._handleRecordExperience(merged);
+        if (res.success) {
+          addLog(t("{name} 复盘完成，经验已记录（整合 {n} 个座位视角）", { name: this.name, n: fragments.length }));
+        }
+      } catch (e) {
+        addLog(t("{name} 复盘整合失败：{e}", { name: this.name, e: e.message }));
+      }
+    }
+
+    // 单个座位的视角复盘：上下文只用该座位自己的 messages（本人手牌 + 本人决策记录），
+    // 不接触其他座位的手牌与决策。工具限定 view_history（桌上公开出牌）与
+    // read_experience（共享记忆），不提供 record_experience —— 各视角结论最后统一整合保存。
+    // 返回该视角提炼出的经验文本；无内容可记录时返回 null。
+    async _runReviewPass(mate, game) {
+      mate.thinking = true;
       updateSeatInfo();
       try {
-        this.messages.push({
+        mate.messages.push({
           role: "user",
           content: [
-            t("【复盘】本局已结束。请回顾本局的表现，从策略层面反思经验教训。"),
+            t("【复盘】本局已结束。请从你所在座位的视角回顾本局表现，从策略层面反思经验教训——你只能基于亲眼所见（桌上出牌）和亲身决策，不应假设其他玩家的手牌。"),
             t("你可以调用 view_history 回顾本局出牌过程，调用 read_experience 查看之前的经验记录。"),
             "",
             t("【复盘要求 — 不要记具体的某手牌，要抽象出原则】"),
@@ -2301,64 +2355,93 @@
             t("3. 博弈判断：在关键轮次中，选择「压牌抢出牌权」还是「放牌让队友接」的判断准则是什么？考虑当前局势（是否头游在望、对手剩余牌数）时，决策有什么可以改进的地方？"),
             t("4. 逢人配使用：逢人配（红心级牌）有没有被浪费在低价值的牌型上？应该优先用来凑炸弹还是凑同花顺？在什么情况下应该保留逢人配而不是急于用掉？"),
             "",
-            t("【重要】record_experience 是全量覆盖式保存——新内容会替换所有旧经验。"),
-            t("请先 read_experience 读取旧经验，整合新旧内容后用 record_experience 保存。如果觉得没什么可记录的，直接回复「无」即可。")
+            t("【保存】经验会在同模型所有座位复盘后统一整合保存，本视角不需要调用 record_experience。"),
+            t("请用一段话总结你从这个座位提炼出的经验教训。如果觉得没什么可记录的，直接回复「无」即可。")
           ].join("\n")
         });
-        notifyAIPanel(this.position);
+        notifyAIPanel(mate.position);
 
         let turns = 0;
         while (turns < 5) {
           turns++;
           try {
             const response = await callLLMWithMessages(
-              this._buildAPIMessages(game), GUANDAN_TOOLS, this.providerId, this.modelName
+              mate._buildAPIMessages(game), REVIEW_TOOLS, mate.providerId, mate.modelName
             );
             const msg = response.message;
 
             if (msg.tool_calls && msg.tool_calls.length > 0) {
-              this.messages.push(msg);
+              mate.messages.push(msg);
               for (const tc of msg.tool_calls) {
                 const fnName = tc.function.name;
                 let args = {};
                 try { args = JSON.parse(tc.function.arguments || "{}"); } catch (e) {}
                 let result;
-                try { result = await this._dispatchTool(fnName, args, game); } catch (e) { result = { error: t("工具异常：{e}", { e: e.message }) }; }
-                this.messages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(result) });
-                if (fnName === "record_experience" && result.success) {
-                  addLog(t("{name} 复盘完成，经验已记录", { name: this.name }));
-                }
+                try { result = await mate._dispatchTool(fnName, args, game); } catch (e) { result = { error: t("工具异常：{e}", { e: e.message }) }; }
+                mate.messages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(result) });
               }
-              notifyAIPanel(this.position);
+              notifyAIPanel(mate.position);
               continue;
             }
 
-            this.messages.push(msg);
-            addLog(t("{name} 复盘完成", { name: this.name }));
-            notifyAIPanel(this.position);
-            return;
+            mate.messages.push(msg);
+            notifyAIPanel(mate.position);
+            return typeof msg.content === "string" && msg.content.trim() ? msg.content.trim() : null;
           } catch (e) {
             // Tool call ID 相关错误：自修复后重试
-            if (this._isToolIdError(e.message)) {
-              const removed = this._fixupToolCalls();
+            if (mate._isToolIdError(e.message)) {
+              const removed = mate._fixupToolCalls();
               if (removed > 0) {
-                addLog(t("{name} 复盘时检测到 tool call ID 不匹配，已清理 {n} 条孤立的 tool 消息", { name: this.name, n: removed }));
-                this.messages.push({
+                addLog(t("{name} 复盘时检测到 tool call ID 不匹配，已清理 {n} 条孤立的 tool 消息", { name: mate.name, n: removed }));
+                mate.messages.push({
                   role: "user",
                   content: t("检测到上下文 tool call 不匹配，已自动清理 {n} 条孤立的 tool 消息。请继续复盘思考。", { n: removed })
                 });
-                notifyAIPanel(this.position);
+                notifyAIPanel(mate.position);
                 continue;
               }
             }
-            addLog(t("{name} 复盘出错：{e}", { name: this.name, e: e.message }));
-            return;
+            throw e;
           }
         }
+        return null; // 5 轮仍未给出结论
       } finally {
-        this.thinking = false;
+        mate.thinking = false;
         updateSeatInfo();
       }
+    }
+
+    // 整合各视角结论与旧经验：只输入各座位的文字结论，不输入任何游戏状态，输出统一经验文本
+    async _mergeExperience(fragments, labels, oldExp) {
+      const parts = [
+        t("以下是同模型 {n} 个座位各自视角的复盘结论（互相独立，仅基于各自亲眼所见与亲身决策）：", { n: fragments.length })
+      ];
+      fragments.forEach((f, i) => {
+        parts.push("【" + labels[i] + "】\n" + f);
+      });
+      if (oldExp && oldExp.trim()) {
+        parts.push(t("以及之前保存的经验记录（整合时请完整保留其中仍然有效的部分）："));
+        parts.push(oldExp.trim());
+      }
+      parts.push(t("请将以上内容整合为一份经验记录：去重、合并同类原则、保留所有仍然有效的要点，输出一段结构清晰的文字。不要记录具体某手牌的细节，只保留可迁移的策略原则。"));
+      const messages = [
+        { role: "system", content: t("你是掼蛋复盘专家，负责把多个座位各自视角的复盘结论整合成一份统一的经验记录。") },
+        { role: "user", content: parts.join("\n\n") }
+      ];
+      const response = await callLLMWithMessages(messages, undefined, this.providerId, this.modelName);
+      const text = (response.message && response.message.content) || "";
+      const trimmed = text.trim();
+      if (!trimmed) throw new Error(t("整合结果为空"));
+      return trimmed;
+    }
+
+    // 「无」类回答判断：空内容或仅表示本视角无可记录经验
+    _isNothing(text) {
+      const s = (text || "").trim().replace(/[。.！!？?，,；;、\s「」【】]/g, "");
+      if (!s) return true;
+      if (s === "无") return true;
+      if (/^(none|nothing|nothing worth)/i.test(s)) return true;
+      return false;
     }
 
     // ---------- 局面描述 ----------
@@ -3132,13 +3215,19 @@
         showVictoryModal(this, winTeam, upgradeLevels);
       }, 400);
 
-      // 触发 AI 玩家复盘
+      // 触发 AI 玩家复盘：同一 (服务商, 模型) 只复盘一次，但覆盖该模型所有座位（各自单视角）
       setTimeout(() => {
-        this.players.forEach(p => {
-          if (p instanceof LLMAIPlayer) {
-            p.reviewGame(this).catch(e => addLog(t("{name} 复盘失败：{e}", { name: p.name, e: e.message })));
-          }
-        });
+        const groups = new Map();
+        for (const p of this.players) {
+          if (!(p instanceof LLMAIPlayer)) continue;
+          const key = p.providerId + "|" + (p.modelName || "unknown");
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key).push(p);
+        }
+        for (const mates of groups.values()) {
+          const lead = mates[0];
+          lead.reviewGame(this, mates).catch(e => addLog(t("{name} 复盘失败：{e}", { name: lead.name, e: e.message })));
+        }
       }, 2000);
     }
 
