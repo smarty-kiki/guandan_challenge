@@ -1,0 +1,4339 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大模型掼蛋挑战赛 — 牌桌</title>
+  <!-- 共享模块：4 家 Provider 配置 + Cookie/localStorage 工具（见 js/common.js） -->
+  <script src="js/common.js"></script>
+  <link href="vendor/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      /* 首页同款色板 */
+      --bg: #faf6ee;
+      --panel: #fffdf7;
+      --line: #e7dfcd;
+      --text: #1c2b24;
+      --sub: #55655c;
+      --gold: #c99a3d;
+      --gold-bright: #e2b052;
+      --felt-1: #12563f;
+      --felt-2: #0b3f2e;
+      --felt-3: #082e21;
+      /* 牌桌功能色 */
+      --brand: #0f8a5f;
+      --brand-soft: #e8f6ef;
+      --red: #c24132;
+      --level-gold: #d4890b;
+      --wild-purple: #7c3aed;
+      --table-bg: #103f30;
+      --card-bg: #fffef8;
+      --card-shadow: rgba(8, 40, 29, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse 700px 420px at 96% -6%, rgba(226, 176, 82, 0.14), transparent 60%),
+        radial-gradient(ellipse 600px 420px at -6% 104%, rgba(46, 140, 100, 0.12), transparent 55%),
+        var(--bg);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    .game-shell {
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 0.6rem 1rem;
+    }
+
+    /* ---------- top bar ---------- */
+    .game-topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.8rem;
+      margin-bottom: 0.8rem;
+      flex-wrap: wrap;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: 0 8px 28px rgba(28, 43, 36, 0.07);
+      padding: 0.9rem 1.1rem;
+    }
+    .game-topbar .left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .game-topbar h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 900;
+      position: relative;
+      padding-left: 14px;
+    }
+    .game-topbar h1::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 1.15em;
+      border-radius: 3px;
+      background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    }
+    .seat-config-row {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.35rem;
+      margin: 0.2rem 0;
+    }
+    .seat-config-row .config-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--sub);
+      white-space: nowrap;
+    }
+    .seat-cfg-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(330px, 1fr));
+      gap: 0.35rem 0.9rem;
+    }
+    @media (max-width: 860px) {
+      .seat-cfg-grid { grid-template-columns: 1fr; }
+    }
+    .seat-cfg-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      margin: 0;
+    }
+    .seat-cfg-item .seat-name {
+      display: inline-block;
+      min-width: 24px;
+      text-align: center;
+      background: rgba(226, 176, 82, 0.15);
+      border: 1px solid rgba(201, 154, 61, 0.4);
+      color: #8a6a1d;
+      border-radius: 8px;
+      padding: 1px 5px;
+      font-size: 0.7rem;
+    }
+    .seat-cfg-select {
+      height: 24px;
+      padding: 0 4px;
+      font-size: 0.68rem;
+      border-color: var(--line);
+      border-radius: 8px;
+      background-color: #fffdf7;
+      color: var(--text);
+    }
+    .seat-cfg-select.seat-type { width: 46px; }
+    .seat-cfg-select.seat-provider { width: 112px; }
+    .seat-cfg-select.seat-model { width: 176px; }
+    .game-topbar .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-end;
+    }
+    .game-topbar .actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* ---------- 首页同款 pill 按钮 ---------- */
+    .btn { border-radius: 999px; font-weight: 800; }
+    .btn:focus { box-shadow: 0 0 0 0.25rem rgba(201, 154, 61, 0.25); }
+    .btn-sm { padding: 0.42rem 1.05rem; font-size: 0.8rem; }
+    .btn-success {
+      background: linear-gradient(135deg, var(--gold-bright) 0%, var(--gold) 100%);
+      border: none;
+      color: #241a04;
+      box-shadow: 0 4px 14px rgba(201, 154, 61, 0.35);
+    }
+    .btn-success:hover, .btn-success:focus, .btn-success:active {
+      background: linear-gradient(135deg, #eec269 0%, #d4a747 100%);
+      border: none;
+      color: #241a04;
+    }
+    .status-line {
+      font-size: 0.72rem;
+      color: var(--sub);
+      margin: 0;
+    }
+    .status-line.error { color: #b04f2e; }
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      gap: 4px;
+      background: linear-gradient(135deg, #fef3d0, #fde68a);
+      border: 1.5px solid #d4890b;
+      color: #8b5e08;
+      border-radius: 20px;
+      padding: 2px 12px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1;
+      white-space: nowrap;
+      transform: translateY(-2px); /* 徽章比标题文字低，上移 2px 横向居中 */
+    }
+
+    /* ---------- table ---------- */
+    .game-table {
+      background: linear-gradient(160deg, var(--felt-1) 0%, var(--felt-2) 48%, var(--felt-3) 100%);
+      border: 6px solid #071f17;
+      border-radius: 24px;
+      box-shadow: 0 30px 70px rgba(8, 40, 29, 0.35), inset 0 0 0 1px rgba(226, 176, 82, 0.22), inset 0 0 80px rgba(0, 0, 0, 0.15);
+      padding: 0.8rem;
+      display: grid;
+      grid-template-areas:
+        ".    top    ."
+        "left center right"
+        ".   bottom  .";
+      grid-template-columns: 280px 1fr 280px;
+      grid-template-rows: auto 1fr auto;
+      gap: 0.5rem;
+      min-height: 70vh;
+      position: relative;
+    }
+
+    /* ---------- player seats ---------- */
+    .player-seat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.5rem;
+      border-radius: 12px;
+      min-width: 0;
+    }
+    .player-seat.top    { grid-area: top; }
+    .player-seat.left   { grid-area: left; align-items: flex-start; }
+    .player-seat.right  { grid-area: right; align-items: flex-end; }
+    .player-seat.bottom { grid-area: bottom; padding: 0.7rem 0.8rem; }
+    .player-seat.center { grid-area: center; align-items: flex-start; background: rgba(255,255,255,0.12); backdrop-filter: blur(4px); }
+
+    /* Side players: vertical card fan */
+    .player-seat.left .player-cards-row {
+      flex-direction: column;
+      gap: 0;
+      align-items: flex-start;
+    }
+    .player-seat.right .player-cards-row {
+      flex-direction: column;
+      gap: 0;
+      align-items: flex-end;
+    }
+    .player-seat.left .player-cards-row .card {
+      transform: rotate(90deg);
+      margin: -4px 0;
+    }
+    .player-seat.right .player-cards-row .card {
+      transform: rotate(-90deg);
+      margin: -4px 0;
+    }
+    .player-seat.left .player-cards-row .card:first-child,
+    .player-seat.right .player-cards-row .card:first-child {
+      margin-top: 0;
+    }
+    .player-seat.left .player-cards-row .card:last-child,
+    .player-seat.right .player-cards-row .card:last-child {
+      margin-bottom: 0;
+    }
+    .player-seat.left .player-cards-row .card:hover {
+      transform: rotate(90deg) translateY(-4px);
+    }
+    .player-seat.right .player-cards-row .card:hover {
+      transform: rotate(-90deg) translateY(-4px);
+    }
+    .player-seat.left .player-cards-row .card.selected {
+      transform: rotate(90deg) translateY(-8px);
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(226, 176, 82, 0.45);
+    }
+    .player-seat.right .player-cards-row .card.selected {
+      transform: rotate(-90deg) translateY(-8px);
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(226, 176, 82, 0.45);
+    }
+    /* Side position card piles: horizontal layout, tight vertical stacking */
+    .player-seat.left .card-pile {
+      flex-direction: row;
+      align-items: center;
+      margin: -5px 0;
+    }
+    .player-seat.right .card-pile {
+      flex-direction: row-reverse;
+      align-items: center;
+      margin: -5px 0;
+    }
+    .player-seat.left .card-pile .card {
+      margin: 0 -2px 0 0;
+      position: relative;
+    }
+    .player-seat.right .card-pile .card {
+      margin: 0 0 0 -2px;
+    }
+    .player-seat.left .card-pile .card:last-child,
+    .player-seat.right .card-pile .card:last-child {
+      margin: 0;
+    }
+    /* Side piles: first card (outer edge) on top */
+    .player-seat.left .card-pile .card:nth-child(1),
+    .player-seat.right .card-pile .card:nth-child(1) { z-index: 8; }
+    .player-seat.left .card-pile .card:nth-child(2),
+    .player-seat.right .card-pile .card:nth-child(2) { z-index: 7; }
+    .player-seat.left .card-pile .card:nth-child(3),
+    .player-seat.right .card-pile .card:nth-child(3) { z-index: 6; }
+    .player-seat.left .card-pile .card:nth-child(4),
+    .player-seat.right .card-pile .card:nth-child(4) { z-index: 5; }
+    .player-seat.left .card-pile .card:nth-child(5),
+    .player-seat.right .card-pile .card:nth-child(5) { z-index: 4; }
+    .player-seat.left .card-pile .card:nth-child(6),
+    .player-seat.right .card-pile .card:nth-child(6) { z-index: 3; }
+    .player-seat.left .card-pile .card:nth-child(7),
+    .player-seat.right .card-pile .card:nth-child(7) { z-index: 2; }
+    .player-seat.left .card-pile .card:nth-child(8),
+    .player-seat.right .card-pile .card:nth-child(8) { z-index: 1; }
+    .player-seat.left .card-pile .card,
+    .player-seat.right .card-pile .card {
+      cursor: default;
+    }
+    /* Tighter spacing between elements in side columns */
+    .player-seat.left .player-cards-row > *,
+    .player-seat.right .player-cards-row > * {
+      margin: -4px 0;
+    }
+    .player-seat.left .player-cards-row > .card-pile,
+    .player-seat.right .player-cards-row > .card-pile {
+      margin: -5px 0;
+    }
+    .player-seat.left .player-cards-row > *:first-child,
+    .player-seat.right .player-cards-row > *:first-child {
+      margin-top: 0;
+    }
+    .player-seat.left .player-cards-row > *:last-child,
+    .player-seat.right .player-cards-row > *:last-child {
+      margin-bottom: 0;
+    }
+    .player-seat.left .player-cards-row > .card-pile:first-child,
+    .player-seat.right .player-cards-row > .card-pile:first-child {
+      margin-top: -2px;
+    }
+    .player-seat.left .player-cards-row > .card-pile:last-child,
+    .player-seat.right .player-cards-row > .card-pile:last-child {
+      margin-bottom: -2px;
+    }
+
+    .player-name {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .player-name.current-turn {
+      background: rgba(255,255,255,0.2);
+      border-radius: 6px;
+      padding: 2px 8px;
+      margin: -2px -8px;
+    }
+    .player-name .team-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 1px 7px;
+      border-radius: 8px;
+    }
+    .team-a { background: #e8f6ef; color: #0f8a5f; }
+    .team-b { background: #fde8d0; color: #c06d2b; }
+
+    /* ---------- card piles ---------- */
+    .card-pile {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      position: relative;
+      border-radius: 4px;
+      transition: box-shadow 0.15s, background 0.15s;
+    }
+    .card-pile .card {
+      margin-bottom: -12px;
+      transition: margin 0.15s;
+    }
+    .card-pile .card:last-child {
+      margin-bottom: 0;
+    }
+    .card-pile:hover .card {
+      margin-bottom: -6px;
+    }
+    /* 南侧牌摞始终向上延伸，所有牌靠底对齐，下层压上层 */
+    #cardsBottom.piles-up {
+      align-items: flex-end;
+    }
+    #cardsBottom.piles-up .card-pile {
+      flex-direction: column-reverse;
+    }
+    #cardsBottom.piles-up .card-pile .card {
+      margin-bottom: 0;
+      margin-top: -12px;
+    }
+    #cardsBottom.piles-up .card-pile .card:last-child {
+      margin-top: 0;
+    }
+    #cardsBottom.piles-up .card-pile:hover .card {
+      margin-top: -6px;
+    }
+    /* 南侧牌摞：下方牌压上方牌（first-child 在底部，z-index 最高） */
+    #cardsBottom.piles-up .card-pile .card:nth-child(1) { z-index: 8; }
+    #cardsBottom.piles-up .card-pile .card:nth-child(2) { z-index: 7; }
+    #cardsBottom.piles-up .card-pile .card:nth-child(3) { z-index: 6; }
+    #cardsBottom.piles-up .card-pile .card:nth-child(4) { z-index: 5; }
+    #cardsBottom.piles-up .card-pile .card:nth-child(5) { z-index: 4; }
+    #cardsBottom.piles-up .card-pile .card:nth-child(6) { z-index: 3; }
+    #cardsBottom.piles-up .card-pile .card:nth-child(7) { z-index: 2; }
+    #cardsBottom.piles-up .card-pile .card:nth-child(8) { z-index: 1; }
+    .card-pile.selected {
+      box-shadow: 0 0 0 1px var(--gold);
+      background: rgba(226, 176, 82, 0.14);
+    }
+
+    .player-cards-row {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 1px;
+      justify-content: center;
+      max-width: 100%;
+    }
+
+    /* ---------- cards ---------- */
+    .card {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 50px;
+      background: var(--card-bg);
+      border: 1.5px solid #d4cbb8;
+      border-radius: 4px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      box-shadow: 0 1px 2px var(--card-shadow);
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+      user-select: none;
+      position: relative;
+      flex-shrink: 0;
+      line-height: 1.1;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 10px rgba(16,42,30,0.2);
+    }
+    .card.selected {
+      transform: translateY(-8px);
+      box-shadow: 0 6px 14px rgba(16,42,30,0.28), 0 0 0 2px rgba(226, 176, 82, 0.45);
+      border-color: var(--gold);
+    }
+    .card.level-card {
+      border-color: var(--level-gold);
+      background: linear-gradient(180deg, #fffef5 0%, #fef9e0 100%);
+    }
+    .card.wild-card {
+      border-color: var(--wild-purple);
+      background: linear-gradient(180deg, #faf7ff 0%, #f0e8ff 100%);
+    }
+    .card .rank {
+      font-size: 0.72rem;
+    }
+    .card .suit {
+      font-size: 0.55rem;
+    }
+    .card.red { color: var(--red); }
+    .card.black { color: #222; }
+    .card.joker-red { color: var(--red); }
+    .card.joker-black { color: #333; }
+
+    .card .wild-tag {
+      position: absolute;
+      bottom: 0px;
+      right: 1px;
+      font-size: 0.4rem;
+      color: var(--wild-purple);
+      font-weight: 900;
+    }
+
+    .card.small {
+      width: 30px;
+      height: 42px;
+      font-size: 0.58rem;
+    }
+    .card.small .rank { font-size: 0.62rem; }
+    .card.small .suit { font-size: 0.45rem; }
+
+    .card.mini {
+      width: 24px;
+      height: 34px;
+      font-size: 0.5rem;
+    }
+    .card.mini .rank { font-size: 0.55rem; }
+    .card.mini .suit { font-size: 0.4rem; }
+
+    .card-back {
+      background: repeating-linear-gradient(
+        45deg,
+        #0d3527 0px, #0d3527 2px,
+        #103f30 2px, #103f30 4px
+      );
+      border-color: #071f17;
+      color: transparent;
+      cursor: default;
+    }
+    .card-back::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border: 1.5px solid rgba(255,255,255,0.25);
+      border-radius: 2px;
+    }
+
+    /* ---------- play area ---------- */
+    .play-area {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: 0;
+      min-height: 160px;
+      max-height: 100%;
+      overflow-y: auto;
+      padding: 0.3rem 0;
+      width: 100%;
+    }
+    .round-history {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 100%;
+    }
+    .round-row {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 3px;
+      align-items: center;
+      width: 100%;
+      background: rgba(255,255,255,0.08);
+      border-radius: 6px;
+      padding: 3px 6px 3px 28px;
+      position: relative;
+    }
+    .round-number {
+      position: absolute;
+      left: 4px;
+      top: 5px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 18px;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.6rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .round-play-entry {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.08);
+    }
+    .round-play-entry .play-who {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: rgba(255,255,255,0.85);
+      white-space: nowrap;
+      min-width: 32px;
+    }
+    .round-play-entry .play-cards {
+      display: flex;
+      gap: 1px;
+      flex-wrap: wrap;
+    }
+    .round-play-entry .play-pass {
+      font-size: 0.6rem;
+      color: rgba(255,255,255,0.45);
+      writing-mode: vertical-rl;
+      min-height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .round-play-entry.pass-entry {
+      min-height: 30px;
+    }
+    .round-play-entry .play-card-mini {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 30px;
+      background: var(--card-bg);
+      border: 1px solid #d4cbb8;
+      border-radius: 3px;
+      font-weight: 800;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .round-play-entry .play-card-mini .rank { font-size: 0.48rem; }
+    .round-play-entry .play-card-mini .suit { font-size: 0.36rem; }
+    .round-play-entry .play-card-mini.red { color: var(--red); }
+    .round-play-entry .play-card-mini.black { color: #222; }
+    .round-play-entry .play-card-mini.joker-red { color: var(--red); }
+    .round-play-entry .play-card-mini.joker-black { color: #333; }
+    .round-play-entry .play-card-mini.level-card {
+      border-color: var(--level-gold);
+      background: linear-gradient(180deg, #fffef5 0%, #fef9e0 100%);
+    }
+    .round-play-entry .play-card-mini.wild-card {
+      border-color: var(--wild-purple);
+      background: linear-gradient(180deg, #faf7ff 0%, #f0e8ff 100%);
+    }
+    .round-end-marker {
+      width: 100%;
+      height: 1px;
+      background: rgba(255,255,255,0.12);
+      margin: 1px 0;
+    }
+
+    /* ---------- controls ---------- */
+    .player-actions {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 0.3rem;
+    }
+    /* 桌面操作按钮：金色描边 pill（深绿桌上） */
+    .seat-actions .btn-outline-light {
+      background: transparent;
+      border: 1.5px solid rgba(226, 176, 82, 0.55);
+      color: #f4d9a0;
+      border-radius: 999px;
+    }
+    .seat-actions .btn-outline-light:hover:not(:disabled) {
+      background: var(--gold-bright);
+      border-color: var(--gold-bright);
+      color: #241a04;
+    }
+    .seat-actions .btn-outline-light:disabled { opacity: 0.35; }
+
+    .player-name .ai-badge {
+      display: inline-block;
+      font-size: 0.58rem;
+      padding: 1px 6px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      transition: transform 0.15s;
+    }
+    .player-name .ai-badge:hover {
+      transform: scale(1.1);
+    }
+    /* ---------- AI conversation panel ---------- */
+    .ai-conversation-panel {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 560px;
+      max-width: 94vw;
+      max-height: 70vh;
+      background: #1a1f2e;
+      border: 1px solid rgba(226, 176, 82, 0.25);
+      border-radius: 20px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.5);
+      z-index: 999;
+      flex-direction: column;
+    }
+    .ai-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      flex-shrink: 0;
+    }
+    .ai-panel-header span {
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+    .ai-panel-copy-log {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.4);
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+    }
+    .ai-panel-copy-log:hover { color: #fff; }
+    .ai-panel-close {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+    }
+    .ai-panel-close:hover { color: #fff; }
+    .ai-panel-body {
+      padding: 0.6rem 0.8rem;
+      overflow-y: auto;
+      flex: 1;
+      max-height: calc(70vh - 48px);
+      font-size: 0.72rem;
+      line-height: 1.5;
+    }
+    .ai-msg p { margin: 0 0 0.3rem 0; line-height: 1.4; }
+    .ai-msg p:last-child { margin-bottom: 0; }
+    .ai-msg h3, .ai-msg h4 { margin: 0; line-height: 1.4; }
+    .ai-msg ul, .ai-msg ol { margin: 0; line-height: 1.4; }
+    .ai-msg li { margin: 0; line-height: 1.4; }
+    .ai-msg pre { margin: 0; line-height: 1.4; }
+    .ai-msg {
+      margin-bottom: 0.5rem;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      animation: aiFadeIn 0.2s;
+    }
+    @keyframes aiFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .ai-msg-system {
+      background: rgba(124,58,237,0.15);
+      border-left: 3px solid #7c3aed;
+      color: #c4b5fd;
+      white-space: pre-wrap;
+    }
+    .ai-msg-user {
+      background: rgba(59,130,246,0.12);
+      border-left: 3px solid #3b82f6;
+      color: #93c5fd;
+    }
+    .ai-msg-assistant {
+      background: rgba(16,185,129,0.1);
+      border-left: 3px solid #10b981;
+      color: #a7f3d0;
+    }
+    .ai-msg-tool {
+      background: rgba(245,158,11,0.1);
+      border-left: 3px solid #f59e0b;
+      color: #fcd34d;
+      font-family: monospace;
+      font-size: 0.68rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .ai-msg .role-label {
+      font-weight: 800;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+      opacity: 0.7;
+    }
+    .ai-msg .tool-call-name {
+      font-weight: 800;
+      color: #fbbf24;
+    }
+    .ai-think-block {
+      margin: 3px 0;
+      padding: 4px 8px;
+      background: rgba(167,139,250,0.06);
+      border-left: 2px solid rgba(167,139,250,0.3);
+      border-radius: 0 6px 6px 0;
+    }
+    .ai-think-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: #a78bfa;
+      margin-bottom: 2px;
+    }
+    .ai-think-content {
+      font-size: 0.65rem;
+      color: #c4b5fd;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .ai-panel-empty {
+      color: rgba(255,255,255,0.35);
+      text-align: center;
+      padding: 1rem;
+    }
+    .ai-panel-chat {
+      display: flex;
+      gap: 0.4rem;
+      padding: 0.5rem 0.8rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      flex-shrink: 0;
+    }
+    .ai-panel-chat input {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px;
+      padding: 0.4rem 0.6rem;
+      color: #fff;
+      font-size: 0.72rem;
+      outline: none;
+    }
+    .ai-panel-chat input::placeholder { color: rgba(255,255,255,0.25); }
+    .ai-panel-chat input:focus { border-color: rgba(255,255,255,0.35); }
+    .ai-panel-chat button {
+      background: rgba(59,130,246,0.25);
+      border: 1px solid rgba(59,130,246,0.35);
+      color: #93c5fd;
+      border-radius: 6px;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.72rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .ai-panel-chat button:hover { background: rgba(59,130,246,0.45); }
+    .ai-panel-chat button:disabled { opacity: 0.4; cursor: default; }
+    .ai-msg-user-chat {
+      background: rgba(59,130,246,0.2);
+      border-left: 3px solid #60a5fa;
+      color: #bfdbfe;
+    }
+    .ai-msg-compress {
+      text-align: center;
+      color: #fbbf24;
+      font-size: 0.7rem;
+      padding: 0.3rem 0.5rem;
+      opacity: 0.7;
+      user-select: none;
+    }
+    .ai-msg-pending {
+      opacity: 0.6;
+    }
+    .ai-msg-pending .pending-badge {
+      color: #fbbf24;
+      font-size: 0.6rem;
+      font-weight: 700;
+    }
+    .ai-msg-streaming .ai-cursor {
+      display: inline-block;
+      width: 6px;
+      height: 14px;
+      background: #a78bfa;
+      margin-left: 1px;
+      vertical-align: middle;
+      animation: blink 0.6s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* legend */
+    .legend-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 0.7rem;
+      color: var(--sub);
+      margin-top: 0.4rem;
+    }
+    .legend-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      margin-right: 3px;
+      vertical-align: middle;
+    }
+    .legend-dot.level { background: var(--level-gold); }
+    .legend-dot.wild { background: var(--wild-purple); }
+
+    @media (max-width: 900px) {
+      .game-table {
+        grid-template-columns: 80px 1fr 80px;
+        min-height: 500px;
+      }
+      .card {
+        width: 28px;
+        height: 40px;
+        font-size: 0.55rem;
+      }
+      .card .rank { font-size: 0.6rem; }
+      .card .suit { font-size: 0.42rem; }
+    }
+
+    /* ---------- 无配置提示 toast ---------- */
+    .gd-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 56px;
+      transform: translateX(-50%) translateY(16px);
+      background: linear-gradient(150deg, #12563f 0%, #082e21 100%);
+      color: #fff;
+      border: 1.5px solid #e2b052;
+      border-radius: 14px;
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5), 0 0 0 6px rgba(226, 176, 82, 0.16);
+      padding: 1.05rem 1.7rem 1.3rem;
+      font-size: 1.02rem;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      max-width: min(540px, 92vw);
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 9999;
+      overflow: hidden;
+    }
+    .gd-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .gd-toast .gd-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e2b052;
+      color: #241a04;
+      font-weight: 900;
+      font-size: 1.05rem;
+      margin: 0 0.2rem;
+      vertical-align: -6px;
+    }
+    .gd-toast .gd-bar {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 4px;
+      width: 100%;
+      background: #e2b052;
+      transform-origin: left;
+      animation: gd-shrink linear forwards;
+    }
+    @keyframes gd-shrink {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
+    }
+  </style>
+</head>
+<body>
+<main class="game-shell">
+  <div class="game-topbar">
+    <div class="left-col">
+      <h1><a href="index.html" style="text-decoration:none;color:inherit;">大模型掼蛋挑战赛</a> <span class="level-badge" id="levelBadge">本局打 2</span></h1>
+      <div class="seat-config-row">
+        <span class="config-label">座位配置（每个 AI 座位可独立选不同模型）：</span>
+        <div class="seat-cfg-grid">
+          <label class="seat-cfg-item"><span class="seat-name">南</span>
+            <select id="cfgSeat0" class="form-select form-select-sm seat-cfg-select seat-type"><option value="human">人</option><option value="ai">AI</option></select>
+            <select id="cfgSeat0Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
+            <select id="cfgSeat0Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
+          </label>
+          <label class="seat-cfg-item"><span class="seat-name">东</span>
+            <select id="cfgSeat1" class="form-select form-select-sm seat-cfg-select seat-type" disabled title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
+            <select id="cfgSeat1Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
+            <select id="cfgSeat1Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
+          </label>
+          <label class="seat-cfg-item"><span class="seat-name">北</span>
+            <select id="cfgSeat2" class="form-select form-select-sm seat-cfg-select seat-type" disabled title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
+            <select id="cfgSeat2Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
+            <select id="cfgSeat2Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
+          </label>
+          <label class="seat-cfg-item"><span class="seat-name">西</span>
+            <select id="cfgSeat3" class="form-select form-select-sm seat-cfg-select seat-type" disabled title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
+            <select id="cfgSeat3Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
+            <select id="cfgSeat3Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
+          </label>
+        </div>
+      </div>
+      <p class="status-line" id="gameStatus">等待开始</p>
+    </div>
+    <div class="right-col">
+      <div class="actions">
+        <button id="newGameBtn" class="btn btn-success btn-sm">开始游戏</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="game-table" id="gameTable">
+    <div class="player-seat top" id="seatTop">
+      <div class="player-name" id="nameTop">北 <span class="team-badge team-a">A组</span></div>
+      <div class="player-cards-row" id="cardsTop"></div>
+      <div class="player-actions seat-actions" data-position="2" style="display:none">
+        <button class="pass-btn btn btn-outline-light btn-sm" data-position="2" disabled>过牌</button>
+      </div>
+    </div>
+
+    <div class="player-seat left" id="seatLeft">
+      <div class="player-name" id="nameLeft">西 <span class="team-badge team-b">B组</span></div>
+      <div class="player-cards-row" id="cardsLeft"></div>
+      <div class="player-actions seat-actions" data-position="3" style="display:none">
+        <button class="pass-btn btn btn-outline-light btn-sm" data-position="3" disabled>过牌</button>
+      </div>
+    </div>
+
+    <div class="player-seat center">
+      <div class="play-area" id="playArea">
+        <div class="round-history" id="roundHistory"></div>
+      </div>
+    </div>
+
+    <div class="player-seat right" id="seatRight">
+      <div class="player-name" id="nameRight">东 <span class="team-badge team-b">B组</span></div>
+      <div class="player-cards-row" id="cardsRight"></div>
+      <div class="player-actions seat-actions" data-position="1" style="display:none">
+        <button class="pass-btn btn btn-outline-light btn-sm" data-position="1" disabled>过牌</button>
+      </div>
+    </div>
+
+    <div class="player-seat bottom" id="seatBottom">
+      <div class="player-name" id="nameBottom">南（你） <span class="team-badge team-a">A组</span></div>
+      <div class="player-cards-row" id="cardsBottom"></div>
+      <div class="player-actions seat-actions" data-position="0">
+        <button class="pass-btn btn btn-outline-light btn-sm" data-position="0" disabled>过牌</button>
+        <button class="play-selected-btn btn btn-outline-light btn-sm" data-position="0" disabled>出牌</button>
+        <button class="pile-btn btn btn-outline-light btn-sm" data-position="0" disabled>理牌</button>
+        <button class="unpile-btn btn btn-outline-light btn-sm" data-position="0" disabled>拆牌</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend-row">
+    <span><span class="legend-dot level"></span> 级牌（当前等级牌，大于 A 小于小王）</span>
+    <span><span class="legend-dot wild"></span> 逢人配（红心级牌，可当任意牌凑牌型）</span>
+  </div>
+
+  <!-- AI 决策过程浮层 -->
+  <div class="ai-conversation-panel" id="aiPanel">
+    <div class="ai-panel-header">
+      <span id="aiPanelTitle">AI 决策过程</span>
+      <button class="ai-panel-copy-log" id="aiPanelCopyLog" title="复制操作日志">复制</button>
+      <button class="ai-panel-close" id="aiPanelClose">&times;</button>
+    </div>
+    <div class="ai-panel-body" id="aiPanelBody">
+      <div class="ai-panel-empty">点击座位旁的 AI 标识查看大模型对话过程</div>
+    </div>
+    <div class="ai-panel-chat" id="aiPanelChat">
+      <input type="text" id="aiPanelChatInput" placeholder="向 AI 提问…" maxlength="500" />
+      <button id="aiPanelChatSend">发送</button>
+    </div>
+  </div>
+</main>
+
+<script src="vendor/jquery.min.js"></script>
+<script>
+  // ==================== 掼蛋游戏逻辑 ====================
+
+  const SUITS = ["♠", "♥", "♣", "♦"];
+  const RANKS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
+  const RANK_ORDER = { "2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,"10":10,"J":11,"Q":12,"K":13,"A":14 };
+  const LEVEL_RANKS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
+
+  const TYPE_NAMES = {
+    single: "单张", pair: "对子", triple: "三张", triple_plus_2: "三带二",
+    straight: "顺子", consecutive_pairs: "连对", bomb: "炸弹",
+    straight_flush: "同花顺", king_bomb: "天王炸",
+    consecutive_triples: "钢板"
+  };
+
+  // ==================== Player 玩家基类 ====================
+  class Player {
+    constructor(name, team, position, isHuman) {
+      this.name = name;
+      this.team = team;
+      this.position = position; // 0=南, 1=东, 2=北, 3=西
+      this.isHuman = isHuman;
+      this.cards = [];
+      this.piles = []; // [{ cardIds: [...] }] card organization piles
+    }
+
+    // All players share the same decide-play interface.
+    // Human: enters decision state (UI is already ready).
+    // AI: runs rule-based logic, inspecting the game for context.
+    decidePlay(game) {
+      // no-op for human players — UI buttons handle the action
+    }
+
+    // Remove specific cards from hand and cleanup piles
+    removeCards(cardIds) {
+      const ids = new Set(cardIds);
+      this.cards = this.cards.filter(c => !ids.has(c.id));
+      this.piles = this.piles.filter(p => {
+        p.cardIds = p.cardIds.filter(id => !ids.has(id));
+        return p.cardIds.length > 0;
+      });
+    }
+
+    // Pile selected cards together as a valid combination
+    pileCards(cardIds) {
+      // Remove these cards from any existing piles
+      const ids = new Set(cardIds);
+      this.piles = this.piles.filter(p => {
+        p.cardIds = p.cardIds.filter(id => !ids.has(id));
+        // 剩 0 或 1 张都清除：单张不能成摞，防止迭代理牌时产生残余单张摞
+        return p.cardIds.length >= 2;
+      });
+      this.piles.push({ cardIds: [...cardIds] });
+    }
+
+    // Unpile cards (break apart the pile)
+    unpileCards(cardIds) {
+      this.piles = this.piles.filter(p => {
+        if (p.cardIds.every(id => cardIds.includes(id))) {
+          return false;
+        }
+        return true;
+      });
+    }
+  }
+
+  // ==================== LLM AI 系统提示词 ====================
+  const GUANDAN_SYSTEM_PROMPT = [
+    "你是掼蛋AI玩家。请根据手牌和场上情况，通过调用工具来探索牌型组合，最终决定出牌或过牌。",
+    "思考要精炼，输出要简洁。不要长篇分析，直接调用工具行动，必要时一两句话点明关键理由即可。",
+    "",
+    "---",
+    "一、基本设定",
+    "- 2副牌共108张，4人对战，对家组队：南(位置0)↔北(位置2)为A组队友，东(位置1)↔西(位置3)为B组队友",
+    "- 队友坐在你对面（position相差2），你的胜负以队伍为单位计算：队友头游你也获胜",
+    "- 每局限定一个级牌（从2到A依次升级）",
+    "- 牌面点数从小到大：2(2),3(3),4(4),5(5),6(6),7(7),8(8),9(9),10(10),J(11),Q(12),K(13),A(14),级牌(15),小王(16),大王(17)",
+    "- 【重要】J、Q、K、A 只是数字11、12、13、14的扑克牌面符号，它们与2~10一样都是纯粹的数字",
+    "- 「连续」指底层的数字依次差1。例如：8,9,10,J,Q（数字8~12）是连续的，10,J,Q,K,A（数字10~14）是连续的，J,Q,K（数字11~13）是连续的",
+    "- 不要把 J=11, Q=12, K=13, A=14 当成不连续的「特殊牌」，JQK 之间的连续关系和 345 之间的连续关系完全一样",
+    "- 判断顺子时，把 J 读作 11、Q 读作 12、K 读作 13、A 读作 14，然后看是否为5个连续数字即可",
+    "- 「同点」指多张牌的牌面点数相同（如两张K、三张7）。大王只能和大王同点，小王只能和小王同点",
+    "- 级牌大小介于小王和A之间：大王(17) > 小王(16) > 级牌(15) > A(14) > K(13) > ... > 2(2)",
+    "- 逢人配：红心级牌，每局最多2张。单独出时代表级牌本身，组合出时可替代任意非王牌凑牌型",
+    "",
+    "---",
+    "二、牌型（10种）",
+    "1. 单张：任意1张",
+    "2. 对子：同点2张（含对大王/对小王）",
+    "3. 三张：同点3张",
+    "4. 三带二：同点3张 + 一个对子（对子点数必须与三张不同。如 999+QQ 合法，不能是 999+99）",
+    "5. 顺子：5张连续单张（不限花色）。即5张牌的底层数字依次递增1。包括 10JQKA（10~14）和 A2345（A视为1，1~5）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字凑连续",
+    "6. 连对：3对连续对子（不限花色）。即3个对子的点数数字依次递增1。包括 QQKKAA（12~14）和 AA2233（A视为1，1~3）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字凑连续",
+    "7. 钢板：2个连续三同张（不限花色，如333444）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字凑连续",
+    "8. 炸弹：4张及以上同点，张数越多越大",
+    "9. 同花顺：同花色连续5张。即5张同花色牌的底层数字依次递增1。包括 10JQKA（10~14）和 A2345（A视为1，1~5）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字且花色可任意适配凑连续",
+    "10. 天王炸：2大王+2小王，全场最大",
+    "",
+    "---",
+    "三、逢人配规则",
+    "- 逢人配（红心级牌）单独出：单张=级牌本身，2张=级牌对子",
+    "- 1常牌+1配：对子（配当常牌点数用）",
+    "- 2同常牌+1配：三张",
+    "- 1常牌+2配：三张",
+    "- 凑顺子/连对/钢板：默认往大凑（按最大基数方案）",
+    "  例：♥2♥2+66+77 → 667788 而非 556677",
+    "- 凑同花顺：默认往大凑",
+    "- 凑炸弹：逢人配视作与常规牌点数相同（如♥5+5♠+5♣+5♦ = 四个5炸弹）",
+    "",
+    "---",
+    "四、大小比较",
+    "- 天王炸 > 6张及以上炸弹 > 同花顺 > 5张炸弹 > 4张炸弹 > 其他牌型",
+    "- 炸弹之间：先比张数，张数多的大；同张数比点数",
+    "- 同花顺 vs 炸弹：同花顺算5张档，高于4张炸弹，低于6张及以上炸弹",
+    "- 其他牌型（顺子/钢板/连对/三带二/三张/对子/单张）：只能同类型比大小，不同类型不能互压",
+    "- 同类型比点数：顺子/连对/钢板比最大那张牌的点数；三带二只比三张的点数（对子不参与比较），三张同点则不能压",
+    "- 三张比三张的点数；对子比对子的点数；单张比单张的点数",
+    "",
+    "---",
+    "五、出牌与轮次",
+    "- 领出者可以出任意牌型",
+    "- 跟牌必须出同类型更大，或用炸弹/同花顺/天王炸压制",
+    "- 连续3人过牌，该轮结束，最后出牌者获得新一轮出牌权",
+    "- 头游出完后，后续轮次若一圈人都不要，队友接风",
+    "",
+    "---",
+    "六、核心目标与策略",
+    "",
+    "【获胜条件】",
+    "- 你和对家是一个队伍（南北A组、东西B组），你俩中任意一人先把牌出完即为头游，队伍获胜",
+    "- 一切决策的核心目的是让队伍赢，而非单纯压住上家的每一手牌",
+    "- 有时放掉一手牌让队友接，比自己硬压更有利",
+    "",
+    "【队友配合】",
+    "- 局面描述中标记了 [队友] 的玩家就是你的对家。他的胜利就是你的胜利",
+    "- 队友出的牌绝对不要压！即使你有更大的同类牌型或更大的炸弹，也必须过牌。压队友的牌等于帮对手，是严重错误",
+    "- 如果队友领出了牌，你应直接过牌，让队友顺利走牌。队友的炸弹能赢你就让他赢",
+    "- 如果队友手牌很少（即将头游），优先帮他挡住对手的压制，甚至用炸弹清场让他接风（注意：是压对手的牌，不是压队友的牌）",
+    "- 对手领出时，如果你手中有大牌但队友可能有更大的，考虑让队友来压",
+    "- 用炸弹清场 = 当对手出了牌压制了你队友时，你用更大的炸弹反压对手，让队友重新获得出牌权",
+    "",
+    "【出牌策略】",
+    "- 领出时：优先出小单张、小对子，把难题抛给对手，保留大牌和炸弹用于关键时刻",
+    "- 跟牌时：先用小牌跟，不要一上来就出大牌；如果代价太大，果断过牌保留实力",
+    "- 对手即将头游时：不惜代价用炸弹或大牌压制，阻止对手先走完",
+    "- 有逢人配时：优先用它凑大炸弹或同花顺，提高压制力",
+    "- 手牌少于8张时：积极用炸弹抢出牌权，准备冲刺头游",
+    "",
+    "【组牌策略 — 发牌后第一步】",
+    "- 发牌后应立即用 view_hand 查看手牌，然后用 pile_cards 整理牌型",
+    "- 核心原则：尽量降低出牌手数。27张牌，手数越少越容易抢到头游。每多一手牌就可能多给对手一次压制的机会",
+    "- 炸弹和同花顺是强力压制牌型，可以跨类型压制。但组牌时手数降低同样重要——一个钢板出一手等于6张，两个三张出两手才出完6张",
+    "- 三带二（5张1手）、钢板（6张1手）、顺子（5张1手）、连对（6张1手）等牌型一次能出多张，有效减少手数",
+    "- 规则：有三张时优先搭配对子组成三带二，有三带二就不能拆成三张+对子分两次出",
+    "- 规则：有连续对子（如33 44 55）必须组成连对。连对=6张1手出完，三个独立对子=6张3手才出完。3手变1手是巨大差距，不是可选项",
+    "- 规则：有连续三张（如666 777）必须组成钢板。钢板=6张1手出完，两个独立三张=6张2手才出完。2手变1手是巨大差距，不是可选项",
+    "- 总之：能组成更大牌型的，必须组成大牌型而非拆成小牌型。组牌时从大往小看：钢板 → 连对 → 三带二 → 顺子 → 三张 → 对子",
+    "- 单张和对子留着最后出，作为收尾或者领出时探路",
+    "- 组牌不是一成不变的！出牌时要根据场上情况灵活调整：",
+    "  · 如果领出需要出小的，可以拆一个牌摞",
+    "  · 如果跟牌需要凑特定类型，可能要拆炸弹改组成顺子或对子",
+    "  · 同花顺虽然手数不如炸弹低（5张才出一手），但压制力强，有时值得放弃最低手数",
+    "  · 逢人配可以灵活调配，优先把它用在最关键的大牌型上",
+    "- 权衡原则：一切以配合队友获胜为目的，手数低 + 牌力强 + 灵活应变 = 最优组牌",
+    "",
+    "【出牌判断优先级】",
+    "1. 自己能否直接出完（头游）？→ 出牌冲刺",
+    "2. 对手是否即将头游？→ 不惜代价压制",
+    "3. 队友是否领出或即将头游？→ 过牌让队友走",
+    "4. 跟牌代价是否合理？→ 代价小就跟，代价大就过",
+    "5. 都没有特殊情况的普通轮次 → 正常应对",
+    "",
+    "【操作提示】",
+    "- 必须先调用 view_hand 查看手牌和索引",
+    "- pile_cards 的 groups 参数是对手牌索引的一次完整分区，各组索引必须互不重叠。每张牌最多归入一组，其余牌为散牌。这不是候选方案列表，不能把同一张牌放在多个组里",
+    "- 可以调用 view_history 查看本局出牌历史，了解哪些大牌和炸弹已经出过，辅助决策",
+    "- 可以调用 read_experience 查看过往对局经验教训。每局开始时应先回顾过往经验，避免重蹈覆辙",
+    "- 最终必须调用 play_cards 或 pass_turn 完成回合",
+    "- 不要在 text 中出牌，必须通过工具调用出牌",
+    "",
+    "【任务状态协议 — 必须遵守】",
+    "- 每次回复末尾必须包含一行任务状态 JSON，格式：",
+    '  {"task":"prep","complete":false}  表示组牌尚未完成，还需继续',
+    '  {"task":"prep","complete":true}   表示组牌已全部完成',
+    '  {"task":"play","complete":false}  表示出牌思考尚未完成',
+    '  {"task":"play","complete":true}   表示出牌决策已完成（此时必须有 play_cards 或 pass_turn 工具调用）',
+    "- task 字段：组牌阶段用 prep，出牌阶段用 play",
+    "- 只有 complete: true 时系统才会结束当前阶段，否则会继续调用你",
+    "- 这个状态 JSON 必须独占一行，放在回复的最末尾"
+  ].join("\n");
+
+  // ==================== LLM AI 工具定义 ====================
+  const GUANDAN_TOOLS = [
+    {
+      type: "function",
+      function: {
+        name: "view_hand",
+        description: "查看当前手牌。返回排序后的手牌列表（含索引）、已有牌摞、级牌和逢人配信息。在调用其他工具之前必须先调用此工具获取当前手牌索引。每次理牌或拆牌后手牌索引不变，但牌摞状态会更新。",
+        parameters: { type: "object", properties: {}, required: [] }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "pile_cards",
+        description: "理牌：将手牌组成牌摞。支持单组(indices)或多组(groups，推荐)。【重要】groups 中各组的索引必须互不重叠——每张牌最多出现在一组中，不能跨组重复使用。各组相当于对手牌的一次完整分区，不是多个候选方案。",
+        parameters: {
+          type: "object",
+          properties: {
+            indices: { type: "array", items: { type: "integer" }, description: "（单组模式）要理在一起的手牌索引数组" },
+            groups: { type: "array", items: { type: "array", items: { type: "integer" } }, description: "（多组模式，推荐）手牌索引的分区：每个子数组是一组要理在一起的牌。各组索引必须互不重叠，每张牌只能归入一组。如手牌26张，groups: [[0,1],[3,4,5],[6,7,8,9,10]] 表示索引0-1组对子、3-5组三张、6-10组顺子，其余索引留作散牌。" }
+          },
+          required: []
+        }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "unpile_cards",
+        description: "拆牌：将一个或多个牌摞拆散，牌回到手牌中。传入牌摞编号（piles），编号来自 view_hand 中显示的「牌摞N」。支持单个牌摞或批量拆散多个牌摞。",
+        parameters: {
+          type: "object",
+          properties: {
+            piles: { type: "array", items: { type: "integer" }, description: "要拆散的牌摞编号数组，如 [0] 拆散第0个牌摞，[0,2] 同时拆散牌摞0和牌摞2。编号必须来自 view_hand 中显示的当前牌摞列表。" }
+          },
+          required: ["piles"]
+        }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "play_cards",
+        description: "出牌：从手牌中选择索引出牌（最终动作，调用后回合结束）。牌型必须合法，且必须能压过场上牌（除非你是领出者）。调用此工具后你的回合立即结束。",
+        parameters: {
+          type: "object",
+          properties: {
+            indices: { type: "array", items: { type: "integer" }, description: "要出的手牌索引数组" }
+          },
+          required: ["indices"]
+        }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "pass_turn",
+        description: "过牌：选择不出牌（最终动作，调用后回合结束）。只有当你不是领出者时才能过牌。调用此工具后你的回合立即结束。",
+        parameters: { type: "object", properties: {}, required: [] }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "view_history",
+        description: "查看本局所有轮的出牌历史。返回每一轮各家出牌情况（牌型、点数、power），帮助判断哪些大牌和炸弹已经出过。在任何时候都可以调用，不消耗回合。",
+        parameters: { type: "object", properties: {}, required: [] }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "read_experience",
+        description: "读取过往经验：查看之前所有对局中你（当前模型）记录的经验教训。包括关键教训、策略调整、常见错误等。每局开始时应先调用此工具回顾过往经验。",
+        parameters: { type: "object", properties: {}, required: [] }
+      }
+    },
+    {
+      type: "function",
+      function: {
+        name: "record_experience",
+        description: "记录经验：复盘后将本局提炼出的打牌原则和博弈规律保存到记忆中。不要记录具体牌型和轮次，要抽象出可迁移的策略准则。经验按模型独立存储（同一模型换座位，经验会跟随）。每局结束复盘时使用。",
+        parameters: {
+          type: "object",
+          properties: {
+            content: { type: "string", description: "要记录的经验内容。不要记具体的某手牌，应从策略层面总结：组牌优先级、出牌节奏、博弈判断准则、逢人配使用原则等可复用的规律。" }
+          },
+          required: ["content"]
+        }
+      }
+    }
+  ];
+
+  // ==================== LLMAIPlayerFactory AI 初始化类 ====================
+  class LLMAIPlayerFactory {
+    constructor(providerId, modelName, systemPrompt) {
+      this.providerId = providerId;
+      this.modelName = modelName;
+      this.systemPrompt = Array.isArray(systemPrompt) ? systemPrompt.join("\n") : systemPrompt;
+    }
+
+    createPlayer(name, team, position) {
+      return new LLMAIPlayer(name, team, position, this.providerId, this.modelName, this.systemPrompt);
+    }
+  }
+
+  // ==================== LLMAIPlayer LLM AI 玩家 ====================
+  class LLMAIPlayer extends Player {
+    constructor(name, team, position, providerId, modelName, systemPrompt) {
+      super(name, team, position, false);
+      this.providerId = providerId;
+      this.modelName = modelName;
+      this.systemPrompt = Array.isArray(systemPrompt) ? systemPrompt.join("\n") : systemPrompt;
+      this.messages = [];      // 独立对话上下文
+      this.maxTurns = 50;      // 最大思考轮次
+      this.preparing = false;  // 是否正在组牌
+      this.thinking = false;   // 是否正在思考出牌
+      this.chatting = false;   // 是否正在回复用户聊天
+      this._prepResolve = null;
+      this._chatResolve = null; // 聊天锁：decidePlay/prepareHand 等待聊天结束
+      this._lastCompression = null; // 上下文压缩信息 { keptFrom, removed, time, _shown }
+      this.decisionLog = [];   // 组牌/出牌操作日志
+    }
+
+    _alertBug(msg) {
+      const fullMsg = `[疑似 BUG] ${this.name}：${msg}`;
+      addLog(fullMsg);
+      alert(fullMsg);
+    }
+
+    _logDecision(action, params, result) {
+      const entry = {
+        time: new Date().toLocaleTimeString(),
+        action,
+        params: JSON.parse(JSON.stringify(params)),
+        result: JSON.parse(JSON.stringify(result))
+      };
+      this.decisionLog.push(entry);
+    }
+
+    // ---------- 构建 API 消息列表（含上下文压缩） ----------
+    // 返回压缩后的消息数组，不修改 this.messages（全量历史，用于面板展示）
+    _buildAPIMessages(game) {
+      // 各模型上下文大小不同（32K～1M token，见 common.js getModelContextSize）：
+      // 估算当前用量，一旦超过该模型上下文的一半，就开始压缩历史，
+      // 避免小上下文模型被长对话撑爆，也让大上下文模型尽量保留完整过程
+      const ctxSize = getModelContextSize(this.providerId, this.modelName);
+      const MAX_CHARS = Math.floor(ctxSize * 0.5 * 2); // ~2 字符 ≈ 1 token
+      const KEEP_RECENT = 25;    // 压缩后最少保留最近消息数
+
+      let totalChars = 0;
+      for (const m of this.messages) {
+        const c = typeof m.content === "string" ? m.content : JSON.stringify(m.content || "");
+        totalChars += c.length;
+      }
+      if (totalChars < MAX_CHARS) {
+        return this.messages;
+      }
+
+      // 找到安全截断点：必须在 user 消息边界，避免切断 tool_call/tool_result 配对
+      let keepFrom = Math.max(1, this.messages.length - KEEP_RECENT);
+      while (keepFrom > 1 && this.messages[keepFrom].role !== "user") {
+        keepFrom--;
+      }
+      if (keepFrom <= 1) return this.messages;
+
+      const systemMsg = this.messages[0];
+      const recent = this.messages.slice(keepFrom);
+      const removed = keepFrom - 1;
+      const summary = {
+        role: "user",
+        content: `[上下文压缩] 此前 ${removed} 条对话已省略。当前打 ${game.levelRank}，红心${game.levelRank} 是逢人配。你仍在掼蛋游戏中，请继续按规则决策。`
+      };
+
+      // 记录压缩信息供面板展示
+      this._lastCompression = { keptFrom: keepFrom, removed, time: Date.now() };
+
+      return [systemMsg, summary, ...recent];
+    }
+
+    // ---------- Tool call ID 自修复 ----------
+    // 双向修复：孤立的 tool result 和 缺失 result 的 assistant tool_call
+    _fixupToolCalls() {
+      const toRemove = new Set();
+
+      // Pass 1: 收集 assistant tool_calls 及其索引、声明的 tool_call_id
+      const assistantCalls = []; // { index, ids: [] }
+      const validIds = new Set();
+      for (let i = 0; i < this.messages.length; i++) {
+        const m = this.messages[i];
+        if (m.role === "assistant" && Array.isArray(m.tool_calls) && m.tool_calls.length > 0) {
+          const ids = [];
+          for (const tc of m.tool_calls) {
+            if (tc.id) { validIds.add(tc.id); ids.push(tc.id); }
+          }
+          assistantCalls.push({ index: i, ids });
+        }
+      }
+
+      // Pass 2: 找孤立的 tool result（tool_call_id 无匹配的 assistant）
+      for (let i = 0; i < this.messages.length; i++) {
+        const m = this.messages[i];
+        if (m.role === "tool" && m.tool_call_id && !validIds.has(m.tool_call_id)) {
+          toRemove.add(i);
+        }
+      }
+
+      // Pass 3: 找不完整的 assistant（有 tool_calls 但某些 result 缺失）
+      for (const ac of assistantCalls) {
+        let missing = false;
+        for (const tid of ac.ids) {
+          const hasResult = this.messages.some((m, i) =>
+            m.role === "tool" && m.tool_call_id === tid && !toRemove.has(i)
+          );
+          if (!hasResult) { missing = true; break; }
+        }
+        if (missing) {
+          toRemove.add(ac.index);
+          // 同时标记该 assistant 对应的残留 tool result（如果有的话）
+          for (const tid of ac.ids) {
+            for (let i = 0; i < this.messages.length; i++) {
+              if (this.messages[i].role === "tool" && this.messages[i].tool_call_id === tid) {
+                toRemove.add(i);
+              }
+            }
+          }
+        }
+      }
+
+      if (toRemove.size === 0) return 0;
+
+      // 从后往前删
+      const sorted = [...toRemove].sort((a, b) => b - a);
+      for (const idx of sorted) {
+        this.messages.splice(idx, 1);
+      }
+      addLog(`[LLM AI] ${this.name} 自修复：移除 ${toRemove.size} 条不匹配的 tool 消息`);
+      this._lastCompression = null;
+      return toRemove.size;
+    }
+
+    // 判断错误是否与 tool call ID 相关（tool call 与 tool result 配对失败）
+    _isToolIdError(errMsg) {
+      const msg = String(errMsg || "").toLowerCase();
+      if (!msg.includes("tool")) return false;
+      // MiniMax: "tool call result does not follow tool call (2013)"
+      if (msg.includes("does not follow tool call") || msg.includes("does not follow")) return true;
+      // 通用: tool call/tool result 配对错误，带错误码 2013
+      if (msg.includes("tool") && msg.includes("(2013)")) return true;
+      // 通用: tool call/tool result/ID 未找到
+      if ((msg.includes("tool call") || msg.includes("tool result") || msg.includes("tool id") || msg.includes("tool_call_id")) && (msg.includes("not found") || msg.includes("not_found") || msg.includes("not follow"))) return true;
+      return false;
+    }
+
+    // ---------- 组牌：reason="initial" 开局 / "post_play" 出牌后 ----------
+    async prepareHand(game, reason) {
+      if (game.finished || this.cards.length === 0) return;
+      // 循环等待，直到聊天和组牌都完成（每次 await 后重新检查，防止等待期间新操作插入）
+      while (this._chatPromise || (this.preparing && this._prepPromise)) {
+        if (this._chatPromise) await this._chatPromise;
+        if (this.preparing && this._prepPromise) await this._prepPromise;
+      }
+      this.preparing = true;
+      this._prepPromise = new Promise(resolve => { this._prepResolve = resolve; });
+      // 初始化对话
+      if (this.messages.length === 0) {
+        this.messages.push({ role: "system", content: this.systemPrompt });
+      }
+
+      const initMsg = reason === "initial"
+        ? [
+            "发牌已完成。请用 view_hand 查看手牌，按你自己的想法整理牌型。",
+            "当前打 " + game.levelRank + "，红心" + game.levelRank + " 是逢人配。手牌共 " + this.cards.length + " 张。",
+            "提示：你可以先调用 read_experience 工具查看过往对局的经验记录，帮助本局决策。",
+            "【重要】组牌完成后必须明确回复文字确认（如'组牌完成'或总结组牌结果），在此之前系统会一直等待你完成组牌。",
+            "组牌阶段不要调用 play_cards 或 pass_turn。"
+          ].join("\n")
+        : "【后台理牌】你刚出完牌/过牌，可以利用等待时间重新审视手牌组织。用 pile_cards（推荐 groups）或 unpile_cards 调整牌摞。完成后回复 {\"task\":\"prep\",\"complete\":true}。";
+
+      this.messages.push({ role: "user", content: initMsg });
+      updateSeatInfo();
+      renderPlayerCards(this.position);
+      notifyAIPanel(this.position);
+
+      let consecutiveErrors = 0;
+      try {
+        while (true) {
+          try {
+          const onChunk = aiPanelPlayerIdx === this.position
+            ? (chunk) => { renderStreamingChunk(chunk); }
+            : null;
+          const response = await callLLMWithMessages(
+            this._buildAPIMessages(game), GUANDAN_TOOLS, this.providerId, this.modelName, onChunk
+          );
+          const msg = response.message;
+          consecutiveErrors = 0;
+
+          if (msg.tool_calls && msg.tool_calls.length > 0) {
+            this.messages.push(msg);
+            for (const tc of msg.tool_calls) {
+              const fnName = tc.function.name;
+              if (fnName === "play_cards" || fnName === "pass_turn") {
+                this.messages.push({
+                  role: "tool", tool_call_id: tc.id,
+                  content: JSON.stringify({ error: "组牌阶段不能出牌或过牌" })
+                });
+              } else {
+                let args = {};
+                try { args = JSON.parse(tc.function.arguments || "{}"); } catch (e) {}
+                let result;
+                try { result = await this._dispatchTool(fnName, args, game); } catch (e) { result = { error: "工具异常：" + e.message }; }
+                this.messages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(result) });
+              }
+            }
+            notifyAIPanel(this.position);
+            renderPlayerCards(this.position);
+            continue;
+          }
+
+          const content = extractContentText(msg.content);
+          const status = parseTaskStatus(content);
+          this.messages.push(msg);
+
+          // 拒绝 play 任务类型（当前是组牌阶段，不是出牌阶段）
+          if (status && status.task === "play") {
+            this.messages.push({
+              role: "user",
+              content: "当前是组牌阶段，不是出牌阶段。请使用 {\"task\":\"prep\",\"complete\":true} 格式。组牌阶段不要调用 play_cards 或 pass_turn。"
+            });
+            notifyAIPanel(this.position);
+            continue;
+          }
+
+          if (status && status.complete) {
+            addLog(this.name + " 组牌完成");
+            notifyAIPanel(this.position);
+            renderPlayerCards(this.position);
+            return;
+          }
+
+          const hint = status
+            ? "收到，任务状态为未完成。请继续整理牌型，完成后将 complete 设为 true。"
+            : "未找到任务状态 JSON。请继续组牌，并在回复末尾添加：{\"task\":\"prep\",\"complete\":true}。";
+          this.messages.push({ role: "user", content: hint });
+          notifyAIPanel(this.position);
+        } catch (e) {
+          // Tool call ID 相关错误：自修复后重试
+          if (this._isToolIdError(e.message)) {
+            const removed = this._fixupToolCalls();
+            if (removed > 0) {
+              addLog(this.name + " 组牌时检测到 tool call ID 不匹配，已清理 " + removed + " 条孤立的 tool 消息");
+              this.messages.push({
+                role: "user",
+                content: "检测到上下文 tool call 不匹配，已自动清理 " + removed + " 条孤立的 tool 消息。请继续组牌，用 view_hand 查看手牌。完成后回复 {\"task\":\"prep\",\"complete\":true}。"
+              });
+              notifyAIPanel(this.position);
+              continue;
+            }
+          }
+          consecutiveErrors++;
+          addLog(this.name + " 组牌出错（第" + consecutiveErrors + "次）：" + e.message);
+          if (consecutiveErrors >= 5) {
+            addLog(this.name + " 连续出错超过5次，放弃组牌");
+            return;
+          }
+          await new Promise(r => setTimeout(r, 2000));
+          this.messages.push({
+            role: "user",
+            content: "刚才请求出错（" + e.message + "），请继续组牌。用 view_hand 查看手牌，用 pile_cards 整理。完成后回复 {\"task\":\"prep\",\"complete\":true}。"
+          });
+          notifyAIPanel(this.position);
+        }
+      }
+      } finally {
+        this.preparing = false;
+        if (this._prepResolve) { this._prepResolve(); this._prepResolve = null; }
+        updateSeatInfo();
+        renderPlayerCards(this.position);
+        tryProcessChatQueue();
+      }
+    }
+
+    // ---------- 主入口：多轮 LLM 决策 ----------
+    async decidePlay(game) {
+      if (game.finished || this.cards.length === 0) return;
+      // 循环等待，直到聊天和组牌都完成（每次 await 后重新检查，防止等待期间新操作插入）
+      while (this._chatPromise || (this.preparing && this._prepPromise)) {
+        if (this._chatPromise) await this._chatPromise;
+        if (this.preparing && this._prepPromise) await this._prepPromise;
+      }
+      this.thinking = true;
+      updateSeatInfo();
+      try {
+      // 首次调用时初始化对话
+      if (this.messages.length === 0) {
+        this.messages.push({ role: "system", content: this.systemPrompt });
+      }
+
+      // 添加当前局面描述
+      this.messages.push({ role: "user", content: this._buildSituation(game) });
+      notifyAIPanel(this.position);
+
+      const onChunk = (chunk) => {
+        if (aiPanelPlayerIdx === this.position) {
+          renderStreamingChunk(chunk);
+        }
+      };
+
+      let turnCount = 0;
+      while (turnCount < this.maxTurns) {
+        turnCount++;
+        try {
+          const response = await callLLMWithMessages(
+            this._buildAPIMessages(game), GUANDAN_TOOLS, this.providerId, this.modelName,
+            aiPanelPlayerIdx === this.position ? onChunk : null
+          );
+          const msg = response.message;
+
+          // 有 tool calls
+          if (msg.tool_calls && msg.tool_calls.length > 0) {
+            this.messages.push(msg);
+            let terminal = false;
+            for (const tc of msg.tool_calls) {
+              const fnName = tc.function.name;
+              let args = {};
+              try { args = JSON.parse(tc.function.arguments || "{}"); } catch (e) {}
+              let result;
+              try { result = await this._dispatchTool(fnName, args, game); } catch (e) { result = { error: "工具异常：" + e.message }; }
+              this.messages.push({
+                role: "tool",
+                tool_call_id: tc.id,
+                content: JSON.stringify(result)
+              });
+              if ((fnName === "play_cards" || fnName === "pass_turn") && result && result.success) {
+                terminal = true;
+              }
+            }
+            notifyAIPanel(this.position);
+            if (terminal) return;
+            continue;
+          }
+
+          // 无 tool calls：检查任务状态
+          const content = extractContentText(msg.content);
+          const status = parseTaskStatus(content);
+          this.messages.push(msg);
+
+          // 拒绝 prep 任务类型（当前是出牌阶段，不是组牌阶段）
+          if (status && status.task === "prep") {
+            this.messages.push({
+              role: "user",
+              content: "当前是出牌阶段，不是组牌阶段。请使用 {\"task\":\"play\",\"complete\":true} 格式。调用 play_cards 或 pass_turn 工具来完成回合。"
+            });
+            notifyAIPanel(this.position);
+            continue;
+          }
+
+          // If complete, try old-format JSON action as fallback
+          if (status && status.complete && content && content.trim()) {
+            try {
+              const parsed = parseModelJson(content);
+              if (parsed.action === "pass") { game.pass(this.position); return; }
+              if (parsed.action === "play" && Array.isArray(parsed.indices)) {
+                const hand = game.sortCards(this.cards);
+                const selected = parsed.indices.map(i => hand[i]).filter(c => c);
+                if (selected.length > 0) { const ok = game.play(this.position, selected); if (ok) return; }
+              }
+            } catch (e) {}
+            // complete but no valid action → must use tools
+            this.messages.push({
+              role: "user",
+              content: "任务标记为完成，但没有有效的出牌动作。请调用 play_cards 或 pass_turn 工具来完成回合。"
+            });
+            notifyAIPanel(this.position);
+            continue;
+          }
+
+          // Not complete or no status: prompt to continue
+          const hint = status
+            ? "收到，任务状态为未完成。请继续思考并调用工具（view_hand/pile_cards/play_cards/pass_turn），完成后将 complete 设为 true。"
+            : "未找到任务状态 JSON。请继续思考，在回复末尾添加状态：{\"task\":\"play\",\"complete\":true} 配合工具调用完成出牌，或 {\"task\":\"play\",\"complete\":false} 表示还需思考。";
+          this.messages.push({ role: "user", content: hint });
+          notifyAIPanel(this.position);
+        } catch (e) {
+          // Tool call ID 相关错误：自修复后重试
+          if (this._isToolIdError(e.message)) {
+            const removed = this._fixupToolCalls();
+            if (removed > 0) {
+              addLog(`[LLM AI] ${this.name} 出牌时检测到 tool call ID 不匹配，已清理 ${removed} 条孤立的 tool 消息`);
+              this.messages.push({
+                role: "user",
+                content: "检测到上下文 tool call 不匹配，已自动清理 " + removed + " 条孤立的 tool 消息。请继续出牌决策。调用 play_cards 或 pass_turn 工具来完成回合。"
+              });
+              notifyAIPanel(this.position);
+              continue;
+            }
+          }
+          addLog(`[LLM AI] ${this.name} 出错：${e.message}`);
+          if (game.lastPlay && game.lastPlay.playerIdx !== this.position) {
+            game.pass(this.position);
+          }
+          return;
+        }
+      }
+
+      // 超过最大轮次，强制出牌或过牌
+      addLog(`[LLM AI] ${this.name} 超过思考轮次上限，强制出牌/过牌`);
+      if (game.lastPlay && game.lastPlay.playerIdx !== this.position) {
+        game.pass(this.position);
+      } else {
+        // 领出者不能 pass，强制出最小的单张
+        const sorted = game.sortCards(this.cards);
+        if (sorted.length > 0) {
+          game.play(this.position, [sorted[0]]);
+        }
+      }
+      } finally {
+        this.thinking = false;
+        updateSeatInfo();
+        tryProcessChatQueue();
+      }
+    }
+
+    // ---------- Tool 分发 ----------
+    async _dispatchTool(fnName, args, game) {
+      switch (fnName) {
+        case "view_hand":     return this._handleViewHand(game);
+        case "pile_cards":    return this._handlePileCards(game, args.indices || [], args.groups || null);
+        case "unpile_cards":  return this._handleUnpileCards(game, args.piles);
+        case "play_cards":    return this._handlePlayCards(game, args.indices || []);
+        case "pass_turn":     return this._handlePassTurn(game);
+        case "view_history":       return this._handleViewHistory(game);
+        case "read_experience":    return this._handleReadExperience();
+        case "record_experience":  return this._handleRecordExperience(args.content || "");
+        default:
+          // 如果是 GUANDAN_TOOLS 中定义的工具但未被 switch 处理 → BUG
+          const knownTools = GUANDAN_TOOLS.map(t => t.function.name);
+          if (knownTools.includes(fnName)) {
+            this._alertBug("工具 " + fnName + " 已在 GUANDAN_TOOLS 中定义但 _dispatchTool 未处理");
+          }
+          return { error: `未知工具: ${fnName}` };
+      }
+    }
+
+    // ---------- view_hand ----------
+    _handleViewHand(game) {
+      if (this.cards.length > 0 && game.finishedOrder.indexOf(this.position) >= 0) {
+        this._alertBug("手牌有" + this.cards.length + "张但已在完成列表中（位置" + game.finishedOrder.indexOf(this.position) + "）");
+      }
+      const sorted = game.sortCards(this.cards);
+      if (sorted.length !== this.cards.length) {
+        this._alertBug("sortCards 返回数量(" + sorted.length + ")与手牌数量(" + this.cards.length + ")不一致");
+      }
+      const handLines = sorted.map((c, i) => {
+        let label = `${i}: ${c.suit||""}${c.rank}`;
+        if (game.isWildCard(c)) label += " (逢人配)";
+        else if (game.isLevelCard(c)) label += " (级牌)";
+        return label;
+      });
+
+      let pilesDesc = "无";
+      if (this.piles.length > 0) {
+        pilesDesc = this.piles.map((p, pi) => {
+          const pileCards = p.cardIds.map(id => this.cards.find(c => c.id === id)).filter(c => c);
+          const sortedPile = game.sortCards(pileCards);
+          const cardDesc = sortedPile.map(c => `${c.suit||""}${c.rank}`).join(" ");
+          const analysis = game.analyzeCards(pileCards);
+          const typeDesc = analysis ? TYPE_NAMES[analysis.type] || analysis.type : "未知";
+          return `牌摞${pi}: 索引 [${p.cardIds.map(id => {
+            const idx = sorted.findIndex(c => c.id === id);
+            return idx;
+          }).join(", ")}] → ${cardDesc} (${typeDesc})`;
+        }).join("\n");
+      }
+
+      const wilds = this.cards.filter(c => game.isWildCard(c));
+      const levelInfo = `级牌: ${game.levelRank}，逢人配: ${wilds.length}张（${wilds.map(c => c.suit+c.rank).join(", ") || "无"}）`;
+
+      return {
+        hand: handLines.join("\n"),
+        piles: pilesDesc,
+        hand_size: this.cards.length,
+        level_rank: game.levelRank,
+        wild_count: wilds.length,
+        info: levelInfo,
+        _reminder: "注意：每次 pile/unpile/play 之后，手牌排序会变化，索引会失效。下次操作前请重新调用 view_hand。"
+      };
+    }
+
+    // ---------- pile_cards ----------
+    _handlePileCards(game, indices, groups) {
+      // Determine the groups to process
+      let groupList;
+      if (groups && groups.length > 0) {
+        // 容错：如果 groups 元素不是数组（如 LLM 传了 groups: [0,1,2]），当作单组处理
+        if (!Array.isArray(groups[0])) {
+          groupList = [groups];
+        } else {
+          groupList = groups;
+        }
+      } else if (indices && indices.length > 0) {
+        groupList = [indices]; // single-group mode
+      } else {
+        return { error: "请提供 indices（单组）或 groups（多组）参数。推荐使用 groups 一次完成全部组牌，如 groups: [[0,1],[3,4,5],[7,8,9,10,11]]" };
+      }
+
+      const sorted = game.sortCards(this.cards);
+      const results = [];
+      const allCardIds = [];
+
+      // 前置验证：检查各组索引是否有重叠、单张、范围
+      const seenIndices = new Map(); // index → group number
+      for (let g = 0; g < groupList.length; g++) {
+        const raw = groupList[g];
+        const idxList = Array.isArray(raw) ? raw : [raw];
+        if (!idxList || idxList.length === 0) continue;
+        // 单张牌不能组牌——不要传单张索引到 groups 里，散牌直接留在手牌中即可
+        if (idxList.length === 1) {
+          return { error: `第${g + 1}组只有1张牌（索引 ${idxList[0]}）。单张牌不需要理牌，请从 groups 中移除所有单张。散牌留在手牌中即可，只有多张组成的牌型才需要放进 groups。` };
+        }
+        for (const idx of idxList) {
+          if (seenIndices.has(idx)) {
+            return {
+              error: `索引 ${idx} 同时出现在第${seenIndices.get(idx) + 1}组和第${g + 1}组中。groups 各组索引必须互不重叠——每张牌只能归入一组。请重新规划，确保各组的索引完全不重复。`,
+              overlap: true,
+              conflictingIndex: idx,
+              group1: seenIndices.get(idx),
+              group2: g
+            };
+          }
+          // 验证索引范围
+          if (idx < 0 || idx >= sorted.length) {
+            return { error: `索引 ${idx} 超出范围（当前手牌共 ${sorted.length} 张，有效索引 0~${sorted.length - 1}）`, invalidIndex: true };
+          }
+          seenIndices.set(idx, g);
+        }
+      }
+
+      for (let g = 0; g < groupList.length; g++) {
+        const raw = groupList[g];
+        // 容错：单个元素若不是数组则包裹
+        const idxList = Array.isArray(raw) ? raw : [raw];
+        if (!idxList || idxList.length === 0) {
+          results.push({ group: g, error: "第" + (g + 1) + "组索引为空" });
+          continue;
+        }
+        const cards = idxList.map(i => sorted[i]).filter(c => c);
+        if (cards.length !== idxList.length) {
+          const mapped = idxList.map(i => sorted[i] ? `${i}:${sorted[i].suit||""}${sorted[i].rank}` : `${i}:无效`);
+          results.push({ group: g, error: `第${g + 1}组部分索引无效：[${mapped.join(", ")}]` });
+          continue;
+        }
+        const analysis = game.analyzeCards(cards);
+        if (!analysis) {
+          if (cards.length >= 2) {
+            const allSameRank = cards.every(c => c.rank === cards[0].rank);
+            if (allSameRank) {
+              this._alertBug(`${cards.length}张同点数牌(${cards[0].rank})analyzeCards返回null`);
+            }
+          }
+          const cardDesc = cards.map(c => `${c.suit||""}${c.rank}`).join(" ");
+          results.push({ group: g, error: `第${g + 1}组 [${cardDesc}] 无法组成合法牌型` });
+          continue;
+        }
+        if (analysis.type === "single") {
+          results.push({ group: g, error: `第${g + 1}组是单张，无需组牌` });
+          continue;
+        }
+        const cardIds = cards.map(c => c.id);
+        this.pileCards(cardIds);
+        const created = this.piles.find(p => p.cardIds.length === cardIds.length && p.cardIds.every(id => cardIds.includes(id)));
+        if (!created) {
+          this._alertBug("pileCards 调用后未找到新建的牌摞（cardIds: " + JSON.stringify(cardIds) + "）");
+        }
+        const typeName = TYPE_NAMES[analysis.type] || analysis.type;
+        results.push({ group: g, success: true, message: `第${g + 1}组：${typeName}（${cards.length}张）`, type: typeName, power: analysis.power });
+        allCardIds.push(...cardIds);
+      }
+
+      // 清理幽灵牌摞：牌被抽走后，剩余牌可能不再构成合法牌型
+      this.piles = this.piles.filter(p => {
+        const cards = p.cardIds.map(id => this.cards.find(c => c.id === id)).filter(c => c);
+        if (cards.length < 2) return false;
+        return game.analyzeCards(cards) !== null;
+      });
+
+      const successCount = results.filter(r => r.success).length;
+      const failCount = results.filter(r => r.error).length;
+      const summary = groupList.length > 1
+        ? `共${groupList.length}组：${successCount}组成功${failCount > 0 ? "，" + failCount + "组失败" : ""}`
+        : (results[0] && results[0].success ? results[0].message : "");
+      if (successCount > 0) renderPlayerCards(this.position);
+      const ret = { success: failCount === 0, summary, details: results };
+      this._logDecision("pile_cards", { groups: groupList }, ret);
+      return ret;
+    }
+
+    // ---------- unpile_cards ----------
+    _handleUnpileCards(game, piles) {
+      // 容错：单个数字转为数组
+      if (typeof piles === "number") piles = [piles];
+      if (!piles || !Array.isArray(piles) || piles.length === 0) {
+        return { error: "请提供要拆散的牌摞编号（piles 参数，如 [0] 或 [0,2]）。牌摞编号来自 view_hand 中显示的「牌摞N」。", invalidPiles: true };
+      }
+
+      // 前置验证：所有编号是否有效
+      for (const pi of piles) {
+        if (typeof pi !== "number" || pi < 0 || pi >= this.piles.length) {
+          return { error: `牌摞编号 ${pi} 无效。当前共 ${this.piles.length} 个牌摞（编号 0~${this.piles.length - 1}）。请先调用 view_hand 查看当前牌摞列表。`, invalidPiles: true };
+        }
+      }
+
+      // 检查是否有重复编号
+      const unique = new Set(piles);
+      if (unique.size !== piles.length) {
+        return { error: "piles 中有重复的牌摞编号，请去重后重新提交。" };
+      }
+
+      // 从大到小排序，先拆后面的摞避免编号偏移
+      const sortedPiles = [...piles].sort((a, b) => b - a);
+
+      const results = [];
+      for (const pi of sortedPiles) {
+        const pile = this.piles[pi];
+        const pileCards = pile.cardIds.map(id => this.cards.find(c => c.id === id)).filter(c => c);
+        const cardDesc = pileCards.map(c => `${c.suit||""}${c.rank}`).join(" ");
+        this.unpileCards(pile.cardIds);
+        results.push({ success: true, message: `牌摞${pi} [${cardDesc}]（${pileCards.length}张）已拆散` });
+      }
+
+      renderPlayerCards(this.position);
+
+      const ret = {
+        success: true,
+        summary: `共拆散 ${piles.length} 个牌摞`,
+        details: results
+      };
+      this._logDecision("unpile_cards", { piles }, ret);
+      return ret;
+    }
+
+    // ---------- play_cards ----------
+    _handlePlayCards(game, indices) {
+      // 容错：LLM 可能传单个数字而非数组
+      if (typeof indices === "number") indices = [indices];
+      if (!Array.isArray(indices) || indices.length === 0) return { error: "请提供要出牌的索引数组" };
+      const sorted = game.sortCards(this.cards);
+      const cards = indices.map(i => sorted[i]).filter(c => c);
+      if (cards.length !== indices.length) {
+        const mapped = indices.map(i => sorted[i] ? `${i}:${sorted[i].suit||""}${sorted[i].rank}` : `${i}:无效`);
+        return { error: `部分索引无效。手牌共${this.cards.length}张(索引0-${this.cards.length-1})。你提供的索引对应的牌: [${mapped.join(", ")}]。请先调用 view_hand 重新确认。` };
+      }
+
+      const analysis = game.analyzeCards(cards);
+      if (!analysis) {
+        const cardDesc = cards.map(c => `${c.suit||""}${c.rank}`).join(" ");
+        return { error: `所选牌 [${cardDesc}] 无法组成合法牌型。可能原因: 1) 索引过时(手牌排序在理牌/出牌后可能变化) 2) 牌型不合法。请先调用 view_hand 重新确认索引。`, indices };
+      }
+
+      if (game.lastPlay && game.lastPlay.playerIdx !== this.position) {
+        if (!game.canBeat(analysis, game.lastPlay.analysis)) {
+          return { error: `所选牌型（${TYPE_NAMES[analysis.type]}）打不过场上牌（${TYPE_NAMES[game.lastPlay.type]}），请重新选择或过牌` };
+        }
+      }
+
+      const ok = game.play(this.position, cards);
+      if (!ok) {
+        // 检查是否可能是系统 BUG：牌型合法且满足出牌规则，但 game.play 返回 false
+        if (game.lastPlay && game.lastPlay.playerIdx !== this.position) {
+          const canBeat = game.canBeat(analysis, game.lastPlay.analysis);
+          if (canBeat) {
+            this._alertBug("牌型可打过场上牌但 game.play 返回 false：" + (TYPE_NAMES[analysis.type] || analysis.type));
+          }
+        } else if (!game.lastPlay || game.lastPlay.playerIdx === this.position) {
+          this._alertBug("是领出者且牌型合法但 game.play 返回 false：" + (TYPE_NAMES[analysis.type] || analysis.type));
+        }
+        return { error: "出牌失败，请重试" };
+      }
+      // 验证出牌后手牌是否减少
+      const remainingIds = new Set(this.cards.map(c => c.id));
+      const stillPresent = cards.filter(c => remainingIds.has(c.id));
+      if (stillPresent.length > 0) {
+        this._alertBug("出牌成功后仍有" + stillPresent.length + "张牌留在手牌中");
+      }
+      return { success: true, message: `已出${cards.length}张牌：${TYPE_NAMES[analysis.type] || analysis.type}` };
+    }
+
+    // ---------- pass_turn ----------
+    _handlePassTurn(game) {
+      if (!game.lastPlay) return { error: "你是领出者，不能过牌。请出牌。" };
+      if (game.lastPlay.playerIdx === this.position) return { error: "当前你是领出者，不能过牌。" };
+      const ok = game.pass(this.position);
+      if (!ok) {
+        this._alertBug("game.pass 返回 false，但 lastPlay 存在且非本人（lastPlay.playerIdx=" + game.lastPlay.playerIdx + ", this.position=" + this.position + "）");
+        return { error: "过牌失败" };
+      }
+      return { success: true, message: "已过牌" };
+    }
+
+    // ---------- view_history ----------
+    _handleViewHistory(game) {
+      if (game.roundHistory.length === 0) {
+        return { rounds: [], summary: "本局尚无出牌记录" };
+      }
+
+      // 按轮分组（newRoundAfter 标记一轮结束）
+      const roundGroups = [];
+      let currentRound = [];
+      for (const entry of game.roundHistory) {
+        currentRound.push(entry);
+        if (entry.newRoundAfter) {
+          roundGroups.push(currentRound);
+          currentRound = [];
+        }
+      }
+      if (currentRound.length > 0) {
+        roundGroups.push(currentRound);
+      }
+
+      const rounds = roundGroups.map((entries, ri) => {
+        const roundDesc = entries.map(e => {
+          if (e.cards === null) {
+            return `${e.playerName} 过牌`;
+          }
+          const sorted = game.sortCards(e.cards);
+          const analysis = game.analyzeCards(sorted);
+          const typeName = analysis ? TYPE_NAMES[analysis.type] || analysis.type : "?";
+          const cardsDesc = sorted.map(c => `${c.suit||""}${c.rank}`).join(" ");
+          return `${e.playerName} 出 ${typeName}：${cardsDesc}${analysis ? " (power:" + analysis.power + ")" : ""}`;
+        });
+        return { round: ri + 1, plays: roundDesc };
+      });
+
+      const totalRounds = rounds.length;
+      const totalPlays = game.roundHistory.length;
+      return {
+        total_rounds: totalRounds,
+        total_plays: totalPlays,
+        rounds,
+        _reminder: "power 越小牌越小。注意哪些大牌和炸弹已出，据此判断对手剩余实力。"
+      };
+    }
+
+    // ---------- read_experience ----------
+    // 经验记忆按「模型」存储而非座位：同一模型换座位经验跟随，不同模型同座位互不串扰
+    _expMemoryKey() {
+      return "guandan_exp_" + this.providerId + "_" + (this.modelName || "unknown");
+    }
+
+    _handleReadExperience() {
+      const key = this._expMemoryKey();
+      try {
+        const content = localStorage.getItem(key) || "";
+        if (!content.trim()) {
+          return { content: "", summary: "尚无过往经验记录。" };
+        }
+        return { content, summary: "过往经验已加载（共 " + content.length + " 字符）。" };
+      } catch (e) {
+        return { error: "读取经验失败：" + e.message };
+      }
+    }
+
+    // ---------- record_experience ----------
+    _handleRecordExperience(content) {
+      if (!content || typeof content !== "string" || content.trim().length === 0) {
+        return { error: "请提供要记录的经验内容（content 参数不能为空）。" };
+      }
+      const key = this._expMemoryKey();
+      try {
+        localStorage.setItem(key, content.trim());
+        return { success: true, message: "经验已保存（全量覆盖，共 " + content.trim().length + " 字符）。" };
+      } catch (e) {
+        return { error: "记录经验失败：" + e.message };
+      }
+    }
+
+    // ---------- 复盘 ----------
+    async reviewGame(game) {
+      // 循环等待，直到聊天和组牌都完成（每次 await 后重新检查，防止等待期间新操作插入）
+      while (this._chatPromise || (this.preparing && this._prepPromise)) {
+        if (this._chatPromise) await this._chatPromise;
+        if (this.preparing && this._prepPromise) await this._prepPromise;
+      }
+
+      this.thinking = true;
+      updateSeatInfo();
+      try {
+        this.messages.push({
+          role: "user",
+          content: [
+            "【复盘】本局已结束。请回顾本局的表现，从策略层面反思经验教训。",
+            "你可以调用 view_history 回顾本局出牌过程，调用 read_experience 查看之前的经验记录。",
+            "",
+            "【复盘要求 — 不要记具体的某手牌，要抽象出原则】",
+            "不要记录「第X轮我出了XXX，队友出了XXX」这类具体细节。要从整局博弈中提炼出可迁移的打牌原则和博弈规律。",
+            "请重点思考以下问题：",
+            "1. 组牌思路：是否因为组牌策略不对，导致某手牌迟迟打不出去？比如把本该拆开跟牌的牌硬组成了大牌型，或者把本该保留的炸弹拆散了？应该以什么为优先——是优先组顺子/连对以便跟牌，还是优先保留炸弹/大牌型以便压牌？",
+            "2. 出牌节奏：自己和队友是否出现「牌出不去」的情况——手里有能打的牌但因为组牌方式导致没有合适的牌型去跟？队友是否因为你的出牌选择（比如过早打出大牌、没有及时喂牌）而陷入被动？",
+            "3. 博弈判断：在关键轮次中，选择「压牌抢出牌权」还是「放牌让队友接」的判断准则是什么？考虑当前局势（是否头游在望、对手剩余牌数）时，决策有什么可以改进的地方？",
+            "4. 逢人配使用：逢人配（红心级牌）有没有被浪费在低价值的牌型上？应该优先用来凑炸弹还是凑同花顺？在什么情况下应该保留逢人配而不是急于用掉？",
+            "",
+            "【重要】record_experience 是全量覆盖式保存——新内容会替换所有旧经验。",
+            "请先 read_experience 读取旧经验，整合新旧内容后用 record_experience 保存。如果觉得没什么可记录的，直接回复「无」即可。"
+          ].join("\n")
+        });
+        notifyAIPanel(this.position);
+
+        let turns = 0;
+        while (turns < 5) {
+          turns++;
+          try {
+            const response = await callLLMWithMessages(
+              this._buildAPIMessages(game), GUANDAN_TOOLS, this.providerId, this.modelName
+            );
+            const msg = response.message;
+
+            if (msg.tool_calls && msg.tool_calls.length > 0) {
+              this.messages.push(msg);
+              for (const tc of msg.tool_calls) {
+                const fnName = tc.function.name;
+                let args = {};
+                try { args = JSON.parse(tc.function.arguments || "{}"); } catch (e) {}
+                let result;
+                try { result = await this._dispatchTool(fnName, args, game); } catch (e) { result = { error: "工具异常：" + e.message }; }
+                this.messages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(result) });
+                if (fnName === "record_experience" && result.success) {
+                  addLog(this.name + " 复盘完成，经验已记录");
+                }
+              }
+              notifyAIPanel(this.position);
+              continue;
+            }
+
+            this.messages.push(msg);
+            addLog(this.name + " 复盘完成");
+            notifyAIPanel(this.position);
+            return;
+          } catch (e) {
+            // Tool call ID 相关错误：自修复后重试
+            if (this._isToolIdError(e.message)) {
+              const removed = this._fixupToolCalls();
+              if (removed > 0) {
+                addLog(this.name + " 复盘时检测到 tool call ID 不匹配，已清理 " + removed + " 条孤立的 tool 消息");
+                this.messages.push({
+                  role: "user",
+                  content: "检测到上下文 tool call 不匹配，已自动清理 " + removed + " 条孤立的 tool 消息。请继续复盘思考。"
+                });
+                notifyAIPanel(this.position);
+                continue;
+              }
+            }
+            addLog(this.name + " 复盘出错：" + e.message);
+            return;
+          }
+        }
+      } finally {
+        this.thinking = false;
+        updateSeatInfo();
+      }
+    }
+
+    // ---------- 局面描述 ----------
+    _buildSituation(game) {
+      const shouldLead = !game.lastPlay || game.lastPlay.playerIdx === this.position;
+      let desc = "";
+
+      // --- 各玩家状态 ---
+      desc += "【玩家状态】\n";
+      for (let i = 0; i < 4; i++) {
+        const p = game.players[i];
+        const finished = game.finishedOrder.indexOf(i) >= 0;
+        const placeNames = ["", "头游", "二游", "三游", "末游"];
+        const place = game.finishedOrder.indexOf(i);
+        const status = finished ? "（已" + (placeNames[place + 1] || "完成") + "）" : "";
+        const teammate = (this.position + 2) % 4 === i ? " [队友]" : "";
+        const isMe = i === this.position ? " ← 你" : "";
+        desc += `  ${p.name}：${finished ? "0 张" + status : p.cards.length + " 张"}${teammate}${isMe}\n`;
+      }
+
+      // --- 本轮出牌记录（之前的轮次已在对话历史中） ---
+      desc += "\n【本轮出牌记录】\n";
+      if (game.roundHistory.length === 0) {
+        desc += "  （本局尚未有人出牌）\n";
+      } else {
+        let roundStart = 0;
+        for (let i = game.roundHistory.length - 2; i >= 0; i--) {
+          if (game.roundHistory[i].newRoundAfter) {
+            roundStart = i + 1;
+            break;
+          }
+        }
+        const currentRound = game.roundHistory.slice(roundStart);
+        for (const entry of currentRound) {
+          const who = entry.playerName;
+          if (entry.cards === null) {
+            desc += `  ${who} 过牌\n`;
+          } else {
+            const cardsDesc = entry.cards.map(c => `${c.suit||""}${c.rank}`).join(" ");
+            const analysis = game.analyzeCards(entry.cards);
+            const typeName = analysis ? (TYPE_NAMES[analysis.type] || analysis.type) : "?";
+            desc += `  ${who} 出了 ${typeName}：${cardsDesc}\n`;
+          }
+        }
+      }
+
+      // --- 当前局面 ---
+      desc += "\n【当前局面】\n";
+      if (shouldLead) {
+        desc += "你是领出者，可以出任意合法牌型。\n";
+      } else {
+        const lp = game.lastPlay;
+        const who = game.players[lp.playerIdx].name;
+        const cardsDesc = lp.cards.map(c => `${c.suit||""}${c.rank}`).join(" ");
+        desc += `上家 ${who} 出了 ${TYPE_NAMES[lp.type] || lp.type}：${cardsDesc}。\n`;
+        desc += "你必须出同类型更大的牌，或用炸弹/同花顺/天王炸压制，或过牌。\n";
+      }
+      desc += `当前打 ${game.levelRank}。红心${game.levelRank} 是逢人配。\n`;
+      desc += `你的手牌共 ${this.cards.length} 张。\n`;
+      desc += "请先调用 view_hand 工具查看手牌和索引，然后决定如何出牌。\n";
+      desc += "你可以多次调用 pile_cards 和 unpile_cards 来探索不同组合。\n";
+      desc += '回复末尾必须包含任务状态 JSON：{"task":"play","complete":true}（已完成出牌决策）或 {"task":"play","complete":false}（还需思考）。';
+      return desc;
+    }
+  }
+
+  // ==================== GuandanGame 单局牌桌 ====================
+  class GuandanGame {
+    constructor(levelRank) {
+      this.levelRank = levelRank;       // 当前打几
+      this.levelTeamA = levelRank;      // A组打到几
+      this.levelTeamB = levelRank;      // B组打到几
+      this.players = [];
+      this.currentPlayer = 0;
+      this.lastPlay = null;
+      this.passCount = 0;
+      this.round = 0;
+      this.started = false;
+      this.finished = false;
+      this.finishedOrder = [];
+      this.roundHistory = [];
+    }
+
+    // ---------- Rank value ----------
+    getRankValue(rank) {
+      if (rank === "大王") return 17;
+      if (rank === "小王") return 16;
+      if (rank === this.levelRank) return 15;
+      return RANK_ORDER[rank] || 0;
+    }
+
+    getBaseRankValue(rank) {
+      if (rank === "大王") return 17;
+      if (rank === "小王") return 16;
+      return RANK_ORDER[rank] || 0;
+    }
+
+    getSuitValue(suit) {
+      return { "♠":3, "♥":2, "♣":1, "♦":0 }[suit] || -1;
+    }
+
+    isLevelCard(card) {
+      return card.rank === this.levelRank && card.suit !== null;
+    }
+
+    isWildCard(card) {
+      return card.rank === this.levelRank && card.suit === "♥";
+    }
+
+    isRedSuit(card) {
+      return card.suit === "♥" || card.suit === "♦";
+    }
+
+    sortCards(cards) {
+      const self = this;
+      return [...cards].sort((a, b) => {
+        const rv = self.getRankValue(b.rank) - self.getRankValue(a.rank);
+        if (rv !== 0) return rv;
+        return self.getSuitValue(a.suit) - self.getSuitValue(b.suit);
+      });
+    }
+
+    // ---------- Deck ----------
+    createDeck() {
+      const deck = [];
+      for (let d = 0; d < 2; d++) {
+        for (const suit of SUITS) {
+          for (const rank of RANKS) {
+            deck.push({ suit, rank, id: `${suit}${rank}_${d}` });
+          }
+        }
+        deck.push({ suit: null, rank: "小王", id: `joker_small_${d}` });
+        deck.push({ suit: null, rank: "大王", id: `joker_big_${d}` });
+      }
+      return deck;
+    }
+
+    shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // ---------- Game init ----------
+    startNewGame() {
+      const deck = this.shuffle(this.createDeck());
+      const seatNames = ["南", "东", "北", "西"];
+      const seatTeams = ["A", "B", "A", "B"];
+
+      this.players = [];
+      for (let i = 0; i < 4; i++) {
+        const seatCfg = seatConfig[i] || { type: "human" };
+        const isHuman = seatCfg.type === "human";
+        const name = seatNames[i] + (isHuman ? "（你）" : "");
+        if (isHuman) {
+          this.players[i] = new Player(name, seatTeams[i], i, true);
+        } else {
+          // 每个 AI 座位独立选择服务商/模型，各自创建 LLMAIPlayer
+          const aiCfg = getSeatAiConfig(i);
+          if (aiCfg) {
+            const factory = new LLMAIPlayerFactory(aiCfg.providerId, aiCfg.modelName, GUANDAN_SYSTEM_PROMPT);
+            this.players[i] = factory.createPlayer(name, seatTeams[i], i);
+          } else {
+            addLog("座位 " + seatNames[i] + " 配置为 AI 但没有可用大模型，该座位按真人处理");
+            this.players[i] = new Player(name, seatTeams[i], i, true);
+          }
+        }
+        this.players[i].cards = deck.slice(i * 27, (i + 1) * 27);
+      }
+
+      this.currentPlayer = 0;
+      this.lastPlay = null;
+      this.passCount = 0;
+      this.round = 0;
+      this.started = true;
+      this.finished = false;
+      this.finishedOrder = [];
+      this.startedAt = Date.now(); // 开局时间（用于统计最长一局）
+      this.roundHistory = [];
+
+      const humanIdx = this.players.findIndex(p => p.isHuman);
+      if (humanIdx >= 0) {
+        const wildCount = this.players[humanIdx].cards.filter(c => this.isWildCard(c)).length;
+        addLog(`新一局开始！当前打 ${this.levelRank}，级牌 ${this.levelRank} 大于 A 小于小王。${this.players[humanIdx].name} 有 ${wildCount} 张逢人配（红心${this.levelRank}）。`);
+      } else {
+        addLog(`新一局开始！当前打 ${this.levelRank}，级牌 ${this.levelRank} 大于 A 小于小王。全部 AI 自动对战。`);
+      }
+
+      return this;
+    }
+
+    // ---------- Pattern detection ----------
+    analyzeCards(cards) {
+      const n = cards.length;
+      if (n === 0) return null;
+      const wilds = cards.filter(c => this.isWildCard(c));
+      const regulars = cards.filter(c => !this.isWildCard(c));
+      const wildCount = wilds.length;
+      if (wildCount === 0) return this.analyzeSimple(cards);
+      return this.analyzeWithWilds(regulars, wilds);
+    }
+
+    analyzeSimple(cards) {
+      const n = cards.length;
+      if (n === 0) return null;
+
+      const rankCounts = {};
+      cards.forEach(c => {
+        const r = c.rank;
+        rankCounts[r] = (rankCounts[r] || 0) + 1;
+      });
+      const counts = Object.values(rankCounts).sort((a,b) => b - a);
+      const uniqueRanks = Object.keys(rankCounts).length;
+
+      // 天王炸
+      if (n === 4) {
+        const bigJokers = cards.filter(c => c.rank === "大王").length;
+        const smallJokers = cards.filter(c => c.rank === "小王").length;
+        if (bigJokers === 2 && smallJokers === 2) {
+          return { type: "king_bomb", power: 99 };
+        }
+      }
+
+      // Single
+      if (n === 1) return { type: "single", power: this.getRankValue(cards[0].rank) };
+
+      // Pair
+      if (n === 2 && counts[0] === 2) return { type: "pair", power: this.getRankValue(cards[0].rank) };
+
+      // Triple
+      if (n === 3 && counts[0] === 3) return { type: "triple", power: this.getRankValue(cards[0].rank) };
+
+      // Bomb: 4+ same rank
+      if (counts[0] >= 4 && uniqueRanks === 1) {
+        return { type: "bomb", power: this.getRankValue(cards[0].rank), length: counts[0] };
+      }
+
+      // Triple + 2：只比三张的大小，对子不影响
+      if (n === 5 && counts[0] === 3 && counts[1] === 2) {
+        const tripleRank = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
+        return { type: "triple_plus_2", power: this.getRankValue(tripleRank) };
+      }
+
+      // 钢板: exactly 2 consecutive triples
+      if (n === 6 && counts.every(c => c === 3)) {
+        const ranks = Object.keys(rankCounts);
+        const baseVals = ranks.map(r => this.getBaseRankValue(r)).sort((a,b) => a-b);
+        if (baseVals.length === 2 && this.isConsecutive(baseVals) && baseVals[1] <= 14) {
+          const highestRank = ranks.reduce((a, b) => this.getBaseRankValue(a) > this.getBaseRankValue(b) ? a : b);
+          return { type: "consecutive_triples", power: this.getRankValue(highestRank), length: 2 };
+        }
+      }
+
+      // Consecutive pairs: exactly 3 pairs, including AA2233
+      if (n === 6 && counts.every(c => c === 2)) {
+        const ranks = Object.keys(rankCounts);
+        const baseVals = ranks.map(r => this.getBaseRankValue(r)).sort((a,b) => a-b);
+        if (baseVals.length === 3) {
+          if (this.isConsecutive(baseVals) && baseVals[2] <= 14) {
+            const highestRank = ranks.reduce((a, b) => this.getBaseRankValue(a) > this.getBaseRankValue(b) ? a : b);
+            return { type: "consecutive_pairs", power: this.getRankValue(highestRank), length: 3 };
+          }
+          if (baseVals[0] === 2 && baseVals[2] === 14 && baseVals[1] === 3) {
+            return { type: "consecutive_pairs", power: this.getRankValue("3"), length: 3 };
+          }
+        }
+      }
+
+      // Straight: exactly 5, including A2345
+      if (n === 5 && counts.every(c => c === 1)) {
+        const ranks = Object.keys(rankCounts);
+        const baseVals = ranks.map(r => this.getBaseRankValue(r)).sort((a,b) => a-b);
+        if (this.isConsecutive(baseVals) && baseVals[4] <= 14) {
+          const highestRank = ranks.reduce((a, b) => this.getBaseRankValue(a) > this.getBaseRankValue(b) ? a : b);
+          return { type: "straight", power: this.getRankValue(highestRank), length: 5 };
+        }
+        if (baseVals[0] === 2 && baseVals[4] === 14 && this.isConsecutive(baseVals.slice(0, 4))) {
+          return { type: "straight", power: this.getRankValue("5"), length: 5 };
+        }
+      }
+
+      // Straight flush: exactly 5, including A2345
+      if (n === 5) {
+        const suit = cards[0].suit;
+        if (suit && cards.every(c => c.suit === suit)) {
+          const baseVals = cards.map(c => this.getBaseRankValue(c.rank)).sort((a,b) => a-b);
+          if (this.isConsecutive(baseVals) && baseVals[4] <= 14) {
+            const highestRank = cards.reduce((a, b) => this.getBaseRankValue(a.rank) > this.getBaseRankValue(b.rank) ? a : b).rank;
+            return { type: "straight_flush", power: this.getRankValue(highestRank), length: 5 };
+          }
+          if (baseVals[0] === 2 && baseVals[4] === 14 && this.isConsecutive(baseVals.slice(0, 4))) {
+            return { type: "straight_flush", power: this.getRankValue("5"), length: 5 };
+          }
+        }
+      }
+
+      return null;
+    }
+
+    isConsecutive(sortedValues) {
+      for (let i = 1; i < sortedValues.length; i++) {
+        if (sortedValues[i] - sortedValues[i-1] !== 1) return false;
+      }
+      return true;
+    }
+
+    analyzeWithWilds(regulars, wilds) {
+      const wildCount = wilds.length;
+      const total = regulars.length + wildCount;
+
+      if (regulars.length === 0) {
+        if (wildCount === 1) return { type: "single", power: 15 };
+        if (wildCount === 2) return { type: "pair", power: 15 };
+        return null;
+      }
+
+      const rankCounts = {};
+      regulars.forEach(c => {
+        rankCounts[c.rank] = (rankCounts[c.rank] || 0) + 1;
+      });
+
+      let bestResult = null;
+
+      // Check if wilds can complete a bomb
+      const maxCount = Math.max(...Object.values(rankCounts));
+      if (maxCount + wildCount >= 4) {
+        let bestRank = null;
+        let bestCnt = 0;
+        for (const [r, cnt] of Object.entries(rankCounts)) {
+          const rv = this.getRankValue(r);
+          if (cnt > bestCnt || (cnt === bestCnt && rv > (bestRank ? this.getRankValue(bestRank) : 0))) {
+            bestCnt = cnt;
+            bestRank = r;
+          }
+        }
+        const totalBomb = bestCnt + wildCount;
+        if (totalBomb >= 4) {
+          const result = { type: "bomb", power: this.getRankValue(bestRank), length: totalBomb, wildUsed: wildCount };
+          if (totalBomb >= 5 && (!bestResult || result.power > bestResult.power)) {
+            bestResult = result;
+          } else if (totalBomb === 4 && !bestResult) {
+            bestResult = result;
+          }
+        }
+      }
+
+      // Straight with wilds
+      if (regulars.length >= 4 && wildCount >= 1) {
+        const ranks = [...new Set(regulars.map(c => this.getBaseRankValue(c.rank)))].sort((a,b) => a-b);
+        for (let start = 0; start < ranks.length; start++) {
+          for (let len = 5; len <= 5; len++) {
+            const needed = [];
+            let val = ranks[start];
+            for (let i = 0; i < len; i++) {
+              if (!ranks.includes(val + i)) needed.push(val + i);
+            }
+            if (needed.length <= wildCount && val + len - 1 <= 14) {
+              const highestBaseVal = val + len - 1;
+              const highestRank = Object.keys(RANK_ORDER).find(r => RANK_ORDER[r] === highestBaseVal) || String(highestBaseVal);
+              const power = this.getRankValue(highestRank);
+              if (!bestResult || highestBaseVal > (bestResult._baseHighest || 0)) {
+                bestResult = { type: "straight", power, length: len, wildUsed: needed.length, _baseHighest: highestBaseVal };
+              }
+            }
+          }
+        }
+        // A2345 straight with wilds
+        const regVals = [...new Set(regulars.map(c => this.getBaseRankValue(c.rank)))];
+        const a2345Set = [2, 3, 4, 5, 14];
+        const covered = a2345Set.filter(v => regVals.includes(v));
+        const extras = regVals.filter(v => !a2345Set.includes(v));
+        if (extras.length === 0 && covered.length + wildCount >= 5) {
+          const wildsNeeded = 5 - covered.length;
+          const a2345power = this.getRankValue("5");
+          const baseHighest = 5;
+          const lessWilds = wildsNeeded < (bestResult ? bestResult.wildUsed || 0 : 0);
+          if (!bestResult || baseHighest > ((bestResult && bestResult._baseHighest) || 0) || (baseHighest === ((bestResult && bestResult._baseHighest) || 0) && lessWilds)) {
+            bestResult = { type: "straight", power: a2345power, length: 5, wildUsed: wildsNeeded, _baseHighest: baseHighest };
+          }
+        }
+      }
+
+      // Consecutive pairs with wilds
+      if (regulars.length >= 4 && wildCount >= 1) {
+        // Collect all ranks that appear in hand (including singles)
+        const handRanks = Object.keys(rankCounts).map(r => this.getBaseRankValue(r));
+        // Try every possible starting value from 2 to 12 (max start for 3 pairs ending at A=14)
+        for (let startVal = 2; startVal <= 12; startVal++) {
+          const endVal = startVal + 2; // 3 consecutive pairs: start, start+1, start+2
+          if (endVal > 14) continue;
+          // Check if any card in this range exists in hand
+          const hasAny = handRanks.some(v => v >= startVal && v <= endVal);
+          if (!hasAny) continue;
+          let wildsNeeded = 0;
+          for (let v = startVal; v <= endVal; v++) {
+            const rank = Object.keys(RANK_ORDER).find(r => RANK_ORDER[r] === v);
+            const cnt = rank ? (rankCounts[rank] || 0) : 0;
+            wildsNeeded += Math.max(0, 2 - cnt); // Need (2 - cnt) wilds to complete a pair
+          }
+          if (wildsNeeded > 0 && wildsNeeded <= wildCount) {
+            const highestRank = Object.keys(RANK_ORDER).find(r => RANK_ORDER[r] === endVal);
+            if (highestRank) {
+              const power = this.getRankValue(highestRank);
+              if (!bestResult || endVal > (bestResult._baseHighest || 0) || (endVal === (bestResult._baseHighest || 0) && wildsNeeded < (bestResult.wildUsed || 999))) {
+                bestResult = { type: "consecutive_pairs", power, length: 3, wildUsed: wildsNeeded, _baseHighest: endVal };
+              }
+            }
+          }
+        }
+        // AA2233 special: handles 2-3-14 sequence
+        const aa2233Ranks = { "2": 2, "3": 3, "A": 14 };
+        let aaWildsNeeded = 0;
+        for (const [r, v] of Object.entries(aa2233Ranks)) {
+          const cnt = rankCounts[r] || 0;
+          aaWildsNeeded += Math.max(0, 2 - cnt);
+        }
+        if (aaWildsNeeded > 0 && aaWildsNeeded <= wildCount) {
+          const baseHighest = 3;
+          if (!bestResult || baseHighest > (bestResult._baseHighest || 0) || (baseHighest === (bestResult._baseHighest || 0) && aaWildsNeeded < (bestResult.wildUsed || 999))) {
+            bestResult = { type: "consecutive_pairs", power: this.getRankValue("3"), length: 3, wildUsed: aaWildsNeeded, _baseHighest: baseHighest };
+          }
+        }
+      }
+
+      // 钢板 with wilds
+      if (!bestResult && regulars.length >= 3 && wildCount >= 1) {
+        const rankEntries = Object.entries(rankCounts).map(([r, cnt]) => ({
+          rank: r, cnt, baseVal: this.getBaseRankValue(r)
+        }));
+        for (const entry of rankEntries) {
+          const val1 = entry.baseVal;
+          if (val1 >= 14) continue;
+          const nextEntry = rankEntries.find(e => e.baseVal === val1 + 1);
+          const cnt2 = nextEntry ? nextEntry.cnt : 0;
+          const w1 = Math.max(0, 3 - entry.cnt);
+          const w2 = Math.max(0, 3 - cnt2);
+          const wildsNeeded = w1 + w2;
+          if (wildsNeeded > 0 && wildsNeeded <= wildCount) {
+            const highestRank = nextEntry ? nextEntry.rank : Object.keys(RANK_ORDER).find(r => RANK_ORDER[r] === val1 + 1);
+            if (highestRank) {
+              const power = this.getRankValue(highestRank);
+              const baseHighest = val1 + 1;
+              if (!bestResult || baseHighest > (bestResult._baseHighest || 0)) {
+                bestResult = { type: "consecutive_triples", power, length: 2, wildUsed: wildsNeeded, _baseHighest: baseHighest };
+              }
+            }
+          }
+        }
+      }
+
+      // Straight flush with wilds
+      if (!bestResult && regulars.length >= 4 && wildCount >= 1) {
+        const suits = [...new Set(regulars.map(c => c.suit))];
+        if (suits.length === 1 && suits[0]) {
+          const ranks = [...new Set(regulars.map(c => this.getBaseRankValue(c.rank)))].sort((a,b) => a-b);
+          for (let start = 0; start < ranks.length; start++) {
+            const needed = [];
+            const val = ranks[start];
+            for (let i = 0; i < 5; i++) {
+              if (!ranks.includes(val + i)) needed.push(val + i);
+            }
+            if (needed.length <= wildCount && val + 4 <= 14) {
+              const highestBaseVal = val + 4;
+              const highestRank = Object.keys(RANK_ORDER).find(r => RANK_ORDER[r] === highestBaseVal) || String(highestBaseVal);
+              const power = this.getRankValue(highestRank);
+              if (!bestResult || highestBaseVal > (bestResult._baseHighest || 0)) {
+                bestResult = { type: "straight_flush", power, length: 5, wildUsed: needed.length, _baseHighest: highestBaseVal };
+              }
+            }
+          }
+          // A2345 straight flush with wilds
+          const a2345SFSet = [2, 3, 4, 5, 14];
+          const sfCovered = a2345SFSet.filter(v => ranks.includes(v));
+          const sfExtras = ranks.filter(v => !a2345SFSet.includes(v));
+          if (sfExtras.length === 0 && sfCovered.length + wildCount >= 5) {
+            const wildsNeeded = 5 - sfCovered.length;
+            const sfPower = this.getRankValue("5");
+            const baseHighest = 5;
+            const lessWilds = wildsNeeded < (bestResult ? bestResult.wildUsed || 0 : 0);
+            if (!bestResult || baseHighest > ((bestResult && bestResult._baseHighest) || 0) || (baseHighest === ((bestResult && bestResult._baseHighest) || 0) && lessWilds)) {
+              bestResult = { type: "straight_flush", power: sfPower, length: 5, wildUsed: wildsNeeded, _baseHighest: baseHighest };
+            }
+          }
+        }
+      }
+
+      // Fallback: simple patterns
+      if (!bestResult) {
+        const regularRanks = regulars.map(c => c.rank);
+        const uniqueRegRanks = [...new Set(regularRanks)];
+        const totalCount = regulars.length + wildCount;
+        // 三带二 with wilds: triple + pair from 5 cards
+        if (totalCount === 5 && wildCount >= 1) {
+          for (const rank of uniqueRegRanks) {
+            const cnt = regularRanks.filter(r => r === rank).length;
+            const wildsForTriple = Math.max(0, 3 - cnt);
+            if (wildsForTriple > wildCount) continue;
+            const wildsLeft = wildCount - wildsForTriple;
+            const regularsLeft = regulars.length - cnt;
+            // Remaining cards + wilds must form a pair (2 cards)
+            if (regularsLeft + wildsLeft >= 2) {
+              bestResult = { type: "triple_plus_2", power: this.getRankValue(rank), wildUsed: wildsForTriple + Math.max(0, 2 - regularsLeft) };
+              break;
+            }
+          }
+        }
+        // Pair with 1 wild
+        if (!bestResult) {
+          for (const rank of uniqueRegRanks) {
+            const cnt = regularRanks.filter(r => r === rank).length;
+            const power = this.getRankValue(rank);
+            if (totalCount === 2 && cnt === 1 && wildCount === 1) {
+              bestResult = { type: "pair", power, wildUsed: 1 };
+              break;
+            }
+            if (totalCount === 3 && cnt >= 1 && cnt + wildCount >= 3) {
+              bestResult = { type: "triple", power, wildUsed: 3 - cnt };
+              break;
+            }
+          }
+        }
+        if (!bestResult && regulars.length === 0) {
+          if (wildCount === 2) bestResult = { type: "pair", power: 15, wildUsed: 2 };
+          else if (wildCount === 1) bestResult = { type: "single", power: 15, wildUsed: 1 };
+        }
+        if (!bestResult) return null;
+      }
+
+      return bestResult;
+    }
+
+    // ---------- Comparison ----------
+    canBeat(newAnalysis, lastAnalysis) {
+      if (!lastAnalysis) return true;
+
+      if (newAnalysis.type === "king_bomb") return true;
+      if (lastAnalysis.type === "king_bomb") return false;
+
+      const bombTypes = ["bomb", "straight_flush"];
+      const newIsBomb = bombTypes.includes(newAnalysis.type);
+      const lastIsBomb = bombTypes.includes(lastAnalysis.type);
+
+      if (newIsBomb && !lastIsBomb) return true;
+      if (!newIsBomb && lastIsBomb) return false;
+
+      if (newIsBomb && lastIsBomb) {
+        const newLen = newAnalysis.length || 4;
+        const lastLen = lastAnalysis.length || 4;
+        if (newLen !== lastLen) return newLen > lastLen;
+        if (newAnalysis.type === "straight_flush" && lastAnalysis.type !== "straight_flush") return true;
+        if (newAnalysis.type !== "straight_flush" && lastAnalysis.type === "straight_flush") return false;
+        return newAnalysis.power > lastAnalysis.power;
+      }
+
+      if (newAnalysis.type !== lastAnalysis.type) return false;
+      if (newAnalysis.length && newAnalysis.length !== lastAnalysis.length) return false;
+      return newAnalysis.power > lastAnalysis.power;
+    }
+
+    // ---------- Turn management ----------
+    nextPlayer() {
+      let next = (this.currentPlayer + 1) % 4;
+      let tries = 0;
+      while (this.players[next].cards.length === 0 && tries < 4) {
+        next = (next + 1) % 4;
+        tries++;
+      }
+      this.currentPlayer = next;
+    }
+
+    // ---------- Game actions ----------
+    play(playerIdx, cards) {
+      const analysis = this.analyzeCards(cards);
+      if (!analysis) return false;
+
+      if (this.lastPlay && this.lastPlay.playerIdx !== playerIdx) {
+        if (!this.canBeat(analysis, this.lastPlay.analysis)) return false;
+      }
+
+      if (!this.lastPlay || this.lastPlay.playerIdx === playerIdx) {
+        if (this.roundHistory.length > 0) {
+          this.roundHistory[this.roundHistory.length - 1].newRoundAfter = true;
+        }
+      }
+
+      const player = this.players[playerIdx];
+      this.roundHistory.push({ playerIdx, cards: [...cards], playerName: player.name });
+      player.removeCards(cards.map(c => c.id));
+      // 清理幽灵牌摞：出牌后某些牌摞可能不再构成合法牌型（如 999QQ 三带二打出 QQ 后剩余 999）
+      player.piles = player.piles.filter(p => {
+        const pileCards = p.cardIds.map(id => player.cards.find(c => c.id === id)).filter(c => c);
+        if (pileCards.length < 2) return false;
+        return this.analyzeCards(pileCards) !== null;
+      });
+
+      this.lastPlay = { playerIdx, cards, analysis, type: analysis.type };
+      this.passCount = 0;
+      this.round++;
+
+      const wildNote = analysis.wildUsed ? `（使用逢人配 ${analysis.wildUsed} 张）` : "";
+      addLog(`${player.name} 出了 ${TYPE_NAMES[analysis.type] || analysis.type}（${cards.length}张）${wildNote}`);
+
+      // Check win
+      if (player.cards.length === 0) {
+        this.finishedOrder.push(playerIdx);
+        const place = this.finishedOrder.length;
+        const placeNames = ["", "头游", "二游", "三游", "末游"];
+        addLog(`${player.name} 成为${placeNames[place]}！`);
+
+        if (place === 1) {
+          const remaining = this.players.filter(p => p.cards.length > 0);
+          if (remaining.length <= 1) {
+            this.endGame();
+            return true;
+          }
+          this.nextPlayer();
+          renderAll();
+          setTimeout(async () => {
+            updateCurrentPlayerIndicator();
+            await this.aiPlay();
+          }, 600);
+          return true;
+        } else if (place === 2) {
+          const headPlayer = this.players[this.finishedOrder[0]];
+          if (player.team === headPlayer.team) {
+            addLog(`${player.team === "A" ? "A组" : "B组"}双上！`);
+            this.endGame();
+            return true;
+          }
+        } else if (place >= 3) {
+          this.endGame();
+          return true;
+        }
+      }
+
+      this.nextPlayer();
+      renderAll();
+      setTimeout(async () => {
+        updateCurrentPlayerIndicator();
+        await this.aiPlay();
+      }, 600);
+      return true;
+    }
+
+    pass(playerIdx) {
+      if (!this.lastPlay) return false;
+      if (this.lastPlay.playerIdx === playerIdx) return false;
+      this.passCount++;
+      addLog(`${this.players[playerIdx].name} 过牌`);
+      this.roundHistory.push({ playerIdx, cards: null, playerName: this.players[playerIdx].name });
+      this.nextPlayer();
+      renderAll();
+
+      if (this.passCount >= 3) {
+        if (this.roundHistory.length > 0) {
+          this.roundHistory[this.roundHistory.length - 1].newRoundAfter = true;
+        }
+        let winner = this.lastPlay.playerIdx;
+        if (this.players[winner].cards.length === 0) {
+          const teammate = (winner + 2) % 4;
+          if (this.players[teammate].cards.length > 0) {
+            winner = teammate;
+            addLog(`${this.players[teammate].name} 接风！`);
+          } else {
+            this.endGame();
+            return true;
+          }
+        }
+        addLog(`${this.players[winner].name} 获得新一轮出牌权`);
+        this.lastPlay = null;
+        this.passCount = 0;
+        this.currentPlayer = winner;
+        renderAll();
+        setTimeout(async () => {
+          updateCurrentPlayerIndicator();
+          await this.aiPlay();
+        }, 600);
+        return true;
+      }
+
+      setTimeout(async () => {
+        updateCurrentPlayerIndicator();
+        await this.aiPlay();
+      }, 600);
+      return true;
+    }
+
+    endGame() {
+      this.finished = true;
+
+      for (let i = 0; i < 4; i++) {
+        if (!this.finishedOrder.includes(i)) this.finishedOrder.push(i);
+      }
+
+      const placeNames = ["头游", "二游", "三游", "末游"];
+      const teamAPlaces = [];
+      const teamBPlaces = [];
+
+      this.finishedOrder.forEach((playerIdx, order) => {
+        const player = this.players[playerIdx];
+        const place = order + 1;
+        if (player.team === "A") teamAPlaces.push(place);
+        else teamBPlaces.push(place);
+      });
+
+      const headPlayer = this.players[this.finishedOrder[0]];
+      const winTeam = headPlayer.team;
+      const winTeamLabel = winTeam === "A" ? "A组" : "B组";
+
+      let upgradeLevels = 1;
+      if (winTeam === "A") {
+        if (teamAPlaces.includes(1) && teamAPlaces.includes(2)) upgradeLevels = 3;
+        else if (teamAPlaces.includes(1) && teamAPlaces.includes(3)) upgradeLevels = 2;
+      } else {
+        if (teamBPlaces.includes(1) && teamBPlaces.includes(2)) upgradeLevels = 3;
+        else if (teamBPlaces.includes(1) && teamBPlaces.includes(3)) upgradeLevels = 2;
+      }
+
+      const currentLevelIdx = LEVEL_RANKS.indexOf(this.levelRank);
+      const newLevelIdx = Math.min(LEVEL_RANKS.length - 1, currentLevelIdx + upgradeLevels);
+      this.levelRank = LEVEL_RANKS[newLevelIdx];
+
+      const resultMsg = this.finishedOrder.map((pIdx, i) =>
+        `${placeNames[i]}: ${this.players[pIdx].name}（${this.players[pIdx].team}组）`
+      ).join("，");
+
+      addLog(`========== 本局结束 ==========`);
+      addLog(`结果：${resultMsg}`);
+      addLog(`${winTeamLabel}获胜！连升 ${upgradeLevels} 级，当前打 ${this.levelRank}`);
+
+      // 记录对局战绩（localStorage，首页「本机战绩」展示用）
+      const statsKey = "guandan_challenge_stats";
+      const stats = lsGetJSON(statsKey, { games: 0, teamA: 0, teamB: 0 });
+      stats.games = (stats.games || 0) + 1;
+      const winSeats = winTeam === "A" ? [0, 2] : [1, 3]; // A 组=南+北，B 组=东+西
+      if (winTeam === "A") stats.teamA = (stats.teamA || 0) + 1;
+      else stats.teamB = (stats.teamB || 0) + 1;
+      // 座位胜场：赢家座位各 +1（首页「胜率最高座位」用）
+      stats.seatWins = stats.seatWins || {};
+      winSeats.forEach(i => { stats.seatWins[i] = (stats.seatWins[i] || 0) + 1; });
+      // 模型胜场：获胜局中出现的模型各 +1，同一局同一模型只计一次（首页「最会赢的模型」用）
+      stats.modelWins = stats.modelWins || {};
+      const winModels = new Set();
+      winSeats.forEach(i => {
+        const p = this.players[i];
+        if (p instanceof LLMAIPlayer) winModels.add(p.providerId + " · " + p.modelName);
+      });
+      winModels.forEach(m => { stats.modelWins[m] = (stats.modelWins[m] || 0) + 1; });
+      // 最长一局
+      const gameSec = Math.round((Date.now() - (this.startedAt || Date.now())) / 1000);
+      if (gameSec > (stats.longestGameSec || 0)) {
+        stats.longestGameSec = gameSec;
+        stats.longestGameAt = new Date().toISOString();
+      }
+      lsSetJSON(statsKey, stats);
+
+      const statusColor = winTeam === "A" ? "#0f8a5f" : "#c06d2b";
+      $("#gameStatus").text(`游戏结束 - ${winTeamLabel}胜（升${upgradeLevels}级 → 打${this.levelRank}）`).css("color", statusColor);
+      // Hide all seat action buttons
+      $(".seat-actions").hide();
+      renderLevelBadge();
+      renderAll();
+
+      // 触发 AI 玩家复盘
+      setTimeout(() => {
+        this.players.forEach(p => {
+          if (p instanceof LLMAIPlayer) {
+            p.reviewGame(this).catch(e => addLog(p.name + " 复盘失败：" + e.message));
+          }
+        });
+      }, 2000);
+    }
+
+    // ---------- AI ----------
+    async aiPlay() {
+      if (this.finished) return;
+      const idx = this.currentPlayer;
+      const player = this.players[idx];
+      if (!player || player.cards.length === 0) return;
+      await player.decidePlay(this);
+      // 出牌后异步重新理牌（不阻塞下一家）
+      if (player instanceof LLMAIPlayer && player.cards.length > 0) {
+        player.prepareHand(this, "post_play").catch(() => {});
+      }
+    }
+  }
+
+  // ==================== 座位配置 ====================
+  // seatConfig[i] = { type: "human"|"ai", providerId, modelName }  for i=0(南),1(东),2(北),3(西)
+  // 每个 AI 座位可独立选择不同服务商/模型（本项目的核心亮点），配置存入 localStorage
+  const SEAT_CONFIG_KEY = "guandan_seat_config";
+  const SEAT_NAMES = ["南", "东", "北", "西"];
+
+  function defaultSeatConfig() {
+    return {
+      0: { type: "human", providerId: "", modelName: "" },
+      1: { type: "ai", providerId: "", modelName: "" },
+      2: { type: "ai", providerId: "", modelName: "" },
+      3: { type: "ai", providerId: "", modelName: "" }
+    };
+  }
+
+  function loadSeatConfig() {
+    const saved = lsGetJSON(SEAT_CONFIG_KEY, null);
+    if (!saved) return defaultSeatConfig();
+    const cfg = defaultSeatConfig();
+    for (let i = 0; i < 4; i++) {
+      if (saved[i] && (saved[i].type === "human" || saved[i].type === "ai")) {
+        cfg[i] = {
+          // 只有南座（0）可以选「人」，东/北/西强制 AI（真人无法操作）
+          type: i === 0 ? saved[i].type : "ai",
+          providerId: saved[i].providerId || "",
+          modelName: saved[i].modelName || ""
+        };
+      }
+    }
+    return cfg;
+  }
+
+  let seatConfig = loadSeatConfig();
+
+  function saveSeatConfig() {
+    lsSetJSON(SEAT_CONFIG_KEY, seatConfig);
+  }
+
+  function readSeatConfig() {
+    for (let i = 0; i < 4; i++) {
+      // 只有南座（0）可选「人」，东/北/西强制 AI（真人无法操作）
+      const type = i === 0 ? ($("#cfgSeat" + i).val() === "ai" ? "ai" : "human") : "ai";
+      seatConfig[i].type = type;
+      if (type === "ai") {
+        seatConfig[i].providerId = $("#cfgSeat" + i + "Provider").val() || "";
+        seatConfig[i].modelName = $("#cfgSeat" + i + "Model").val() || "";
+      }
+    }
+    saveSeatConfig();
+  }
+
+  // 解析某个 AI 座位的实际模型配置；
+  // 服务商未选或 Key 缺失时自动落到第一个已配置 Key 的服务商；模型缺省用该服务商默认模型
+  function getSeatAiConfig(i) {
+    const cfg = seatConfig[i];
+    if (!cfg || cfg.type !== "ai") return null;
+    const available = getAvailableProviders();
+    if (!available.length) return null;
+    const providerId = cfg.providerId && getProviderApiKey(cfg.providerId) ? cfg.providerId : available[0];
+    const pcfg = getProviderConfig(providerId);
+    if (!pcfg) return null;
+    let modelName = cfg.modelName;
+    if (!modelName || !pcfg.modelOptions.some(m => m.value === modelName)) {
+      modelName = pcfg.defaultModel;
+    }
+    return { providerId, modelName };
+  }
+
+  function updateSeatInfo() {
+    const seatNames = ["南", "东", "北", "西"];
+    const nameIds = ["#nameBottom", "#nameRight", "#nameTop", "#nameLeft"];
+    const teamBadges = [
+      '<span class="team-badge team-a">A组</span>',
+      '<span class="team-badge team-b">B组</span>',
+      '<span class="team-badge team-a">A组</span>',
+      '<span class="team-badge team-b">B组</span>'
+    ];
+    for (let i = 0; i < 4; i++) {
+      const isHuman = seatConfig[i] && seatConfig[i].type === "human";
+      const name = seatNames[i] + (isHuman ? "（你）" : "");
+      const aiBadge = (!isHuman && getSeatAiConfig(i))
+        ? ' <span class="ai-badge" data-position="' + i + '" title="查看 AI 对话过程">AI</span>'
+        : '';
+      const player = game.players[i];
+      let countStr = "";
+      if (player && game.started) {
+        countStr = " " + player.cards.length + " 张";
+        if (player instanceof LLMAIPlayer && player.preparing) {
+          countStr += " · 组牌中…";
+        } else if (player instanceof LLMAIPlayer && player.thinking) {
+          countStr += " · 思考中…";
+        } else if (player instanceof LLMAIPlayer && player.chatting) {
+          countStr += " · 讨论中…";
+        }
+      } else {
+        countStr = " 27 张";
+      }
+      // Order: 组名 座位名 AI 张数 状态
+      $(nameIds[i]).html(teamBadges[i] + " " + name + aiBadge + countStr);
+    }
+  }
+
+  // ==================== 全局实例 ====================
+  let game = new GuandanGame("2");
+
+  // ---------- LLM Provider 配置见 js/common.js（4 家服务商） ----------
+  // 每个 AI 座位在 startNewGame 时按各自配置创建 LLMAIPlayerFactory
+  let aiPanelPlayerIdx = -1;
+  let aiPanelMsgCount = 0;
+  let aiStreamingMsgEl = null;
+  let chatQueue = []; // { playerIdx, text } — 用户提问队列，等 agent 空闲后发送
+  let chatProcessing = false;
+  let chatStreamingMsgEl = null; // 聊天流式输出元素
+  // 聊天时只允许查看和理牌，不允许出牌/过牌
+  const CHAT_TOOLS = GUANDAN_TOOLS.filter(t => t.function.name !== "play_cards" && t.function.name !== "pass_turn" && t.function.name !== "record_experience");
+
+  // 尝试处理聊天队列（agent 空闲时调用）
+  function tryProcessChatQueue() {
+    if (chatProcessing || chatQueue.length === 0) return;
+    const item = chatQueue[0];
+    const player = game.players[item.playerIdx];
+    if (!player || !(player instanceof LLMAIPlayer)) {
+      chatQueue.shift();
+      tryProcessChatQueue();
+      return;
+    }
+    if (player.preparing || player.thinking) return; // agent 还在忙
+    // 立刻上锁，防止 decidePlay/prepareHand 在 processChatItem 设置锁之前趁虚而入
+    player._chatPromise = new Promise(resolve => { player._chatResolve = resolve; });
+    player.chatting = true;
+    chatProcessing = true;
+    chatQueue.shift();
+    updateSeatInfo();
+    processChatItem(item.playerIdx, item.text);
+  }
+
+  async function processChatItem(playerIdx, text) {
+    const player = game.players[playerIdx];
+    if (!player || !(player instanceof LLMAIPlayer)) {
+      // 解锁（锁在 tryProcessChatQueue 中设置）
+      if (player && player._chatResolve) { player._chatResolve(); player._chatResolve = null; player._chatPromise = null; }
+      chatProcessing = false;
+      tryProcessChatQueue();
+      return;
+    }
+    // 聊天锁已在 tryProcessChatQueue 中设置
+    try {
+      // 移除排队中的 DOM 元素（第一张卡片即为本次提问）
+      $("#aiPanelBody").find(".ai-msg-pending").first().remove();
+
+      // 将用户提问加入 messages（用 [Chat] 前缀与 Game State 区分）
+      player.messages.push({ role: "user", content: "[Chat] " + text });
+      if (aiPanelPlayerIdx === playerIdx) {
+        renderAIPanel();
+        const $body = $("#aiPanelBody");
+        $body.scrollTop($body[0].scrollHeight);
+      }
+
+      // 创建流式输出元素
+      if (aiPanelPlayerIdx === playerIdx) {
+        chatStreamingMsgEl = document.createElement("div");
+        chatStreamingMsgEl.className = "ai-msg ai-msg-assistant ai-msg-streaming";
+        chatStreamingMsgEl.innerHTML = '<div class="role-label">AI <span class="ai-cursor"></span></div><div class="streaming-content"></div><div class="streaming-tools"></div>';
+        $("#aiPanelBody").append(chatStreamingMsgEl);
+        const $body = $("#aiPanelBody");
+        $body.scrollTop($body[0].scrollHeight);
+      }
+
+      // 流式回调
+      const chatOnChunk = (chunk) => {
+        if (!chatStreamingMsgEl) return;
+        const content = chunk.content || "";
+        const toolCalls = chunk.tool_calls;
+        if (content) {
+          chatStreamingMsgEl.querySelector(".streaming-content").innerHTML = renderContentWithThink(content);
+        }
+        if (toolCalls && toolCalls.length > 0) {
+          const tcHtml = toolCalls.map(tc => {
+            let argsPreview = "";
+            try { argsPreview = JSON.stringify(JSON.parse(tc.function.arguments || "{}")); } catch (e) { argsPreview = tc.function.arguments || ""; }
+            return '<div style="margin-top:2px"><span class="tool-call-name">工具：' + escapeHtml(tc.function.name) + '</span>(' + escapeHtml(argsPreview) + ')</div>';
+          }).join("");
+          chatStreamingMsgEl.querySelector(".streaming-tools").innerHTML = tcHtml;
+        }
+        const $body = $("#aiPanelBody");
+        const el = $body[0];
+        if (el.scrollHeight - el.scrollTop - el.clientHeight < 40) {
+          $body.scrollTop(el.scrollHeight);
+        }
+      };
+
+      // 调用 LLM（流式）
+      const result = await callLLMWithMessages(player._buildAPIMessages(game), CHAT_TOOLS, player.providerId, player.modelName, chatOnChunk);
+      let msg = result.message;
+      player.messages.push(msg);
+
+      // 处理工具调用（最多 5 轮）
+      let safety = 0;
+      let chatPreparing = false;
+      while (msg.tool_calls && msg.tool_calls.length > 0 && safety < 5) {
+        // 移除流式元素：工具调用触发后，流式展示已完成使命，
+        // 后续由 renderAIPanel 从 player.messages 正式渲染，避免 DOM 残留重复
+        if (chatStreamingMsgEl) {
+          chatStreamingMsgEl.remove();
+          chatStreamingMsgEl = null;
+        }
+        const hasPileOps = msg.tool_calls.some(tc => tc.function.name === "pile_cards" || tc.function.name === "unpile_cards");
+        if (hasPileOps && !chatPreparing) {
+          chatPreparing = true;
+          player.preparing = true;
+          player._prepPromise = new Promise(resolve => { player._prepResolve = resolve; });
+          updateSeatInfo();
+        }
+        for (const tc of msg.tool_calls) {
+          const fnName = tc.function.name;
+          let args = {};
+          try { args = JSON.parse(tc.function.arguments || "{}"); } catch (e) {}
+          let toolResult;
+          try { toolResult = await player._dispatchTool(fnName, args, game); } catch (e) { toolResult = { error: "工具异常：" + e.message }; }
+          player.messages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(toolResult) });
+        }
+        // 立即渲染工具结果，让用户实时看到 pile_cards 等操作的反馈
+        if (aiPanelPlayerIdx === playerIdx) {
+          renderAIPanel();
+        }
+        // 为后续轮次创建新的流式元素
+        if (aiPanelPlayerIdx === playerIdx) {
+          chatStreamingMsgEl = document.createElement("div");
+          chatStreamingMsgEl.className = "ai-msg ai-msg-assistant ai-msg-streaming";
+          chatStreamingMsgEl.innerHTML = '<div class="role-label">AI <span class="ai-cursor"></span></div><div class="streaming-content"></div><div class="streaming-tools"></div>';
+          $("#aiPanelBody").append(chatStreamingMsgEl);
+        }
+        const nextResult = await callLLMWithMessages(player._buildAPIMessages(game), CHAT_TOOLS, player.providerId, player.modelName, chatOnChunk);
+        msg = nextResult.message;
+        player.messages.push(msg);
+        safety++;
+      }
+
+      // 移除最后的流式元素（由 renderAIPanel 正式渲染）
+      if (chatStreamingMsgEl) {
+        chatStreamingMsgEl.remove();
+        chatStreamingMsgEl = null;
+      }
+      if (chatPreparing) {
+        player.preparing = false;
+        if (player._prepResolve) { player._prepResolve(); player._prepResolve = null; }
+        player._prepPromise = null;
+        updateSeatInfo();
+        renderPlayerCards(playerIdx);
+      }
+
+      if (aiPanelPlayerIdx === playerIdx) {
+        renderAIPanel();
+        const $body = $("#aiPanelBody");
+        $body.scrollTop($body[0].scrollHeight);
+      }
+    } catch (e) {
+      // 如果异常退出，确保清理组牌状态和 UI
+      if (chatStreamingMsgEl) {
+        chatStreamingMsgEl.remove();
+        chatStreamingMsgEl = null;
+      }
+      // Tool call ID 相关错误：自修复上下文
+      let fixed = false;
+      if (player._isToolIdError && player._isToolIdError(e.message)) {
+        const removed = player._fixupToolCalls();
+        if (removed > 0) {
+          addLog(`[Chat] ${player.name} 检测到 tool call ID 不匹配，已清理 ${removed} 条孤立的 tool 消息`);
+          player.messages.push({
+            role: "user",
+            content: "[Chat] 检测到上下文 tool call 不匹配，已自动清理 " + removed + " 条孤立的 tool 消息。如果你刚才的提问还没被完全回答，请重新提问。"
+          });
+          fixed = true;
+        }
+      }
+      if (player.preparing && !player.thinking) {
+        player.preparing = false;
+        if (player._prepResolve) { player._prepResolve(); player._prepResolve = null; }
+        player._prepPromise = null;
+        updateSeatInfo();
+      }
+      // 把已收集的结果渲染出来，并在面板中显示错误
+      if (aiPanelPlayerIdx === playerIdx) {
+        renderAIPanel();
+        const $err = $('<div class="ai-msg ai-msg-tool"><div class="role-label">Error</div>' + escapeHtml(e.message) + (fixed ? ' (已自动修复上下文)' : '') + '</div>');
+        $("#aiPanelBody").append($err);
+        const $body = $("#aiPanelBody");
+        $body.scrollTop($body[0].scrollHeight);
+      }
+      addLog(`[Chat] ${player.name} 提问处理失败：${e.message}` + (fixed ? " (已自动修复上下文)" : ""));
+    }
+    // 解锁聊天，允许 decidePlay/prepareHand 继续
+    player.chatting = false;
+    if (player._chatResolve) { player._chatResolve(); player._chatResolve = null; player._chatPromise = null; }
+    chatProcessing = false;
+    updateSeatInfo();
+    tryProcessChatQueue(); // 继续处理队列中下一条
+  }
+
+  // 发送聊天消息（用户点击发送）
+  function sendChatMessage() {
+    if (aiPanelPlayerIdx < 0) return;
+    const player = game.players[aiPanelPlayerIdx];
+    if (!player || !(player instanceof LLMAIPlayer)) return;
+    const $input = $("#aiPanelChatInput");
+    const text = $input.val().trim();
+    if (!text) return;
+    $input.val("");
+
+    const isBusy = player.preparing || player.thinking || player.chatting || chatProcessing;
+
+    // 先显示在面板中（排队中或立即发送），后续由 processChatItem 清理并正式渲染
+    const $msg = $('<div class="ai-msg ai-msg-user-chat ai-msg-pending">'
+      + '<div class="role-label">你' + (isBusy ? ' <span class="pending-badge">排队中</span>' : '') + '</div>'
+      + escapeHtml(text) + '</div>');
+    $("#aiPanelBody").append($msg);
+    const $body = $("#aiPanelBody");
+    $body.scrollTop($body[0].scrollHeight);
+
+    // 加入队列
+    chatQueue.push({ playerIdx: aiPanelPlayerIdx, text });
+    tryProcessChatQueue();
+  }
+
+  // ---------- AI 对话浮层 ----------
+  function showAIPanel(playerIdx) {
+    aiPanelPlayerIdx = playerIdx;
+    aiPanelMsgCount = 0;
+    aiStreamingMsgEl = null;
+    const player = game.players[playerIdx];
+    if (!player || !(player instanceof LLMAIPlayer)) return;
+    // 重置压缩分隔线状态（全量重新渲染）
+    if (player._lastCompression) player._lastCompression._shown = false;
+    $("#aiPanelTitle").text(player.name + " 决策过程");
+    $("#aiPanel").css("display", "flex");
+    $("#aiPanelBody").empty();
+    renderAIPanel();
+  }
+
+  function hideAIPanel() {
+    aiPanelPlayerIdx = -1;
+    aiPanelMsgCount = 0;
+    aiStreamingMsgEl = null;
+    chatQueue = [];
+    chatProcessing = false;
+    $("#aiPanel").hide();
+  }
+
+  function aiPanelAtBottom($body) {
+    const el = $body[0];
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+  }
+
+  // Called by streaming LLM response for real-time display
+  function renderStreamingChunk(chunk) {
+    if (aiPanelPlayerIdx < 0) return;
+    const $body = $("#aiPanelBody");
+    const atBottom = aiPanelAtBottom($body);
+
+    if (!aiStreamingMsgEl) {
+      aiStreamingMsgEl = document.createElement("div");
+      aiStreamingMsgEl.className = "ai-msg ai-msg-assistant ai-msg-streaming";
+      aiStreamingMsgEl.innerHTML = '<div class="role-label">AI <span class="ai-cursor"></span></div><div class="streaming-content"></div><div class="streaming-tools"></div>';
+      $body.append(aiStreamingMsgEl);
+      if (atBottom) $body.scrollTop($body[0].scrollHeight);
+    }
+
+    const content = chunk.content || "";
+    const toolCalls = chunk.tool_calls;
+
+    if (content) {
+      const contentHtml = renderContentWithThink(content);
+      aiStreamingMsgEl.querySelector(".streaming-content").innerHTML = contentHtml;
+    }
+
+    if (toolCalls && toolCalls.length > 0) {
+      const tcHtml = toolCalls.map(tc => {
+        let argsPreview = "";
+        try { argsPreview = JSON.stringify(JSON.parse(tc.function.arguments || "{}")); } catch (e) { argsPreview = tc.function.arguments || ""; }
+        return '<div style="margin-top:2px"><span class="tool-call-name">工具：' + escapeHtml(tc.function.name) + '</span>(' + escapeHtml(argsPreview) + ')</div>';
+      }).join("");
+      aiStreamingMsgEl.querySelector(".streaming-tools").innerHTML = tcHtml;
+    }
+
+    if (atBottom) $body.scrollTop($body[0].scrollHeight);
+  }
+
+  // Called by LLMAIPlayer when new messages are added
+  function notifyAIPanel(playerIdx) {
+    if (aiPanelPlayerIdx === playerIdx && $("#aiPanel").is(":visible")) {
+      renderAIPanel();
+    }
+  }
+
+  function renderAIPanel() {
+    if (aiPanelPlayerIdx < 0) return;
+    const player = game.players[aiPanelPlayerIdx];
+    if (!player || !(player instanceof LLMAIPlayer)) return;
+
+    // Remove streaming element when finalized messages come in
+    if (aiStreamingMsgEl) {
+      aiStreamingMsgEl.remove();
+      aiStreamingMsgEl = null;
+    }
+
+    const msgs = player.messages;
+    if (msgs.length === 0) {
+      if (aiPanelMsgCount === 0) {
+        $("#aiPanelBody").html('<div class="ai-panel-empty">等待 AI 开始思考…</div>');
+      }
+      return;
+    }
+    // Only render messages that haven't been shown yet
+    let html = "";
+    for (let i = aiPanelMsgCount; i < msgs.length; i++) {
+      // 上下文压缩分隔线
+      if (player._lastCompression && !player._lastCompression._shown && i === player._lastCompression.keptFrom) {
+        html += '<div class="ai-msg ai-msg-compress">━━━ 上下文压缩：此前 ' + player._lastCompression.removed + ' 条消息已省略 ━━━</div>';
+        player._lastCompression._shown = true;
+      }
+      const msg = msgs[i];
+      const role = msg.role;
+      let content = msg.content || "";
+      if (Array.isArray(content)) {
+        content = content.map(p => typeof p === "string" ? p : (p.text || "")).join("");
+      }
+      if (role === "system") {
+        html += '<div class="ai-msg ai-msg-system"><div class="role-label">System</div>系统提示词已加载（游戏规则 + 策略指导）</div>';
+      } else if (role === "user") {
+        if (content.startsWith("[Chat] ")) {
+          html += '<div class="ai-msg ai-msg-user-chat"><div class="role-label">你</div>' + escapeHtml(content.slice(7)) + '</div>';
+        } else {
+          html += '<div class="ai-msg ai-msg-user"><div class="role-label">Game State</div>' + escapeHtml(content) + '</div>';
+        }
+      } else if (role === "assistant") {
+        let tcHtml = "";
+        if (msg.tool_calls && msg.tool_calls.length > 0) {
+          tcHtml = msg.tool_calls.map(tc => {
+            let argsPreview = "";
+            try { argsPreview = JSON.stringify(JSON.parse(tc.function.arguments || "{}")); } catch (e) { argsPreview = tc.function.arguments || ""; }
+            return '<div style="margin-top:2px"><span class="tool-call-name">工具：' + tc.function.name + '</span>(' + escapeHtml(argsPreview) + ')</div>';
+          }).join("");
+        }
+        const textContent = content ? renderContentWithThink(String(content)) : '';
+        html += '<div class="ai-msg ai-msg-assistant"><div class="role-label">AI</div>' + textContent + tcHtml + '</div>';
+      } else if (role === "tool") {
+        let toolContent = content;
+        try {
+          const parsed = JSON.parse(content);
+          if (parsed.error && parsed.overlap) {
+            toolContent = "✗ 索引重叠：" + parsed.error;
+          } else if (parsed.error && parsed.invalidIndex) {
+            toolContent = "✗ 索引越界：" + parsed.error;
+          } else if (parsed.error) {
+            toolContent = "✗ " + parsed.error;
+          } else if (parsed.success !== undefined) {
+            const icon = parsed.success ? "✓" : "✗";
+            // groups mode: show summary + details
+            if (parsed.details && Array.isArray(parsed.details)) {
+              const lines = parsed.details.map(d => {
+                const dIcon = d.success ? "✓" : "✗";
+                return dIcon + " " + (d.message || d.error || "");
+              });
+              toolContent = icon + " " + (parsed.summary || "") + "\n" + lines.join("\n");
+            } else {
+              toolContent = icon + " " + (parsed.summary || parsed.message || parsed.error || "");
+            }
+          } else if (parsed.hand) {
+            toolContent = "手牌共 " + parsed.hand_size + " 张\n" + parsed.info + "\n牌摞: " + parsed.piles;
+          } else if (parsed.content !== undefined && parsed.summary) {
+            // read_experience result
+            if (!parsed.content) {
+              toolContent = parsed.summary;
+            } else {
+              toolContent = parsed.summary + "\n\n" + parsed.content;
+            }
+          } else if (parsed.rounds) {
+            // view_history result
+            const header = "共 " + parsed.total_rounds + " 轮 · " + parsed.total_plays + " 次出牌\n";
+            const body = parsed.rounds.map(r => {
+              return "第" + r.round + "轮\n" + r.plays.map(p => "  " + p).join("\n");
+            }).join("\n\n");
+            const footer = parsed._reminder ? "\n\n" + parsed._reminder : "";
+            toolContent = header + "\n" + body + footer;
+          }
+        } catch (e) {}
+        html += '<div class="ai-msg ai-msg-tool"><div class="role-label">Tool Result</div>' + escapeHtml(String(toolContent)) + '</div>';
+      }
+    }
+    if (html) {
+      $("#aiPanelBody").append(html);
+      aiPanelMsgCount = msgs.length;
+    }
+    // 把排队中的聊天消息移到底部，防止被新追加的 AI 消息顶到中间
+    const $pending = $("#aiPanelBody").find(".ai-msg-pending");
+    if ($pending.length > 0) {
+      $pending.detach().appendTo("#aiPanelBody");
+    }
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // Simple markdown to HTML renderer for LLM output
+  function renderMarkdown(text) {
+    if (!text) return "";
+    // 1. Protect code blocks
+    const blocks = [];
+    let html = String(text).replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+      blocks.push('<pre><code>' + escapeHtml(code.trim()) + '</code></pre>');
+      return '\x00CODE' + (blocks.length - 1) + '\x00';
+    });
+    // 2. Protect inline code
+    html = html.replace(/`([^`]+)`/g, (_, code) => {
+      blocks.push('<code>' + escapeHtml(code) + '</code>');
+      return '\x00CODE' + (blocks.length - 1) + '\x00';
+    });
+    // 3. Escape HTML in remaining text
+    html = escapeHtml(html);
+    // 4. Bold and italic
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    // 5. Headers
+    html = html.replace(/^### (.+)$/gm, '<h4>$1</h4>');
+    html = html.replace(/^## (.+)$/gm, '<h3>$1</h3>');
+    // 6. List items
+    html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+    // Wrap consecutive <li> in <ul>, remove internal \n so they don't become <br>
+    html = html.replace(/(?:<li>.*?<\/li>\n?)+/g, function(match) {
+      return '<ul>' + match.replace(/\n/g, '') + '</ul>';
+    });
+    // 7. Paragraphs: blank-line separated blocks
+    html = html.replace(/\n\n+/g, '</p><p>');
+    html = html.replace(/\n/g, '<br>');
+    // 8. Restore code blocks
+    html = html.replace(/\x00CODE(\d+)\x00/g, (_, i) => blocks[parseInt(i)]);
+    // 9. Wrap top-level
+    if (html.indexOf('<p>') !== 0) html = '<p>' + html + '</p>';
+    // 10. Clean empty <p></p>
+    html = html.replace(/<p><\/p>/g, '');
+    return html;
+  }
+
+  // Parse <think>...</think> blocks into collapsible "思考" sections
+  function renderContentWithThink(rawContent) {
+    let html = "";
+    let remaining = String(rawContent);
+    while (remaining.length > 0) {
+      const thinkStart = remaining.indexOf("<think>");
+      if (thinkStart === -1) {
+        if (remaining.trim()) {
+          html += '<div>' + renderMarkdown(remaining) + '</div>';
+        }
+        break;
+      }
+      if (thinkStart > 0) {
+        html += '<div>' + renderMarkdown(remaining.substring(0, thinkStart)) + '</div>';
+      }
+      const thinkEnd = remaining.indexOf("</think>", thinkStart + 7);
+      if (thinkEnd === -1) {
+        // Streaming: closing tag not yet received
+        const partialThink = remaining.substring(thinkStart + 7).trim();
+        html += '<div class="ai-think-block streaming">';
+        html += '<div class="ai-think-label">思考中…</div>';
+        html += '<div class="ai-think-content">' + (partialThink ? renderMarkdown(partialThink) : '') + '</div>';
+        html += '</div>';
+        break;
+      }
+      const thinkContent = remaining.substring(thinkStart + 7, thinkEnd).trim();
+      html += '<div class="ai-think-block">';
+      html += '<div class="ai-think-label">思考</div>';
+      html += '<div class="ai-think-content">' + renderMarkdown(thinkContent) + '</div>';
+      html += '</div>';
+      remaining = remaining.substring(thinkEnd + 8);
+    }
+    return html;
+  }
+  // ---------- API helpers ----------
+  // Cookie / localStorage / Provider 工具统一来自 js/common.js
+
+  function extractContentText(rawContent) {
+    if (typeof rawContent === "string") return rawContent;
+    if (Array.isArray(rawContent)) {
+      return rawContent.map(part => {
+        if (typeof part === "string") return part;
+        return part && (part.text || part.content) ? (part.text || part.content) : "";
+      }).join("");
+    }
+    return rawContent ? String(rawContent) : "";
+  }
+
+  function parseModelJson(text) {
+    const raw = String(text || "")
+      .replace(/<think>[\s\S]*?<\/think>/gi, "")
+      .replace(/```(?:json)?/gi, "")
+      .replace(/```/g, "")
+      .trim();
+    if (!raw) throw new Error("模型返回为空");
+    try { return JSON.parse(raw); } catch (e) {
+      const start = raw.indexOf("{");
+      const end = raw.lastIndexOf("}");
+      if (start < 0 || end <= start) throw new Error("模型返回不是 JSON");
+      return JSON.parse(raw.slice(start, end + 1));
+    }
+  }
+
+  // Parse task status from LLM response
+  // Looks for {"task":"prep|play","complete":true|false} on the last line
+  function parseTaskStatus(content) {
+    const text = String(content || "");
+    const match = text.match(/\{\s*"task"\s*:\s*"(prep|play)"\s*,\s*"complete"\s*:\s*(true|false)\s*\}/);
+    if (!match) return null;
+    return { task: match[1], complete: match[2] === "true" };
+  }
+
+  async function callLLMWithMessages(messages, tools, providerId, modelName, onChunk) {
+    const providerKey = getProviderApiKey(providerId);
+    if (!providerKey) throw new Error("API Key 缺失");
+
+    const config = getProviderConfig(providerId);
+    if (!config) throw new Error("未知 Provider: " + providerId);
+
+    const useStream = !!onChunk;
+    const body = {
+      model: modelName,
+      messages: messages,
+      tools: tools,
+      max_tokens: 4096,
+      stream: useStream
+    };
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 120000);
+
+    try {
+      const response = await fetch(config.apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + providerKey },
+        body: JSON.stringify(body),
+        signal: controller.signal
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(config.shortLabel + " 请求失败(" + response.status + "): " + errText.slice(0, 180));
+      }
+
+      // 使用即续期：本次调用成功，把该服务商的 API Key Cookie 有效期重新延长到 30 天
+      touchProviderCookie(providerId);
+
+      if (!useStream) {
+        const payload = await response.json();
+        const choice = payload && payload.choices && payload.choices[0] ? payload.choices[0] : null;
+        if (!choice || !choice.message) throw new Error("模型返回为空");
+        return { message: choice.message, finishReason: choice.finish_reason };
+      }
+
+      // --- Streaming mode ---
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let accumulatedContent = "";
+      const toolCalls = {}; // index -> { name, arguments }
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith("data: ")) continue;
+          const data = trimmed.slice(6);
+          if (data === "[DONE]") continue;
+
+          try {
+            const parsed = JSON.parse(data);
+            const delta = parsed.choices && parsed.choices[0] ? parsed.choices[0].delta : null;
+            if (!delta) continue;
+
+            // Content delta
+            if (delta.content) {
+              accumulatedContent += delta.content;
+              onChunk({ content: accumulatedContent, tool_calls: null });
+            }
+
+            // Tool call delta
+            if (delta.tool_calls) {
+              for (const tc of delta.tool_calls) {
+                const idx = tc.index;
+                if (!toolCalls[idx]) toolCalls[idx] = { id: tc.id || "", function: { name: "", arguments: "" } };
+                if (tc.id) toolCalls[idx].id = tc.id;
+                if (tc.function) {
+                  if (tc.function.name) toolCalls[idx].function.name += tc.function.name;
+                  if (tc.function.arguments) toolCalls[idx].function.arguments += tc.function.arguments;
+                }
+                onChunk({
+                  content: accumulatedContent,
+                  tool_calls: Object.values(toolCalls).filter(tc => tc.function.name)
+                });
+              }
+            }
+          } catch (e) { /* skip malformed lines */ }
+        }
+      }
+
+      // Build final message
+      const toolCallsArr = Object.values(toolCalls).filter(tc => tc.function.name);
+      const message = { role: "assistant" };
+      if (accumulatedContent) message.content = accumulatedContent;
+      if (toolCallsArr.length > 0) message.tool_calls = toolCallsArr;
+      return { message, finishReason: "stop" };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function buildCardDescription(card) {
+    if (!card.suit) return card.rank;
+    let desc = card.suit + card.rank;
+    if (game.isWildCard(card)) desc += "(逢人配)";
+    else if (game.isLevelCard(card)) desc += "(级牌)";
+    return desc;
+  }
+
+  // ---------- Rendering ----------
+  function cardClasses(card) {
+    const cls = [];
+    if (game.isWildCard(card)) cls.push("wild-card");
+    else if (game.isLevelCard(card)) cls.push("level-card");
+    if (!card.suit) {
+      // Joker
+      cls.push(card.rank === "大王" ? "joker-red" : "joker-black");
+    } else if (game.isRedSuit(card)) {
+      cls.push("red");
+    } else {
+      cls.push("black");
+    }
+    return cls.join(" ");
+  }
+
+  function renderCard(card, sizeClass) {
+    const cls = sizeClass || "";
+    if (!card) return "";
+    if (card.rank === "大王") {
+      return `<span class="card ${cls} joker-red" title="大王" data-card-id="${card.id}"><span class="rank">大<br>王</span></span>`;
+    }
+    if (card.rank === "小王") {
+      return `<span class="card ${cls} joker-black" title="小王" data-card-id="${card.id}"><span class="rank">小<br>王</span></span>`;
+    }
+    const extraCls = cardClasses(card);
+    const wildTag = game.isWildCard(card) ? '<span class="wild-tag">配</span>' : '';
+    const isWild = game.isWildCard(card);
+    const isLvl = game.isLevelCard(card) && !isWild;
+    return `<span class="card ${cls} ${extraCls}" title="${card.suit}${card.rank}${isWild ? ' 逢人配' : ''}${isLvl ? ' 级牌' : ''}" data-card-id="${card.id}"><span class="rank">${card.rank}</span><span class="suit">${card.suit||''}</span>${wildTag}</span>`;
+  }
+
+  function renderCardBack(sizeClass) {
+    return `<span class="card card-back ${sizeClass || ''}"></span>`;
+  }
+
+  function renderPlayerCards(playerIdx) {
+    const player = game.players[playerIdx];
+    const seatId = ["cardsBottom", "cardsRight", "cardsTop", "cardsLeft"][playerIdx];
+    const $container = $("#" + seatId);
+
+    updateSeatInfo();
+
+    const isBottom = playerIdx === 0;
+    const sizeCls = (isBottom && player.isHuman) ? "" : "mini";
+    // 南侧牌摞始终向上延伸（仅渲染南侧时设置，渲染其他位置不触碰）
+    if (isBottom) $("#cardsBottom").addClass("piles-up");
+
+    // If no piles, show simple sorted cards
+    if (player.piles.length === 0) {
+      const sorted = game.sortCards(player.cards);
+      $container.html(sorted.map(c => renderCard(c, sizeCls)).join(""));
+      return;
+    }
+
+    // Has piles: render piles + loose cards
+    const piledIds = new Set(player.piles.flatMap(p => p.cardIds));
+    const sorted = game.sortCards(player.cards);
+    const looseCards = sorted.filter(c => !piledIds.has(c.id));
+
+    let html = "";
+    player.piles.forEach((p, pileIdx) => {
+      const pileCards = p.cardIds.map(id => player.cards.find(c => c.id === id)).filter(c => c);
+      if (pileCards.length === 0) return;
+      const sortedPile = game.sortCards(pileCards);
+      const isPileSelected = isBottom && p.cardIds.every(id => selectedCards.includes(id));
+      const selCls = isPileSelected ? " selected" : "";
+      html += `<span class="card-pile${selCls}" data-pile-idx="${pileIdx}">`;
+      sortedPile.forEach(c => {
+        html += renderCard(c, sizeCls);
+      });
+      html += `</span>`;
+    });
+    looseCards.forEach(c => {
+      html += renderCard(c, sizeCls);
+    });
+    $container.html(html);
+  }
+
+  function renderAllPlayers() {
+    for (let i = 0; i < 4; i++) {
+      renderPlayerCards(i);
+    }
+  }
+
+  function renderMiniCard(card) {
+    if (card.rank === "大王") {
+      return `<span class="play-card-mini joker-red" title="大王"><span class="rank">大</span></span>`;
+    }
+    if (card.rank === "小王") {
+      return `<span class="play-card-mini joker-black" title="小王"><span class="rank">小</span></span>`;
+    }
+    const colorCls = (card.suit === "♥" || card.suit === "♦") ? "red" : "black";
+    let extraCls = "";
+    if (game.isWildCard(card)) extraCls = " wild-card";
+    else if (game.isLevelCard(card)) extraCls = " level-card";
+    const isWild = game.isWildCard(card);
+    return `<span class="play-card-mini ${colorCls}${extraCls}" title="${card.suit}${card.rank}${isWild ? ' 逢人配' : ''}"><span class="rank">${card.rank}</span><span class="suit">${card.suit||''}</span></span>`;
+  }
+
+  function renderRoundHistory() {
+    const $area = $("#playArea");
+    const $history = $("#roundHistory");
+    if (game.roundHistory.length === 0) {
+      $history.html("");
+      return;
+    }
+    // Group by round (split at round resets)
+    const rounds = [];
+    let currentRound = [];
+    for (const entry of game.roundHistory) {
+      currentRound.push(entry);
+      if (entry.newRoundAfter) {
+        rounds.push(currentRound);
+        currentRound = [];
+      }
+    }
+    if (currentRound.length > 0) rounds.push(currentRound);
+
+    let html = "";
+    for (let r = 0; r < rounds.length; r++) {
+      html += `<div class="round-row"><span class="round-number">${r + 1}</span>`;
+      for (const entry of rounds[r]) {
+        const who = game.players[entry.playerIdx].name;
+        if (entry.cards === null) {
+          html += `<div class="round-play-entry pass-entry"><span class="play-who">${who}</span><span class="play-pass">不要</span></div>`;
+        } else {
+          const cardsHtml = entry.cards.map(c => renderMiniCard(c)).join("");
+          html += `<div class="round-play-entry"><span class="play-who">${who}</span><span class="play-cards">${cardsHtml}</span></div>`;
+        }
+      }
+      html += '</div>';
+    }
+    $history.html(html);
+    $area.scrollTop($area[0].scrollHeight);
+  }
+
+  function renderLevelBadge() {
+    $("#levelBadge").text("本局打 " + game.levelRank);
+  }
+
+  function updateCurrentPlayerIndicator() {
+    const nameIds = ["#nameBottom", "#nameRight", "#nameTop", "#nameLeft"];
+    nameIds.forEach((id, i) => {
+      $(id).toggleClass("current-turn", i === game.currentPlayer);
+    });
+
+    // Show/hide per-seat action buttons
+    $(".seat-actions").each(function() {
+      const pos = parseInt($(this).data("position"));
+      const isHumanSeat = seatConfig[pos] === "human";
+      const isMyTurn = pos === game.currentPlayer;
+      const gameActive = !game.finished && game.started;
+      // Always show for human seat during game; play/pass only when it's their turn
+      const show = isHumanSeat && gameActive;
+      $(this).toggle(!!show);
+
+      if (show) {
+        const $actions = $(this);
+        if (isMyTurn) {
+          $actions.find(".pass-btn").prop("disabled", !game.lastPlay || game.lastPlay.playerIdx === pos).show();
+          $actions.find(".play-selected-btn").prop("disabled", true).show();
+        } else {
+          $actions.find(".pass-btn").hide();
+          $actions.find(".play-selected-btn").hide();
+        }
+        $actions.find(".pile-btn").prop("disabled", true);
+        $actions.find(".unpile-btn").prop("disabled", true);
+      }
+    });
+
+    // Always update pile/play buttons for human bottom seat during game
+    if (game.started && !game.finished && seatConfig[0] === "human") {
+      updatePileButtons();
+      updatePlayButton();
+    }
+  }
+
+  // ---------- Logging ----------
+  function addLog(msg) {
+    console.log("[掼蛋]", msg);
+  }
+
+  // ---------- Human actions ----------
+  let selectedCards = [];
+
+  function toggleCardSelection(cardId) {
+    const idx = selectedCards.indexOf(cardId);
+    if (idx >= 0) {
+      selectedCards.splice(idx, 1);
+    } else {
+      selectedCards.push(cardId);
+    }
+    updateCardSelectionUI();
+    updatePileButtons();
+    updatePlayButton();
+  }
+
+  function updateCardSelectionUI() {
+    const player = game.players[0]; // Always human seat
+    const $cards = $("#cardsBottom .card");
+    $cards.each(function() {
+      const $card = $(this);
+      const cardId = $card.data("card-id");
+      $card.toggleClass("selected", selectedCards.includes(cardId));
+    });
+    // Update pile selection state
+    $("#cardsBottom .card-pile").each(function() {
+      const pileIdx = parseInt($(this).data("pile-idx"));
+      const pile = player.piles[pileIdx];
+      if (pile) {
+        const allSelected = pile.cardIds.every(id => selectedCards.includes(id));
+        $(this).toggleClass("selected", allSelected);
+      }
+    });
+  }
+
+  function updatePlayButton() {
+    const pos = game.currentPlayer;
+    if (selectedCards.length === 0) {
+      $(`.play-selected-btn[data-position="${pos}"]`).prop("disabled", true);
+      return;
+    }
+    const player = game.players[pos];
+    const cards = player.cards.filter(c => selectedCards.includes(c.id));
+    const analysis = game.analyzeCards(cards);
+    if (!analysis) {
+      $(`.play-selected-btn[data-position="${pos}"]`).prop("disabled", true);
+      return;
+    }
+    if (game.lastPlay && game.lastPlay.playerIdx !== pos) {
+      if (!game.canBeat(analysis, game.lastPlay.analysis)) {
+        $(`.play-selected-btn[data-position="${pos}"]`).prop("disabled", true);
+        return;
+      }
+    }
+    $(`.play-selected-btn[data-position="${pos}"]`).prop("disabled", false);
+  }
+
+  function updatePileButtons() {
+    const pos = 0; // Always operate on human seat
+    const human = game.players[pos];
+    const gameActive = game.started && !game.finished;
+    if (!gameActive || !human || !human.isHuman || selectedCards.length === 0) {
+      $(`.pile-btn[data-position="${pos}"]`).prop("disabled", true);
+      $(`.unpile-btn[data-position="${pos}"]`).prop("disabled", true);
+      return;
+    }
+    const cards = human.cards.filter(c => selectedCards.includes(c.id));
+    const analysis = game.analyzeCards(cards);
+    $(`.pile-btn[data-position="${pos}"]`).prop("disabled", !analysis || analysis.type === "single");
+    const anyPileSelected = human.piles.some(p => p.cardIds.every(id => selectedCards.includes(id)));
+    $(`.unpile-btn[data-position="${pos}"]`).prop("disabled", !anyPileSelected);
+  }
+
+  function renderAll() {
+    renderAllPlayers();
+    renderRoundHistory();
+    updateCurrentPlayerIndicator();
+  }
+
+  // ---------- 座位配置 UI ----------
+  // 根据 seatConfig 渲染每个座位的 类型/服务商/模型 下拉框（改变即时保存到 localStorage）
+  function renderSeatConfigControls() {
+    const available = getAvailableProviders();
+    for (let i = 0; i < 4; i++) {
+      const cfg = seatConfig[i] || { type: "human", providerId: "", modelName: "" };
+      const $type = $("#cfgSeat" + i);
+      const $prov = $("#cfgSeat" + i + "Provider");
+      const $model = $("#cfgSeat" + i + "Model");
+
+      $type.val(cfg.type);
+      // 东/北/西座位强制 AI：类型下拉框不可改（HTML 中已移除「人」选项）
+      $type.prop("disabled", i > 0);
+
+      $prov.empty();
+      if (!available.length) {
+        $prov.append('<option value="">无可用 Key</option>');
+        $model.empty().append('<option value="">先去配置 Key</option>');
+        $prov.prop("disabled", true);
+        $model.prop("disabled", true);
+        continue;
+      }
+      available.forEach(id => {
+        $prov.append('<option value="' + id + '">' + getProviderShortLabel(id) + '</option>');
+      });
+      let providerId = cfg.providerId;
+      if (!providerId || !getProviderApiKey(providerId)) providerId = available[0];
+      $prov.val(providerId);
+
+      const pcfg = getProviderConfig(providerId);
+      $model.empty();
+      (pcfg ? pcfg.modelOptions : []).forEach(m => {
+        $model.append('<option value="' + m.value + '">' + m.label + '</option>');
+      });
+      let modelName = cfg.modelName;
+      if (!modelName || !pcfg || !pcfg.modelOptions.some(m => m.value === modelName)) {
+        modelName = pcfg ? pcfg.defaultModel : "";
+      }
+      $model.val(modelName);
+
+      const isAI = cfg.type === "ai";
+      $prov.prop("disabled", !isAI);
+      $model.prop("disabled", !isAI);
+    }
+  }
+
+  // ---------- Event bindings ----------
+  $(function() {
+    // 初始化座位配置 UI（从 localStorage 恢复上次配置）
+    renderSeatConfigControls();
+
+    // 座位类型切换（人 / AI）：保存并重渲染该座位的模型下拉
+    $(".seat-type").on("change", function() {
+      readSeatConfig();
+      renderSeatConfigControls();
+      updateSeatInfo();
+    });
+
+    // 座位服务商切换：自动带上该服务商默认模型
+    $(".seat-provider").on("change", function() {
+      readSeatConfig();
+      renderSeatConfigControls();
+    });
+
+    // 座位模型切换：即时保存
+    $(".seat-model").on("change", function() {
+      readSeatConfig();
+    });
+
+    $("#newGameBtn").on("click", async function() {
+      readSeatConfig();
+      renderSeatConfigControls();
+      // 逐座位校验：AI 座位必须有可用的大模型
+      const aiSeatIdx = [];
+      for (let i = 0; i < 4; i++) {
+        if (seatConfig[i] && seatConfig[i].type === "ai") aiSeatIdx.push(i);
+      }
+      if (aiSeatIdx.length > 0) {
+        if (!getAvailableProviders().length) {
+          showToast("AI 座位需要大模型才能运行。请先到「配置页」填写至少一家服务商的 API Key。", { seconds: 4, suffix: "" });
+          return;
+        }
+        for (const i of aiSeatIdx) {
+          if (!getSeatAiConfig(i)) {
+            showToast("座位「" + SEAT_NAMES[i] + "」配置为 AI，但没有可用的模型配置，请检查其服务商选择。", { seconds: 4, suffix: "" });
+            return;
+          }
+        }
+      }
+      updateSeatInfo();
+      selectedCards = [];
+      game.startNewGame();
+      $("#gameStatus").text("游戏中").css("color", "");
+      $("#newGameBtn").text("新一局").prop("disabled", false);
+      renderLevelBadge();
+      renderAll();
+
+      // 通知所有 AI 玩家开始组牌（后台进行，不阻塞游戏开始）
+      const aiPlayers = game.players.filter(p => p instanceof LLMAIPlayer);
+      if (aiPlayers.length > 0) {
+        addLog("AI 玩家开始组牌…");
+        aiPlayers.forEach(p => {
+          p.prepareHand(game, "initial").then(() => {
+            if (!p.preparing) {
+              addLog(p.name + " 组牌完成");
+            }
+          });
+        });
+      }
+
+      // Auto-start
+      setTimeout(async () => { await game.aiPlay(); }, 600);
+    });
+
+    // --- AI conversation panel ---
+    $(document).on("click", ".ai-badge", function(e) {
+      e.stopPropagation();
+      const pos = parseInt($(this).data("position"));
+      showAIPanel(pos);
+    });
+
+    $("#aiPanelClose").on("click", hideAIPanel);
+
+    $("#aiPanelCopyLog").on("click", function() {
+      if (aiPanelPlayerIdx < 0) return;
+      const player = game.players[aiPanelPlayerIdx];
+      if (!player || !(player instanceof LLMAIPlayer) || player.decisionLog.length === 0) {
+        showToast("暂无操作日志", { seconds: 2, suffix: "" });
+        return;
+      }
+      let text = `=== ${player.name} 操作日志 ===\n`;
+      text += `手牌数量: ${player.cards.length}\n`;
+      if (player.piles.length > 0) {
+        text += "当前牌摞:\n";
+        player.piles.forEach((p, i) => {
+          const cards = p.cardIds.map(id => player.cards.find(c => c.id === id)).filter(c => c);
+          text += `  摞${i}: ${cards.map(c => c.suit + c.rank).join(" ")}\n`;
+        });
+      }
+      text += "\n--- 操作记录 ---\n";
+      player.decisionLog.forEach((entry, i) => {
+        text += `\n[${entry.time}] ${entry.action}\n`;
+        text += `  参数: ${JSON.stringify(entry.params)}\n`;
+        text += `  结果: ${JSON.stringify(entry.result)}\n`;
+      });
+      navigator.clipboard.writeText(text).then(() => {
+        const $btn = $("#aiPanelCopyLog");
+        $btn.text("✓");
+        setTimeout(() => $btn.text("复制"), 1500);
+      }).catch(() => showToast("复制失败", { seconds: 2, suffix: "" }));
+    });
+
+    // Chat send button
+    $("#aiPanelChatSend").on("click", sendChatMessage);
+
+    // Chat input Enter key
+    $("#aiPanelChatInput").on("keydown", function(e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendChatMessage();
+      }
+    });
+
+    // Click outside panel to close
+    $(document).on("click", function(e) {
+      if ($("#aiPanel").is(":visible") && !$(e.target).closest("#aiPanel").length && !$(e.target).closest(".ai-badge").length) {
+        hideAIPanel();
+      }
+    });
+
+    // --- Per-seat action buttons (class-based) ---
+
+    // Pass button
+    $(document).on("click", ".pass-btn", function() {
+      const pos = parseInt($(this).data("position"));
+      if (pos !== game.currentPlayer) return;
+      if (!game.players[pos].isHuman || game.finished) return;
+      game.pass(pos);
+    });
+
+    // Play selected button (bottom seat only - manual card selection)
+    $(document).on("click", ".play-selected-btn", function() {
+      const pos = parseInt($(this).data("position"));
+      if (pos !== game.currentPlayer) return;
+      if (!game.players[pos].isHuman || game.finished) return;
+      const player = game.players[pos];
+      const cards = player.cards.filter(c => selectedCards.includes(c.id));
+      if (cards.length === 0) return;
+      const analysis = game.analyzeCards(cards);
+      if (!analysis) {
+        addLog("无效的牌型组合，请重新选择（提示：逢人配可以帮你凑牌型）");
+        return;
+      }
+      if (game.lastPlay && game.lastPlay.playerIdx !== pos &&
+          !game.canBeat(analysis, game.lastPlay.analysis)) {
+        addLog("所选牌型打不过上家的牌，请重新选择或过牌");
+        return;
+      }
+      selectedCards = [];
+      game.play(pos, cards);
+    });
+
+    // Card click selection (bottom seat only, works any time during game)
+    $(document).on("click", "#cardsBottom .card", function() {
+      const human = game.players[0];
+      if (!human || !human.isHuman || game.finished || !game.started) return;
+      // If inside a pile, toggle the whole pile
+      const $pile = $(this).closest(".card-pile");
+      if ($pile.length) {
+        const pileIdx = parseInt($pile.data("pile-idx"));
+        const pile = human.piles[pileIdx];
+        if (!pile) return;
+        const allSelected = pile.cardIds.every(id => selectedCards.includes(id));
+        if (allSelected) {
+          selectedCards = selectedCards.filter(id => !pile.cardIds.includes(id));
+        } else {
+          pile.cardIds.forEach(id => {
+            if (!selectedCards.includes(id)) selectedCards.push(id);
+          });
+        }
+        updateCardSelectionUI();
+        updatePileButtons();
+        updatePlayButton();
+        return;
+      }
+      // Loose card click: toggle individual selection
+      const cardId = $(this).data("card-id");
+      if (cardId) toggleCardSelection(cardId);
+    });
+
+    $(document).on("click", "#cardsBottom .card-pile", function(e) {
+      const human = game.players[0];
+      if (!human || !human.isHuman || game.finished || !game.started) return;
+      // Only handle click on the pile area between cards
+      if ($(e.target).closest(".card").length) return;
+      const pileIdx = parseInt($(this).data("pile-idx"));
+      const pile = human.piles[pileIdx];
+      if (!pile) return;
+      const allSelected = pile.cardIds.every(id => selectedCards.includes(id));
+      if (allSelected) {
+        selectedCards = selectedCards.filter(id => !pile.cardIds.includes(id));
+      } else {
+        pile.cardIds.forEach(id => {
+          if (!selectedCards.includes(id)) selectedCards.push(id);
+        });
+      }
+      updateCardSelectionUI();
+      updatePileButtons();
+      updatePlayButton();
+    });
+
+    // Pile button
+    $(document).on("click", ".pile-btn", function() {
+      const pos = parseInt($(this).data("position"));
+      if (!game.players[pos] || !game.players[pos].isHuman || game.finished || !game.started) return;
+      const player = game.players[pos];
+      const cards = player.cards.filter(c => selectedCards.includes(c.id));
+      if (cards.length === 0) return;
+      const analysis = game.analyzeCards(cards);
+      if (!analysis || analysis.type === "single") {
+        addLog(!analysis ? "所选牌无法组成有效牌型" : "单张牌无需理牌");
+        return;
+      }
+      player.pileCards(cards.map(c => c.id));
+      selectedCards = [];
+      updateCardSelectionUI();
+      updatePileButtons();
+      updatePlayButton();
+      renderPlayerCards(pos);
+      addLog(`理牌：将 ${cards.length} 张牌组成一摞（${TYPE_NAMES[analysis.type]}）`);
+    });
+
+    // Unpile button
+    $(document).on("click", ".unpile-btn", function() {
+      const pos = parseInt($(this).data("position"));
+      if (!game.players[pos] || !game.players[pos].isHuman || game.finished || !game.started) return;
+      const player = game.players[pos];
+      const toRemove = [];
+      player.piles.forEach((p, i) => {
+        if (p.cardIds.every(id => selectedCards.includes(id))) {
+          toRemove.push(i);
+          selectedCards = selectedCards.filter(id => !p.cardIds.includes(id));
+        }
+      });
+      if (toRemove.length === 0) return;
+      toRemove.sort((a,b) => b-a).forEach(i => player.piles.splice(i, 1));
+      updateCardSelectionUI();
+      updatePileButtons();
+      updatePlayButton();
+      renderPlayerCards(pos);
+    });
+
+    // 初始状态：恢复上次座位配置（localStorage），等待开始
+    renderSeatConfigControls();
+    if (!getAvailableProviders().length) {
+      // 一个模型都没配置：toast 提示（带倒计时），几秒后自动跳转配置页
+      showToast("还没有配置任何模型 Key —— ", {
+        seconds: 5,
+        onDone: function () { location.href = "config.html"; }
+      });
+    }
+    updateSeatInfo();
+    renderLevelBadge();
+  });
+
+  // 轻量 toast：无配置提示用，支持倒计时 + 自动跳转
+  // 用法：showToast("提示文字", { seconds: 5, onDone: fn })
+  function showToast(text, opts) {
+    opts = opts || {};
+    const seconds = opts.seconds || 3;
+    let $t = $("#gdToast");
+    if (!$t.length) {
+      $t = $('<div id="gdToast" class="gd-toast"></div>').appendTo("body");
+    }
+    // 清理上一次的计时器与进度条
+    clearInterval(showToast._timer);
+    clearTimeout(showToast._toDone);
+    $t.find(".gd-bar").remove();
+    $t.find(".gd-count").remove();
+
+    // 倒计时圆点 + 底部进度条
+    let left = seconds;
+    const $count = $('<span class="gd-count"></span>').text(left);
+    $t.empty().append(document.createTextNode(text)).append($count)
+      .append(document.createTextNode(opts.suffix !== undefined ? opts.suffix : " 秒后自动前往配置页"))
+      .append('<div class="gd-bar" style="animation-duration:' + seconds + 's"></div>')
+      .addClass("show");
+
+    showToast._timer = setInterval(function () {
+      left--;
+      if (left <= 0) {
+        clearInterval(showToast._timer);
+        $t.removeClass("show");
+        if (typeof opts.onDone === "function") {
+          showToast._toDone = setTimeout(opts.onDone, 260); // 等淡出动画
+        }
+        return;
+      }
+      $count.text(left);
+    }, 1000);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="大模型掼蛋挑战赛：让 DeepSeek、Kimi、MiniMax、StepFun 同坐一桌打掼蛋。每个座位自由配置模型，AI 是会使用工具的 Agent，经验按模型独立保存。">
+  <title>大模型掼蛋挑战赛 — 四大模型同台对弈</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90' fill='%230f8a5f'%3E%E2%99%A0%3C/text%3E%3C/svg%3E">
+  <link href="vendor/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1c2b24;
+      --ink-soft: #55655c;
+      --cream: #faf6ee;
+      --cream-deep: #f3ecdd;
+      --line: #e7dfcd;
+      --felt-1: #12563f;
+      --felt-2: #0b3f2e;
+      --felt-3: #082e21;
+      --gold: #c99a3d;
+      --gold-bright: #e2b052;
+      --red: #c24132;
+      --blue: #3b6fd4;
+      --purple: #7b5cd6;
+      --green: #0f8a5f;
+      --white: #ffffff;
+      --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      color: var(--ink);
+      background: var(--cream);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.7;
+    }
+
+    .page-shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.2rem;
+    }
+
+    /* ---------- 顶部导航 ---------- */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.1rem 0;
+      flex-wrap: wrap;
+    }
+    .top-nav .brand {
+      font-size: 1.12rem;
+      font-weight: 900;
+      color: var(--ink);
+      text-decoration: none;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .top-nav .brand .mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(150deg, var(--felt-1), var(--felt-3));
+      color: var(--gold-bright);
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 10px rgba(8, 46, 33, 0.25);
+    }
+    .top-nav .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+    .top-nav .nav-link {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--ink-soft);
+      text-decoration: none;
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+    }
+    .top-nav .nav-link:hover { color: var(--ink); background: var(--cream-deep); }
+
+    /* 通用按钮 */
+    .btn-solid {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+      color: #241a04;
+      font-weight: 800;
+      font-size: 0.98rem;
+      padding: 0.72rem 1.7rem;
+      border-radius: 999px;
+      text-decoration: none;
+      box-shadow: 0 8px 22px rgba(201, 154, 61, 0.4);
+      border: 1px solid rgba(36, 26, 4, 0.12);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .btn-solid:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(201, 154, 61, 0.5); }
+    .btn-ghost {
+      display: inline-block;
+      color: var(--ink);
+      font-weight: 800;
+      font-size: 0.98rem;
+      padding: 0.72rem 1.7rem;
+      border-radius: 999px;
+      text-decoration: none;
+      border: 1.5px solid var(--line);
+      background: rgba(255, 255, 255, 0.7);
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .btn-ghost:hover { border-color: var(--gold); background: #fff; }
+    .btn-ghost-lg, .btn-solid-lg { padding: 0.85rem 2rem; font-size: 1.05rem; }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      position: relative;
+      background:
+        radial-gradient(ellipse 900px 500px at 88% -10%, rgba(226, 176, 82, 0.16), transparent 60%),
+        radial-gradient(ellipse 700px 500px at -10% 110%, rgba(46, 140, 100, 0.22), transparent 55%),
+        linear-gradient(155deg, #103f30 0%, #0b3426 48%, #08281d 100%);
+      border-radius: 28px;
+      padding: 4rem 3.4rem 3.4rem;
+      margin-top: 0.4rem;
+      color: #fff;
+      overflow: hidden;
+      box-shadow: 0 30px 70px rgba(8, 40, 29, 0.35);
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 34px 34px;
+    }
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1.02fr 0.98fr;
+      gap: 2.6rem;
+      align-items: center;
+      max-width: 1020px;
+      margin: 0 auto;
+    }
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--gold-bright);
+      background: rgba(226, 176, 82, 0.12);
+      border: 1px solid rgba(226, 176, 82, 0.35);
+      border-radius: 999px;
+      padding: 0.28rem 0.95rem;
+      margin-bottom: 1.4rem;
+    }
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      line-height: 1.28;
+      margin: 0 0 1.1rem;
+      letter-spacing: 0.5px;
+    }
+    .hero h1 .gold { color: var(--gold-bright); }
+    .hero .subtitle {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.82);
+      max-width: 520px;
+      margin: 0 0 1.7rem;
+    }
+    .hero .cta-row { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1.6rem; }
+    .hero .btn-ghost {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .hero .btn-ghost:hover { border-color: var(--gold-bright); background: rgba(255, 255, 255, 0.12); }
+    .hero .trust-row {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.72);
+    }
+    .hero .trust-row span { display: inline-flex; align-items: center; gap: 0.35rem; }
+    .hero .trust-row .tick { color: #8ae8b4; font-weight: 900; }
+
+    /* ---------- 牌桌示意（Hero 主视觉） ---------- */
+    .table-visual {
+      position: relative;
+      width: min(460px, 100%);
+      margin: 0 auto;
+      padding: 26px 0;
+    }
+    .felt {
+      position: relative;
+      aspect-ratio: 1.5;
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background:
+        radial-gradient(ellipse at 28% 22%, rgba(255, 255, 255, 0.10), transparent 52%),
+        radial-gradient(ellipse at 74% 80%, rgba(0, 0, 0, 0.30), transparent 58%),
+        linear-gradient(160deg, var(--felt-1) 0%, var(--felt-2) 55%, var(--felt-3) 100%);
+      box-shadow: 0 26px 60px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+    .felt::after {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      border: 1.5px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 14px;
+      pointer-events: none;
+    }
+    .felt-deck {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      text-align: center;
+    }
+    .felt-deck .deck-count {
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(0, 0, 0, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      padding: 0.35rem 1.2rem;
+    }
+    .felt-deck .deck-suits { display: flex; gap: 1.1rem; font-size: 1.05rem; }
+    .felt-deck .deck-suits span:nth-child(1) { color: #ff9db1; }
+    .felt-deck .deck-suits span:nth-child(2) { color: #8fb9ff; }
+    .felt-deck .deck-suits span:nth-child(3) { color: #ffe08a; }
+    .felt-deck .deck-suits span:nth-child(4) { color: #8ae8b4; }
+
+    .seat {
+      position: absolute;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(20, 60, 45, 0.12);
+      padding: 0.55rem 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      white-space: nowrap;
+      z-index: 2;
+    }
+    .seat-n { top: -12px; left: 50%; transform: translateX(-50%); }
+    .seat-s { bottom: -12px; left: 50%; transform: translateX(-50%); }
+    .seat-e { right: -8px; top: 50%; transform: translateY(-50%); }
+    .seat-w { left: -8px; top: 50%; transform: translateY(-50%); }
+    .seat-e, .seat-w { flex-direction: column; }
+    .seat-e .seat-info, .seat-w .seat-info { text-align: center; }
+    .seat .seat-info { text-align: left; }
+    .seat .seat-label { font-size: 0.62rem; font-weight: 800; color: #8a917b; letter-spacing: 1px; }
+    .seat .seat-model { font-size: 0.78rem; font-weight: 900; color: var(--ink); line-height: 1.3; }
+    .seat .seat-model small { font-weight: 700; color: #9aa293; font-size: 0.68rem; }
+
+    .mcard {
+      width: 24px;
+      height: 34px;
+      background: #fff;
+      border: 1px solid #ddd4c2;
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      font-weight: 900;
+    }
+    .mcard .rk { font-size: 11px; }
+    .mcard .su { font-size: 9px; }
+    .mcard.red { color: #c24132; }
+    .mcard.black { color: #22332a; }
+    .mcards { display: flex; gap: 3px; }
+    .mcards .mcard:nth-child(2) { transform: translateY(-2px); }
+    .mcards .mcard:nth-child(3) { transform: translateY(1px); }
+
+    /* ---------- 通用 section ---------- */
+    .section { padding: 5rem 0; }
+    .section.band-white { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .sec-head { max-width: 680px; margin-bottom: 2.6rem; }
+    .sec-kicker {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-size: 0.75rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: var(--gold);
+      margin-bottom: 0.7rem;
+    }
+    .sec-kicker::before {
+      content: "";
+      width: 26px;
+      height: 2px;
+      background: var(--gold);
+      border-radius: 2px;
+    }
+    .sec-head h2 { font-size: 1.9rem; font-weight: 900; margin: 0 0 0.8rem; letter-spacing: 0.5px; line-height: 1.3; }
+    .sec-head .lead { font-size: 1rem; color: var(--ink-soft); margin: 0; }
+
+    /* ---------- 01 参赛阵容 ---------- */
+    .roster { border-top: 2px solid var(--ink); }
+    .roster-row {
+      display: grid;
+      grid-template-columns: 46px 1fr auto 96px;
+      gap: 1.1rem;
+      align-items: center;
+      padding: 1.15rem 0.4rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .roster-row:last-child { border-bottom: none; }
+    .medal {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      font-weight: 900;
+    }
+    .medal-heart { color: var(--red); background: #fbeae8; }
+    .medal-diamond { color: #a86e0c; background: #faf0da; }
+    .medal-spade { color: var(--blue); background: #eaf0fc; }
+    .medal-club { color: var(--green); background: #e7f5ee; }
+    .roster-info .roster-name { font-size: 1.12rem; font-weight: 900; }
+    .roster-info .roster-name .sub { font-size: 0.78rem; font-weight: 700; color: #9aa293; margin-left: 0.4rem; }
+    .roster-info .roster-tagline { font-size: 0.8rem; color: var(--ink-soft); margin-top: 0.1rem; }
+    .roster-models { display: flex; gap: 0.35rem; flex-wrap: wrap; justify-content: flex-end; }
+    .mchip {
+      font-size: 0.68rem;
+      font-weight: 700;
+      font-family: var(--mono);
+      color: var(--ink-soft);
+      background: var(--cream-deep);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 0.12rem 0.5rem;
+    }
+    .cfg-state {
+      text-align: right;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #b4ac99;
+    }
+    .cfg-state.on { color: var(--green); }
+
+    /* ---------- 02 真正的 Agent ---------- */
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+    .split .copy h2 { font-size: 1.9rem; font-weight: 900; margin: 0 0 1rem; line-height: 1.3; }
+    .split .copy p { color: var(--ink-soft); margin: 0 0 1.2rem; }
+    .split .copy ul { list-style: none; margin: 0; padding: 0; }
+    .split .copy ul li {
+      display: flex;
+      gap: 0.6rem;
+      align-items: flex-start;
+      font-size: 0.92rem;
+      color: var(--ink);
+      padding: 0.42rem 0;
+      border-bottom: 1px dashed var(--line);
+    }
+    .split .copy ul li:last-child { border-bottom: none; }
+    .split .copy ul .tick { color: var(--green); font-weight: 900; }
+    .split .footnote { font-size: 0.78rem; color: #9aa293; margin-top: 1rem; }
+
+    /* 决策控制台 */
+    .console {
+      background:
+        radial-gradient(ellipse at 85% 0%, rgba(64, 180, 120, 0.12), transparent 55%),
+        linear-gradient(160deg, #0c231b 0%, #091b14 100%);
+      border: 1px solid rgba(110, 220, 160, 0.22);
+      border-radius: 16px;
+      box-shadow: 0 24px 50px rgba(9, 27, 20, 0.3);
+      padding: 1.2rem 1.3rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: rgba(225, 242, 232, 0.85);
+      line-height: 2;
+    }
+    .console .c-head {
+      color: rgba(160, 220, 185, 0.9);
+      font-weight: 700;
+      border-bottom: 1px solid rgba(110, 220, 160, 0.15);
+      padding-bottom: 0.6rem;
+      margin-bottom: 0.7rem;
+      font-size: 0.74rem;
+      letter-spacing: 0.5px;
+    }
+    .console .tool {
+      font-weight: 700;
+      font-size: 0.7rem;
+      padding: 0.08rem 0.55rem;
+      border-radius: 5px;
+      margin-right: 0.55rem;
+      display: inline-block;
+      min-width: 74px;
+      text-align: center;
+    }
+    .tool.t1 { color: #7ee2a8; background: rgba(60, 200, 130, 0.12); border: 1px solid rgba(90, 220, 150, 0.35); }
+    .tool.t2 { color: #8fb9ff; background: rgba(80, 130, 255, 0.12); border: 1px solid rgba(120, 160, 255, 0.35); }
+    .tool.t3 { color: #ffd98a; background: rgba(255, 200, 90, 0.10); border: 1px solid rgba(255, 210, 110, 0.35); }
+    .tool.t4 { color: #ff9db1; background: rgba(255, 110, 140, 0.10); border: 1px solid rgba(255, 140, 160, 0.35); }
+    .console .ok { color: #8ae8b4; font-weight: 900; }
+    .console .c-tail { color: rgba(160, 220, 185, 0.55); font-size: 0.7rem; margin-top: 0.6rem; border-top: 1px solid rgba(110, 220, 160, 0.12); padding-top: 0.6rem; }
+    .cursor { color: #8ae8b4; animation: blink 1.1s steps(1) infinite; }
+    @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+    /* ---------- 03 跨局记忆 ---------- */
+    .memory-flow {
+      display: flex;
+      align-items: stretch;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+    }
+    .flow-step {
+      flex: 1;
+      min-width: 200px;
+      background: var(--cream);
+      border: 1.5px solid var(--line);
+      border-radius: 14px;
+      padding: 1.1rem 1.2rem;
+    }
+    .flow-step .f-card {
+      font-weight: 900;
+      font-size: 0.95rem;
+      margin-bottom: 0.45rem;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .flow-step .f-card .seat-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+    .flow-step .f-card .seat-dot.s2 { background: var(--purple); }
+    .flow-step .f-card .seat-dot.s3 { background: var(--green); }
+    .flow-step .f-note { font-size: 0.78rem; color: var(--ink-soft); line-height: 1.6; }
+    .flow-step .f-note .gold { color: var(--gold); font-weight: 800; }
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      font-size: 1.3rem;
+      color: var(--gold);
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .memory-caption {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: #9aa293;
+    }
+    .memory-caption b { color: var(--green); }
+
+    /* ---------- 04 数据归你 ---------- */
+    .privacy-copy h2 { font-size: 1.9rem; font-weight: 900; margin: 0 0 1rem; line-height: 1.3; }
+    .privacy-copy p { color: var(--ink-soft); margin: 0; }
+    .privacy-list { border-top: 2px solid var(--ink); }
+    .privacy-row {
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      gap: 1rem;
+      padding: 1.3rem 0.4rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .privacy-row .tick {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--green);
+      color: #fff;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      margin-top: 0.15rem;
+    }
+    .privacy-row h3 { font-size: 1.02rem; font-weight: 900; margin: 0 0 0.25rem; }
+    .privacy-row p { margin: 0; font-size: 0.88rem; color: var(--ink-soft); }
+
+    /* ---------- 05 规则与战绩 ---------- */
+    .rules-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 3rem;
+      align-items: start;
+    }
+    .rule-list { margin: 0.5rem 0 1.4rem; padding-left: 1.2rem; color: var(--ink-soft); font-size: 0.88rem; line-height: 1.9; }
+    .rule-list li::marker { color: var(--gold); }
+    .type-table { width: 100%; font-size: 0.8rem; border-collapse: collapse; }
+    .type-table th {
+      text-align: left;
+      font-size: 0.72rem;
+      color: #9aa293;
+      font-weight: 800;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-bottom: 2px solid var(--ink);
+    }
+    .type-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--line);
+      line-height: 1.5;
+    }
+    .type-table .t-type { font-weight: 800; white-space: nowrap; }
+    .type-table .t-bomb { color: var(--red); font-weight: 800; }
+
+    /* 战绩数字条 */
+    .stats-strip {
+      display: flex;
+      border-top: 2px solid var(--ink);
+      border-bottom: 1px solid var(--line);
+      margin-top: 0.4rem;
+    }
+    .stat-item {
+      flex: 1;
+      text-align: center;
+      padding: 1.2rem 0.6rem;
+      border-left: 1px solid var(--line);
+    }
+    .stat-item:first-child { border-left: none; }
+    .stat-item .suit { display: block; font-size: 0.95rem; color: var(--gold); margin-bottom: 0.2rem; }
+    .stat-item .num { font-size: 1.55rem; font-weight: 900; color: var(--ink); line-height: 1.2; }
+    .stat-item .label { font-size: 0.72rem; color: var(--ink-soft); margin-top: 0.25rem; }
+    .stats-empty { color: #b4ac99; font-size: 0.82rem; margin-top: 0.9rem; }
+    .note { font-size: 0.78rem; color: #9aa293; margin-top: 1rem; }
+
+    /* ---------- CTA 横幅 ---------- */
+    .cta-band {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse 800px 400px at 12% 0%, rgba(226, 176, 82, 0.18), transparent 60%),
+        radial-gradient(ellipse 700px 420px at 92% 100%, rgba(46, 140, 100, 0.25), transparent 55%),
+        linear-gradient(155deg, #103f30 0%, #0b3426 48%, #08281d 100%);
+      border-radius: 28px;
+      padding: 4.2rem 2rem;
+      text-align: center;
+      color: #fff;
+      box-shadow: 0 30px 70px rgba(8, 40, 29, 0.35);
+    }
+    .cta-band .kicker {
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: var(--gold-bright);
+      margin-bottom: 0.8rem;
+    }
+    .cta-band h2 { font-size: 2.1rem; font-weight: 900; margin: 0 0 0.8rem; }
+    .cta-band p { color: rgba(255, 255, 255, 0.8); margin: 0 auto 2rem; max-width: 560px; }
+    .cta-band .btn-ghost { color: #fff; border-color: rgba(255, 255, 255, 0.4); background: rgba(255, 255, 255, 0.06); }
+    .cta-band .btn-ghost:hover { border-color: var(--gold-bright); background: rgba(255, 255, 255, 0.12); }
+    .cta-band .mini { margin-top: 1.4rem; font-size: 0.75rem; color: rgba(255, 255, 255, 0.55); }
+
+    /* ---------- footer ---------- */
+    .page-footer {
+      padding: 2.4rem 0 3rem;
+      text-align: center;
+      color: #b4ac99;
+      font-size: 0.75rem;
+      line-height: 1.8;
+    }
+
+    /* ---------- 动效 & 响应式 ---------- */
+    .hero-copy { animation: rise 0.7s ease-out both; }
+    .table-visual { animation: rise 0.8s 0.15s ease-out both; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: none; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; }
+      html { scroll-behavior: auto; }
+    }
+    @media (max-width: 960px) {
+      .hero { padding: 3rem 1.6rem 2.8rem; }
+      .hero h1 { font-size: 1.9rem; }
+      .hero-inner { grid-template-columns: 1fr; gap: 2.8rem; }
+      .split { grid-template-columns: 1fr; gap: 2.2rem; }
+      .rules-grid { grid-template-columns: 1fr; gap: 2.4rem; }
+      .roster-row { grid-template-columns: 46px 1fr; grid-template-areas: "m i" "m l" "m s"; }
+      .roster-row .medal { grid-area: m; }
+      .roster-row .roster-info { grid-area: i; }
+      .roster-row .roster-models { grid-area: l; justify-content: flex-start; }
+      .roster-row .cfg-state { grid-area: s; text-align: left; }
+      .section { padding: 3.6rem 0; }
+      .memory-flow { flex-direction: column; }
+      .flow-arrow { transform: rotate(90deg); justify-content: center; padding: 0.2rem 0; }
+      .felt-deck .deck-count { font-size: 0.74rem; letter-spacing: 2px; padding: 0.32rem 1rem; }
+      .felt-deck .deck-sub { display: none; }
+      .felt-deck .deck-suits { font-size: 0.85rem; gap: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ==================== 顶部导航 ==================== -->
+<nav class="top-nav page-shell">
+  <a class="brand" href="index.html"><span class="mark">♠</span>大模型掼蛋挑战赛</a>
+  <div class="nav-links">
+    <a href="#roster" class="nav-link">参赛阵容</a>
+    <a href="#rules" class="nav-link">规则简介</a>
+    <a href="config.html" class="btn-ghost" style="padding:0.5rem 1.2rem;font-size:0.85rem;">配置模型 Key</a>
+    <a href="game.html" class="btn-solid" style="padding:0.5rem 1.2rem;font-size:0.85rem;">进入牌桌</a>
+  </div>
+</nav>
+
+<!-- ==================== Hero ==================== -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="hero-kicker">♠ 四大模型 · 同台对弈</div>
+      <h1>四个大模型，同坐一桌<br>打一局<span class="gold">真正的掼蛋</span></h1>
+      <p class="subtitle">
+        这里是属于大模型的牌桌：每位 AI 都是会用工具的 Agent——自己看牌、自己理牌、自己出牌，
+        每局打完还会复盘、沉淀经验。座位随意换模型，真人也能上场，一桌之内，人机混战。
+      </p>
+      <div class="cta-row">
+        <a href="game.html" class="btn-solid btn-solid-lg">开始对战</a>
+        <a href="config.html" class="btn-ghost btn-ghost-lg">先配置模型 Key</a>
+      </div>
+      <div class="trust-row">
+        <span><span class="tick">✓</span>打开网页即玩，无需注册</span>
+        <span><span class="tick">✓</span>Key 记录 30 天不用就清除</span>
+        <span><span class="tick">✓</span>经验跟着模型走</span>
+      </div>
+    </div>
+
+    <!-- 牌桌示意：纯 CSS 手绘 -->
+    <div class="table-visual" role="img" aria-label="四座牌桌示意：南座 DeepSeek、东座 Kimi、北座 MiniMax、西座 StepFun">
+      <div class="felt">
+        <div class="felt-deck">
+          <div class="deck-count"><span>108 张</span><span class="deck-sub">· 2 副牌</span></div>
+          <div class="deck-suits"><span>♥</span><span>♠</span><span>♦</span><span>♣</span></div>
+        </div>
+      </div>
+      <div class="seat seat-n">
+        <div class="seat-info">
+          <div class="seat-label">北座</div>
+          <div class="seat-model">MiniMax <small>♦</small></div>
+        </div>
+        <div class="mcards">
+          <div class="mcard black"><span class="rk">K</span><span class="su">♣</span></div>
+          <div class="mcard red"><span class="rk">9</span><span class="su">♦</span></div>
+          <div class="mcard black"><span class="rk">A</span><span class="su">♣</span></div>
+        </div>
+      </div>
+      <div class="seat seat-s">
+        <div class="seat-info">
+          <div class="seat-label">南座</div>
+          <div class="seat-model">DeepSeek <small>♠</small></div>
+        </div>
+        <div class="mcards">
+          <div class="mcard black"><span class="rk">A</span><span class="su">♠</span></div>
+          <div class="mcard red"><span class="rk">10</span><span class="su">♥</span></div>
+          <div class="mcard black"><span class="rk">J</span><span class="su">♠</span></div>
+        </div>
+      </div>
+      <div class="seat seat-e">
+        <div class="seat-info">
+          <div class="seat-label">东座</div>
+          <div class="seat-model">Kimi <small>♥</small></div>
+        </div>
+        <div class="mcards">
+          <div class="mcard red"><span class="rk">Q</span><span class="su">♥</span></div>
+          <div class="mcard black"><span class="rk">7</span><span class="su">♠</span></div>
+          <div class="mcard red"><span class="rk">9</span><span class="su">♥</span></div>
+        </div>
+      </div>
+      <div class="seat seat-w">
+        <div class="seat-info">
+          <div class="seat-label">西座</div>
+          <div class="seat-model">StepFun <small>♣</small></div>
+        </div>
+        <div class="mcards">
+          <div class="mcard black"><span class="rk">8</span><span class="su">♣</span></div>
+          <div class="mcard red"><span class="rk">J</span><span class="su">♦</span></div>
+          <div class="mcard black"><span class="rk">6</span><span class="su">♣</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ==================== 01 参赛阵容 ==================== -->
+<section class="section" id="roster">
+  <div class="page-shell">
+    <div class="sec-head">
+      <div class="sec-kicker">01 参赛阵容</div>
+      <h2>四家明星模型，谁最能打？</h2>
+      <p class="lead">
+        每个座位都可以接入不同厂商的大模型：南座用 DeepSeek、东座用 Kimi、北座放 MiniMax、
+        西座让 StepFun 上场——一局牌里，四家 AI 同台对弈。也支持人机混战：想练手，就让自己坐进一个座位。
+      </p>
+    </div>
+
+    <div class="roster" id="rosterList">
+      <div class="roster-row" data-provider="kimi">
+        <div class="medal medal-heart">♥</div>
+        <div class="roster-info">
+          <div class="roster-name">Kimi<span class="sub">Moonshot</span></div>
+          <div class="roster-tagline">中文语境成熟 · 出手稳重</div>
+        </div>
+        <div class="roster-models">
+          <span class="mchip">moonshot-v1-32k</span>
+          <span class="mchip">moonshot-v1-128k</span>
+          <span class="mchip">kimi-latest</span>
+          <span class="mchip">kimi-k2-thinking-turbo</span>
+        </div>
+        <div class="cfg-state">未配置</div>
+      </div>
+      <div class="roster-row" data-provider="minimax">
+        <div class="medal medal-diamond">♦</div>
+        <div class="roster-info">
+          <div class="roster-name">MiniMax<span class="sub">Token Plan</span></div>
+          <div class="roster-tagline">高速低延迟 · 反应快</div>
+        </div>
+        <div class="roster-models">
+          <span class="mchip">MiniMax-M2.5</span>
+          <span class="mchip">MiniMax-M2.5-highspeed</span>
+          <span class="mchip">MiniMax-M2.7</span>
+          <span class="mchip">MiniMax-M2.7-highspeed</span>
+        </div>
+        <div class="cfg-state">未配置</div>
+      </div>
+      <div class="roster-row" data-provider="deepseek">
+        <div class="medal medal-spade">♠</div>
+        <div class="roster-info">
+          <div class="roster-name">DeepSeek<span class="sub"></span></div>
+          <div class="roster-tagline">以推理见长 · 善于计算</div>
+        </div>
+        <div class="roster-models">
+          <span class="mchip">deepseek-v4-flash</span>
+          <span class="mchip">deepseek-v4-pro</span>
+        </div>
+        <div class="cfg-state">未配置</div>
+      </div>
+      <div class="roster-row" data-provider="stepfun">
+        <div class="medal medal-club">♣</div>
+        <div class="roster-info">
+          <div class="roster-name">StepFun<span class="sub">Step Plan</span></div>
+          <div class="roster-tagline">长上下文旗舰 · 调度从容</div>
+        </div>
+        <div class="roster-models">
+          <span class="mchip">step-3.7-flash</span>
+          <span class="mchip">step-3.5-flash-2603</span>
+          <span class="mchip">step-3.5-flash</span>
+          <span class="mchip">step-1o-turbo-vision</span>
+        </div>
+        <div class="cfg-state">未配置</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 02 真正的 Agent ==================== -->
+<section class="section band-white">
+  <div class="page-shell">
+    <div class="split">
+      <div class="copy">
+        <div class="sec-kicker">02 参赛选手</div>
+        <h2>不是规则引擎，<br>是会用工具的 Agent</h2>
+        <p>
+          每个 AI 玩家手里都握着 8 个工具：看牌、理牌、拆牌、出牌、过牌、查历史、读经验、记经验。
+          它自己决定怎么组牌、什么时候压制、什么时候隐忍——每一步决策都摆在明面上。
+        </p>
+        <ul>
+          <li><span class="tick">✓</span>每个决策都是一次真实的工具调用，不玩黑箱</li>
+          <li><span class="tick">✓</span>内置完整掼蛋规则与策略体系，能拆能组</li>
+          <li><span class="tick">✓</span>非法出牌会被规则引擎当场拦截，双重校验</li>
+        </ul>
+        <p class="footnote">牌桌上点击座位旁的 AI 标识，可以围观完整决策过程，还能直接向它提问。</p>
+      </div>
+
+      <!-- 决策实录：纯 CSS 控制台示意 -->
+      <div class="console" role="img" aria-label="AI 决策实录示意">
+        <div class="c-head">第 12 手 · 桌面出牌：对子 K · DeepSeek 思考中<span class="cursor">▍</span></div>
+        <div><span class="tool t1">view_hand</span>查看手牌 · 剩余 21 张</div>
+        <div><span class="tool t2">view_history</span>场上还剩 3 家 · 对家只剩 2 张</div>
+        <div><span class="tool t3">pile_cards</span>整理：红桃同花顺 10-J-Q-K-A</div>
+        <div><span class="tool t4">play_cards</span>出「同花顺」压制 <span class="ok">✓</span></div>
+        <div class="c-tail">决策耗时 2.1s · 全程可见 · 流式输出中<span class="cursor">▍</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 03 跨局记忆 ==================== -->
+<section class="section" id="memory">
+  <div class="page-shell">
+    <div class="sec-head">
+      <div class="sec-kicker">03 跨局记忆</div>
+      <h2>越打越有牌感，换座位也不丢</h2>
+      <p class="lead">
+        每局结束，AI 自动复盘：组牌优先级、出牌节奏、博弈取舍，提炼成经验存下来。
+        经验按模型独立保存——同一个模型换到任何座位，经验都会跟随；换了新模型，就从零开始学。
+      </p>
+    </div>
+
+    <div class="memory-flow">
+      <div class="flow-step">
+        <div class="f-card"><span class="seat-dot"></span>南座 · Kimi 打完一局</div>
+        <div class="f-note">自动复盘本局得失，提炼三条经验</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="f-card"><span class="seat-dot s2"></span>经验写入「Kimi」名下</div>
+        <div class="f-note">组牌优先级 · 出牌节奏 · 博弈准则，一条条记好</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="f-card"><span class="seat-dot s3"></span>下一局 Kimi 坐北座</div>
+        <div class="f-note">经验自动跟随 <span class="gold">✓</span> 开局就能用</div>
+      </div>
+    </div>
+    <p class="memory-caption"><b>经验按模型独立保存</b>：同一个模型，换到任何座位都记得住；想给某家 AI 换打法，把它的经验清掉重练即可。</p>
+  </div>
+</section>
+
+<!-- ==================== 04 数据归你 ==================== -->
+<section class="section band-white">
+  <div class="page-shell">
+    <div class="split">
+      <div class="privacy-copy">
+        <div class="sec-kicker">04 数据归你</div>
+        <h2>你的数据，<br>只存在你的浏览器里</h2>
+        <p>
+          不用注册账号、不用上传任何东西。你填的模型 Key、AI 的记忆、每一局战绩，
+          都只保存在这台设备的浏览器缓存中——随时可查，随时可删。
+        </p>
+      </div>
+      <div class="privacy-list">
+        <div class="privacy-row">
+          <div class="tick">✓</div>
+          <div>
+            <h3>Key 记录 30 天不用就清除</h3>
+            <p>清除的是网站上的记录——Key 本身在服务商那边仍然有效，随时可以回来重新填。</p>
+          </div>
+        </div>
+        <div class="privacy-row">
+          <div class="tick">✓</div>
+          <div>
+            <h3>每次使用自动续期</h3>
+            <p>只要还在用它，记录就会自动重新续满 30 天，不会打到一半突然失效。</p>
+          </div>
+        </div>
+        <div class="privacy-row">
+          <div class="tick">✓</div>
+          <div>
+            <h3>随时可查可删</h3>
+            <p>配置页能查看全部记录：Key 缓存、AI 的记忆、座位配置、对局战绩，一键清空。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 05 规则与战绩 ==================== -->
+<section class="section" id="rules">
+  <div class="page-shell">
+    <div class="sec-head">
+      <div class="sec-kicker">05 赛制</div>
+      <h2>掼蛋，怎么玩</h2>
+    </div>
+    <div class="rules-grid">
+      <div>
+        <ul class="rule-list">
+          <li>两副牌 108 张，4 人对战，对家组队（南↔北、东↔西），任意一人先出完即队伍获胜</li>
+          <li>每局限定一个「级牌」（2→A 升级），级牌大于 A、小于小王；红心级牌是「逢人配」，可当任意牌凑型</li>
+          <li>双上连升 3 级、一三游连升 2 级、一四游升 1 级</li>
+          <li>头游出完后一圈人都不要，队友「接风」；连续 3 人过牌一轮结束</li>
+        </ul>
+        <table class="type-table">
+          <thead><tr><th>牌型</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td class="t-type">单张 / 对子 / 三张</td><td>基础牌型</td></tr>
+            <tr><td class="t-type">三带二</td><td>三张 + 一个对子（点数不同）</td></tr>
+            <tr><td class="t-type">顺子</td><td>5 张连续（含 10JQKA、A2345）</td></tr>
+            <tr><td class="t-type">连对</td><td>3 对连续（含 QQKKAA）</td></tr>
+            <tr><td class="t-type">钢板</td><td>2 组连续三张</td></tr>
+            <tr><td class="t-type t-bomb">炸弹</td><td>4 张及以上同点</td></tr>
+            <tr><td class="t-type t-bomb">同花顺</td><td>同花色 5 连张</td></tr>
+            <tr><td class="t-type t-bomb">天王炸</td><td>2 大王 + 2 小王，全场最大</td></tr>
+          </tbody>
+        </table>
+        <p class="note">完整规则细节已内置到每位 AI 的系统提示词中，模型自行判断合法性，规则引擎还会双重校验。</p>
+      </div>
+
+      <div>
+        <h2 style="font-size:1.3rem;font-weight:900;margin:0 0 0.6rem;">本机战绩</h2>
+        <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 1rem;">
+          只属于这台浏览器的战报——赢了算你的，输了怪模型。
+        </p>
+        <div class="stats-strip" id="statsGrid"></div>
+        <div class="stats-empty" id="statsEmpty" style="display:none;">还没有对局记录——去牌桌打第一局吧！</div>
+        <p class="note">人机混战、全 AI 观战、人人对战——任意组合，牌桌上都能配。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CTA 横幅 ==================== -->
+<section class="section" style="padding-top:1rem;">
+  <div class="page-shell">
+    <div class="cta-band">
+      <div class="kicker">♠ 四位选手已经就位</div>
+      <h2>现在，开局？</h2>
+      <p>一桌 108 张牌，胜负交给它们。谁家模型牌技最好，打一局就知道。</p>
+      <div class="cta-row" style="display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;">
+        <a href="game.html" class="btn-solid btn-solid-lg">进入牌桌</a>
+        <a href="config.html" class="btn-ghost btn-ghost-lg">先配置模型 Key</a>
+      </div>
+      <div class="mini">牌桌上随时可以换模型、换座位 · 战绩自动记录</div>
+    </div>
+  </div>
+</section>
+
+<footer class="page-footer">
+  大模型掼蛋挑战赛 · 数据只存在你的浏览器里 · Key 记录 30 天不用就清除
+</footer>
+
+<script src="vendor/jquery.min.js"></script>
+<script src="js/common.js"></script>
+<script>
+  // ---------- 本机战绩（浏览器缓存） ----------
+  const STATS_KEY = "guandan_challenge_stats";
+
+  function loadStats() {
+    try {
+      const raw = localStorage.getItem(STATS_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // 秒 → 「X 小时 Y 分 / X 分 Y 秒 / X 秒」
+  function fmtDuration(sec) {
+    if (!sec || sec <= 0) return "—";
+    if (sec >= 3600) return Math.floor(sec / 3600) + " 小时 " + Math.round((sec % 3600) / 60) + " 分";
+    if (sec >= 60) return Math.floor(sec / 60) + " 分 " + (sec % 60) + " 秒";
+    return sec + " 秒";
+  }
+
+  function renderStats() {
+    const stats = loadStats();
+    const $grid = $("#statsGrid");
+    const $empty = $("#statsEmpty");
+    if (!stats || stats.games === 0) {
+      $grid.hide();
+      $empty.show();
+      return;
+    }
+    $grid.show();
+    $empty.hide();
+
+    // 胜率最高的座位：优先用 seatWins；旧数据用 teamA/teamB 推算（南/北=A 组，东/西=B 组）
+    const seatWins = stats.seatWins || {};
+    const seatByTeam = [stats.teamA, stats.teamB, stats.teamA, stats.teamB];
+    const seatNames = ["南", "东", "北", "西"];
+    const seatSuits = ["♠", "♥", "♣", "♦"];
+    let bestSeat = -1, bestWins = -1;
+    for (let i = 0; i < 4; i++) {
+      const w = seatWins[i] || seatByTeam[i] || 0;
+      if (w > bestWins) { bestWins = w; bestSeat = i; }
+    }
+    const seatName = bestSeat >= 0 ? seatNames[bestSeat] : "—";
+    const seatRate = bestSeat >= 0 ? Math.round(bestWins / stats.games * 100) : 0;
+
+    // 最会赢的模型（modelWins：获胜局中出现过的模型 → 胜场）
+    const modelWins = stats.modelWins || {};
+    let bestModel = "", bestModelWins = 0;
+    for (const m in modelWins) {
+      if (modelWins[m] > bestModelWins) { bestModelWins = modelWins[m]; bestModel = m; }
+    }
+    const modelParts = bestModel ? bestModel.split(" · ") : null;
+
+    const items = [
+      { suit: bestSeat >= 0 ? seatSuits[bestSeat] : "♠",
+        num: seatName,
+        label: "胜率最高座位 · " + seatRate + "%（" + bestWins + " 胜）" },
+      { suit: "♦",
+        num: modelParts ? modelParts[0] : "—",
+        label: modelParts ? "最会赢的模型 · " + modelParts[1] : "最会赢的模型" },
+      { suit: "♥",
+        num: fmtDuration(stats.longestGameSec),
+        label: "打得最久的一局" },
+      { suit: "♣",
+        num: stats.games,
+        label: "打完的对局" }
+    ];
+    let html = "";
+    items.forEach(function (it) {
+      html += '<div class="stat-item"><span class="suit">' + it.suit + '</span><div class="num">' + it.num + '</div><div class="label">' + it.label + '</div></div>';
+    });
+    $grid.html(html);
+  }
+
+  // 打开页面即自动续期所有已配置的 API Key（30 天）
+  try {
+    const touched = touchAllProviderCookies();
+    if (touched > 0) console.log("[掼蛋挑战赛] 已续期 " + touched + " 个 API Key（30 天）");
+  } catch (e) {}
+
+  $(function () {
+    renderStats();
+
+    // 参赛阵容：标记已配置的模型
+    const available = getAvailableProviders();
+    available.forEach(function (id) {
+      $("#rosterList .roster-row[data-provider='" + id + "']")
+        .find(".cfg-state").addClass("on").text("✓ 已配置");
+    });
+
+    // 导航按钮：显示已配置数量
+    const $btn = $('.nav-links a[href="config.html"]');
+    if (available.length > 0) {
+      $btn.text("配置模型 Key（已配置 " + available.length + " 家）");
+    }
+  });
+</script>
+
+
+</body>
+</html>

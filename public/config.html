@@ -1,0 +1,835 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大模型掼蛋挑战赛 — 模型配置与数据管理</title>
+  <link href="vendor/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1c2b24;
+      --ink-soft: #55655c;
+      --cream: #faf6ee;
+      --cream-deep: #f3ecdd;
+      --line: #e7dfcd;
+      --felt-1: #12563f;
+      --felt-2: #0b3f2e;
+      --felt-3: #082e21;
+      --gold: #c99a3d;
+      --gold-bright: #e2b052;
+      --red: #c24132;
+      --blue: #3b6fd4;
+      --purple: #7b5cd6;
+      --green: #0f8a5f;
+      --white: #ffffff;
+      --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse 700px 420px at 96% -6%, rgba(226, 176, 82, 0.14), transparent 60%),
+        radial-gradient(ellipse 600px 420px at -6% 104%, rgba(46, 140, 100, 0.12), transparent 55%),
+        var(--cream);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    .page-shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.2rem;
+    }
+
+    /* ---------- 顶部导航（与首页一致） ---------- */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.1rem 0;
+      flex-wrap: wrap;
+    }
+    .top-nav .brand {
+      font-size: 1.12rem;
+      font-weight: 900;
+      color: var(--ink);
+      text-decoration: none;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      transform: translateY(1px); /* 品牌 mark 微调下移 1px，视觉对齐首页 */
+    }
+    .top-nav .brand .mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(150deg, var(--felt-1), var(--felt-3));
+      color: var(--gold-bright);
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 10px rgba(8, 46, 33, 0.25);
+    }
+    .top-nav .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+    .top-nav .nav-link {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--ink-soft);
+      text-decoration: none;
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+    }
+    .top-nav .nav-link:hover { color: var(--ink); background: var(--cream-deep); }
+    /* 「进入牌桌」按钮比首页低 1px，微调对齐 */
+    .top-nav .nav-links .btn-solid { transform: translateY(1px); }
+
+    /* ---------- 按钮（与首页一致） ---------- */
+    .btn-solid {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+      color: #241a04;
+      font-weight: 800;
+      font-size: 0.98rem;
+      padding: 0.72rem 1.7rem;
+      border-radius: 999px;
+      text-decoration: none;
+      box-shadow: 0 8px 22px rgba(201, 154, 61, 0.4);
+      border: 1px solid rgba(36, 26, 4, 0.12);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      cursor: pointer;
+    }
+    .btn-solid:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(201, 154, 61, 0.5); color: #241a04; }
+    .btn-ghost {
+      display: inline-block;
+      color: var(--ink);
+      font-weight: 800;
+      font-size: 0.98rem;
+      padding: 0.72rem 1.7rem;
+      border-radius: 999px;
+      text-decoration: none;
+      border: 1.5px solid var(--line);
+      background: rgba(255, 255, 255, 0.7);
+      transition: border-color 0.15s ease, background 0.15s ease;
+      cursor: pointer;
+    }
+    .btn-ghost:hover { border-color: var(--gold); background: #fff; color: var(--ink); }
+    .btn-danger-ghost {
+      display: inline-block;
+      color: var(--red);
+      font-weight: 800;
+      font-size: 0.98rem;
+      padding: 0.72rem 1.7rem;
+      border-radius: 999px;
+      text-decoration: none;
+      border: 1.5px solid #e8c4bd;
+      background: rgba(255, 255, 255, 0.7);
+      transition: border-color 0.15s ease, background 0.15s ease;
+      cursor: pointer;
+    }
+    .btn-danger-ghost:hover { border-color: var(--red); background: #fdf3f1; color: var(--red); }
+    .btn-sm { padding: 0.42rem 1.05rem; font-size: 0.8rem; }
+    .btn-xs { padding: 0.28rem 0.8rem; font-size: 0.74rem; }
+    .btn-solid:disabled { opacity: 0.55; cursor: default; transform: none; }
+
+    /* ---------- 页头 ---------- */
+    .page-head {
+      padding: 3.6rem 0 2.4rem;
+      max-width: 720px;
+    }
+    .sec-kicker {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-size: 0.75rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: var(--gold);
+      margin-bottom: 0.7rem;
+    }
+    .sec-kicker::before {
+      content: "";
+      width: 26px;
+      height: 2px;
+      background: var(--gold);
+      border-radius: 2px;
+    }
+    .page-head h1 { font-size: 2rem; font-weight: 900; margin: 0 0 0.8rem; letter-spacing: 0.5px; line-height: 1.3; }
+    .page-head .lead { font-size: 0.98rem; color: var(--ink-soft); margin: 0; }
+
+    /* ---------- 两栏 ---------- */
+    .two-col { display: grid; grid-template-columns: 380px 1fr; gap: 2rem; align-items: start; }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 10px 26px rgba(28, 43, 36, 0.06);
+      padding: 1.5rem 1.6rem;
+    }
+    .panel h2 { margin: 0 0 0.9rem; font-size: 1.12rem; font-weight: 900; }
+
+    /* ---------- 数据存哪里（左侧） ---------- */
+    .diag-box {
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 0.7rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-align: center;
+      background: #fff;
+      color: var(--ink);
+      margin-bottom: 0.7rem;
+    }
+    .diag-box .sub {
+      display: block;
+      font-weight: 600;
+      font-size: 0.7rem;
+      color: var(--ink-soft);
+      margin-top: 0.15rem;
+    }
+    .diag-box.browser {
+      border-color: var(--gold);
+      background: linear-gradient(150deg, var(--felt-1), var(--felt-3));
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(8, 46, 33, 0.28);
+    }
+    .diag-box.browser .sub { color: rgba(255, 255, 255, 0.75); }
+    .diag-box.cookie { border-color: #e0d2ae; background: var(--cream-deep); }
+    .diag-box.cookie .sub { color: var(--ink-soft); }
+    .diag-box.ls { border-color: #d5e3d9; background: #f2f7f3; }
+    .diag-box.ls .sub { color: var(--ink-soft); }
+    .diag-arrow {
+      text-align: center;
+      color: var(--gold);
+      font-weight: 900;
+      font-size: 1rem;
+      margin: 0.25rem 0;
+    }
+    .diag-arrow .txt { font-size: 0.72rem; font-weight: 800; color: var(--ink-soft); letter-spacing: 1px; }
+    .diag-apis {
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 0.72rem;
+      line-height: 1.6;
+      font-weight: 700;
+      padding: 0.7rem 0.9rem;
+      text-align: center;
+    }
+    .diag-apis .suits { letter-spacing: 0.3rem; color: var(--gold); font-size: 0.85rem; }
+    .diag-note { font-size: 0.76rem; color: var(--ink-soft); line-height: 1.7; margin: 0.9rem 0 0; }
+    .diag-note b { color: var(--ink); }
+
+    /* ---------- provider 卡 ---------- */
+    .provider-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1.05rem 1.15rem;
+      margin-bottom: 0.9rem;
+      background: #fff;
+    }
+    .provider-card:last-child { margin-bottom: 0; }
+    .provider-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
+    .provider-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      color: #fff;
+      font-weight: 900;
+      flex-shrink: 0;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.14);
+    }
+    .provider-logo.kimi { background: linear-gradient(135deg, #1a2a4a, #33446e); }
+    .provider-logo.minimax { background: linear-gradient(135deg, #d97706, #b85d22); }
+    .provider-logo.deepseek { background: linear-gradient(135deg, #2e6edf, #1c4fae); }
+    .provider-logo.stepfun { background: linear-gradient(135deg, #7c3aed, #a855f7); }
+    .provider-name { font-weight: 900; font-size: 0.93rem; }
+    .provider-sub { font-size: 0.7rem; color: #9aa293; }
+    .provider-status {
+      margin-left: auto;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.22rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--cream-deep);
+      color: #b4ac99;
+      white-space: nowrap;
+    }
+    .provider-status.ok { color: var(--green); border-color: #bcdcc9; background: #e7f5ee; }
+
+    .input-group-text {
+      background: var(--cream-deep);
+      border-color: var(--line);
+      color: var(--ink-soft);
+      font-size: 0.78rem;
+      font-weight: 700;
+      border-radius: 10px 0 0 10px !important;
+    }
+    .form-control, .form-select {
+      border-color: var(--line);
+      font-size: 0.85rem;
+      background: #fff;
+      color: var(--ink);
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 0.2rem rgba(201, 154, 61, 0.16);
+      color: var(--ink);
+    }
+    .input-group > .form-control { border-radius: 0 10px 10px 0 !important; }
+    .form-text { font-size: 0.72rem; color: #9aa293; margin-top: 0.5rem; }
+    .form-text b { color: var(--ink); }
+    .provider-actions { display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap; margin-top: 0.6rem; }
+    .cookie-exp { font-size: 0.72rem; color: var(--ink-soft); white-space: nowrap; margin-left: 0.3rem; }
+    .cookie-exp .soon { color: var(--red); font-weight: 800; }
+
+    /* ---------- AI 记忆（按服务商归入卡内） ---------- */
+    .panel-tip { font-size: 0.78rem; color: var(--ink-soft); line-height: 1.7; margin: -0.2rem 0 1rem; }
+    .panel-tip b { color: var(--ink); }
+    .mem-block { margin-top: 0.9rem; border-top: 1px dashed var(--line); padding-top: 0.7rem; }
+    .mem-head {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      font-weight: 900;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+    .mem-head::before { content: "◆"; color: var(--gold); font-size: 0.6rem; }
+    .mem-sub { font-size: 0.68rem; font-weight: 600; color: #9aa293; }
+    .mem-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.42rem 0.6rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--cream);
+      margin-bottom: 0.45rem;
+    }
+    .mem-item:last-child { margin-bottom: 0; }
+    .mem-item .mem-info { flex: 1; min-width: 0; }
+    .mem-item .mem-model { font-size: 0.78rem; font-weight: 800; color: var(--ink); }
+    .mem-item .mem-key { font-size: 0.64rem; color: #9aa293; font-family: var(--mono); word-break: break-all; }
+    .mem-item .mem-meta { font-size: 0.7rem; color: var(--ink-soft); white-space: nowrap; }
+    .mem-empty { font-size: 0.75rem; color: #b4ac99; padding: 0.35rem 0.1rem; }
+
+    /* ---------- 全局操作 ---------- */
+    .global-actions { margin-top: 1.6rem; border-top: 2px solid var(--ink); padding-top: 1.1rem; }
+    .global-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 900;
+      margin-bottom: 0.7rem;
+    }
+    .global-title::before { content: ""; width: 26px; height: 2px; background: var(--gold); border-radius: 2px; }
+    .storage-actions { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+
+    /* ---------- toast（与牌桌页同款醒目样式） ---------- */
+    #gd-toast {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 9999;
+      max-width: min(420px, 90vw);
+      background: linear-gradient(150deg, var(--felt-1) 0%, var(--felt-3) 100%);
+      color: #fff;
+      border: 1.5px solid var(--gold-bright);
+      border-radius: 12px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.4), 0 0 0 5px rgba(226, 176, 82, 0.14);
+      padding: 0.8rem 1.3rem;
+      font-size: 0.86rem;
+      font-weight: 800;
+      opacity: 0;
+      transition: opacity 0.25s;
+      pointer-events: none;
+    }
+    #gd-toast.err { border-color: var(--red); box-shadow: 0 14px 34px rgba(0, 0, 0, 0.4), 0 0 0 5px rgba(194, 65, 50, 0.14); }
+
+    /* ---------- footer ---------- */
+    .page-footer {
+      padding: 2.4rem 0 3rem;
+      text-align: center;
+      color: #b4ac99;
+      font-size: 0.75rem;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 960px) {
+      .page-head { padding: 2rem 0 1.8rem; }
+      .page-head h1 { font-size: 1.6rem; }
+      .panel { padding: 1.2rem 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+<!-- 顶部导航：与首页一致，直接挂在 body 下，同款 page-shell 容器 -->
+<nav class="top-nav page-shell">
+  <a class="brand" href="index.html">
+    <span class="mark">♠</span>大模型掼蛋挑战赛
+  </a>
+  <div class="nav-links">
+    <a class="btn-solid" href="game.html" style="padding:0.5rem 1.2rem;font-size:0.85rem;">进入牌桌</a>
+  </div>
+</nav>
+
+<main class="page-shell">
+
+  <!-- ==================== 页头 ==================== -->
+  <header class="page-head">
+    <div class="sec-kicker">模型配置与数据管理</div>
+    <h1>四个座位，配四个模型</h1>
+    <p class="lead">
+      每个座位可独立选择服务商与模型。Key 只存在浏览器缓存里 —— 30 天不用，网站上的记录就自动清除；
+      每次使用或打开页面，记录都会自动续满 30 天。
+    </p>
+  </header>
+
+  <div class="two-col">
+
+    <!-- ==================== 左：数据存哪里 ==================== -->
+    <div class="panel">
+      <h2>数据存哪里？</h2>
+
+      <div class="diag-box browser">本页（浏览器）
+        <span class="sub">打开网页即用 · 不用注册 · 数据不离开这里</span>
+      </div>
+
+      <div class="diag-box cookie">Key 缓存 — 存大模型 API Key
+        <span class="sub">30 天不用记录就清除 · 每次使用自动续期</span>
+      </div>
+      <div class="diag-box ls">AI 记忆 — 存经验与页面配置
+        <span class="sub">持久保存 · 想存多久存多久</span>
+      </div>
+
+      <div class="diag-arrow">↓ <span class="txt">浏览器调用官方接口</span></div>
+      <div class="diag-apis">
+        <span class="suits">♥ ♦ ♠ ♣</span><br>
+        DeepSeek / Kimi / MiniMax / StepFun<br>
+        四家官方 API 接口
+      </div>
+
+      <p class="diag-note">
+        <b>为什么这样分？</b><br>
+        · API Key 是「凭据」，只存在本浏览器缓存里，30 天不使用，网站上的 Key 记录就自动清除
+        （Key 本身在服务商那边仍然有效）—— 谁拿到也只是暂时有效；每次打开页面或调用模型，记录都会自动续满 30 天。<br>
+        · AI 记忆（每局复盘出的经验）、座位配置、对局战绩是「数据」，保存在浏览器里 —— 想存多久存多久，
+        页面里可以随时查看、删除。<br>
+        <b>安全提示：</b>Key 只保存在<b>本浏览器</b>，不上传任何地方；但请不要在公用电脑上保存真实付费 Key，
+        清除缓存即可删除全部凭据。
+      </p>
+    </div>
+
+    <!-- ==================== 右：API Key 表单 ==================== -->
+    <div>
+      <div class="panel">
+        <h2>大模型 API Key</h2>
+        <p class="panel-tip">
+          配置至少一家即可开局（座位会优先在已配置的模型中选）。Key 只存在浏览器缓存里，30 天不使用，
+          网站上的 Key 记录就自动清除；每次使用记录都会自动续满 30 天。以下均为官方站点。
+        </p>
+
+        <!-- DeepSeek -->
+        <div class="provider-card" id="card-deepseek">
+          <div class="provider-head">
+            <div class="provider-logo deepseek">DS</div>
+            <div>
+              <div class="provider-name">DeepSeek</div>
+              <div class="provider-sub">api.deepseek.com</div>
+            </div>
+            <span class="provider-status" id="status-deepseek">未配置</span>
+          </div>
+          <div class="input-group mb-2">
+            <span class="input-group-text" style="width:88px;">API Key</span>
+            <input type="password" class="form-control" id="deepseek_api_key" placeholder="sk-..." autocomplete="off" spellcheck="false">
+            <button class="btn-ghost btn-sm btn-toggle" type="button" data-target="deepseek_api_key" style="border-radius:0 10px 10px 0;border-left:none;">显示</button>
+          </div>
+          <div class="provider-actions">
+            <button class="btn-solid btn-sm btn-save" data-provider="deepseek" type="button">保存</button>
+            <button class="btn-ghost btn-sm btn-touch" data-provider="deepseek" type="button">续期 30 天</button>
+            <button class="btn-danger-ghost btn-sm btn-clear" data-provider="deepseek" type="button">清除</button>
+            <span class="cookie-exp" id="exp-deepseek"></span>
+          </div>
+          <div class="form-text">默认模型 <b>deepseek-v4-flash</b>；备用 deepseek-v4-pro（Key 相同，任选）。</div>
+          <div class="mem-block">
+            <div class="mem-head">AI 记忆 <span class="mem-sub">按模型独立保存的跨局经验</span></div>
+            <div id="mem-list-deepseek"></div>
+            <div class="mem-empty" id="mem-empty-deepseek" style="display:none;">该服务商暂无 AI 经验记录</div>
+          </div>
+        </div>
+
+        <!-- Kimi -->
+        <div class="provider-card" id="card-kimi">
+          <div class="provider-head">
+            <div class="provider-logo kimi">K</div>
+            <div>
+              <div class="provider-name">Kimi（Moonshot）</div>
+              <div class="provider-sub">api.moonshot.cn</div>
+            </div>
+            <span class="provider-status" id="status-kimi">未配置</span>
+          </div>
+          <div class="input-group mb-2">
+            <span class="input-group-text" style="width:88px;">API Key</span>
+            <input type="password" class="form-control" id="kimi_api_key" placeholder="sk-..." autocomplete="off" spellcheck="false">
+            <button class="btn-ghost btn-sm btn-toggle" type="button" data-target="kimi_api_key" style="border-radius:0 10px 10px 0;border-left:none;">显示</button>
+          </div>
+          <div class="provider-actions">
+            <button class="btn-solid btn-sm btn-save" data-provider="kimi" type="button">保存</button>
+            <button class="btn-ghost btn-sm btn-touch" data-provider="kimi" type="button">续期 30 天</button>
+            <button class="btn-danger-ghost btn-sm btn-clear" data-provider="kimi" type="button">清除</button>
+            <span class="cookie-exp" id="exp-kimi"></span>
+          </div>
+          <div class="form-text">默认模型 <b>moonshot-v1-32k</b>；可选 128k / kimi-latest / kimi-k2-thinking-turbo。</div>
+          <div class="mem-block">
+            <div class="mem-head">AI 记忆 <span class="mem-sub">按模型独立保存的跨局经验</span></div>
+            <div id="mem-list-kimi"></div>
+            <div class="mem-empty" id="mem-empty-kimi" style="display:none;">该服务商暂无 AI 经验记录</div>
+          </div>
+        </div>
+
+        <!-- MiniMax -->
+        <div class="provider-card" id="card-minimax">
+          <div class="provider-head">
+            <div class="provider-logo minimax">MM</div>
+            <div>
+              <div class="provider-name">MiniMax Token Plan</div>
+              <div class="provider-sub">api.minimaxi.com</div>
+            </div>
+            <span class="provider-status" id="status-minimax">未配置</span>
+          </div>
+          <div class="input-group mb-2">
+            <span class="input-group-text" style="width:88px;">API Key</span>
+            <input type="password" class="form-control" id="minimax_token_plan_api_key" placeholder="eyJhbGci..." autocomplete="off" spellcheck="false">
+            <button class="btn-ghost btn-sm btn-toggle" type="button" data-target="minimax_token_plan_api_key" style="border-radius:0 10px 10px 0;border-left:none;">显示</button>
+          </div>
+          <div class="provider-actions">
+            <button class="btn-solid btn-sm btn-save" data-provider="minimax" type="button">保存</button>
+            <button class="btn-ghost btn-sm btn-touch" data-provider="minimax" type="button">续期 30 天</button>
+            <button class="btn-danger-ghost btn-sm btn-clear" data-provider="minimax" type="button">清除</button>
+            <span class="cookie-exp" id="exp-minimax"></span>
+          </div>
+          <div class="form-text">Token Plan 用户在 <b>platform.minimaxi.com</b> 的「接口密钥」页创建 Key；默认模型 <b>MiniMax-M2.5-highspeed</b>。</div>
+          <div class="mem-block">
+            <div class="mem-head">AI 记忆 <span class="mem-sub">按模型独立保存的跨局经验</span></div>
+            <div id="mem-list-minimax"></div>
+            <div class="mem-empty" id="mem-empty-minimax" style="display:none;">该服务商暂无 AI 经验记录</div>
+          </div>
+        </div>
+
+        <!-- StepFun -->
+        <div class="provider-card" id="card-stepfun">
+          <div class="provider-head">
+            <div class="provider-logo stepfun">SF</div>
+            <div>
+              <div class="provider-name">StepFun Step Plan</div>
+              <div class="provider-sub">api.stepfun.com</div>
+            </div>
+            <span class="provider-status" id="status-stepfun">未配置</span>
+          </div>
+          <div class="input-group mb-2">
+            <span class="input-group-text" style="width:88px;">API Key</span>
+            <input type="password" class="form-control" id="stepfun_api_key" placeholder="sk-..." autocomplete="off" spellcheck="false">
+            <button class="btn-ghost btn-sm btn-toggle" type="button" data-target="stepfun_api_key" style="border-radius:0 10px 10px 0;border-left:none;">显示</button>
+          </div>
+          <div class="provider-actions">
+            <button class="btn-solid btn-sm btn-save" data-provider="stepfun" type="button">保存</button>
+            <button class="btn-ghost btn-sm btn-touch" data-provider="stepfun" type="button">续期 30 天</button>
+            <button class="btn-danger-ghost btn-sm btn-clear" data-provider="stepfun" type="button">清除</button>
+            <span class="cookie-exp" id="exp-stepfun"></span>
+          </div>
+          <div class="form-text">Step Plan 用户须在<b>「计费方式 = Step Plan」</b>下创建 Key；默认模型 <b>step-3.7-flash</b>（旗舰，256K 上下文）。</div>
+          <div class="mem-block">
+            <div class="mem-head">AI 记忆 <span class="mem-sub">按模型独立保存的跨局经验</span></div>
+            <div id="mem-list-stepfun"></div>
+            <div class="mem-empty" id="mem-empty-stepfun" style="display:none;">该服务商暂无 AI 经验记录</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== 全局操作 ==================== -->
+      <div class="global-actions">
+        <div class="global-title">全局操作</div>
+        <div class="storage-actions">
+          <button class="btn-ghost btn-sm" id="refreshAllBtn" type="button">全部续期（重新满 30 天）</button>
+          <button class="btn-danger-ghost btn-sm" id="deleteAllCookiesBtn" type="button">删除全部 Key 缓存</button>
+          <button class="btn-danger-ghost btn-sm" id="deleteAllLsBtn" type="button">清空全部记忆与配置</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="page-footer">
+    大模型掼蛋挑战赛 · 数据只存在你的浏览器里 · Key 记录 30 天不用就清除
+  </footer>
+
+<script src="vendor/jquery.min.js"></script>
+<script src="vendor/bootstrap.bundle.min.js"></script>
+<script src="js/common.js"></script>
+<script>
+  // ==================== 常量 ====================
+  // 与 Key 过期时间相关的记录（document.cookie 读不出 expires，这里登记在 localStorage）
+  const COOKIE_EXP_REGISTRY = "gd_cookie_expiry_map";
+
+  // ==================== 过期登记 ====================
+  function getExpiryMap() {
+    try { return JSON.parse(localStorage.getItem(COOKIE_EXP_REGISTRY) || "{}"); }
+    catch (e) { return {}; }
+  }
+  function setExpiryNow(name) {
+    const map = getExpiryMap();
+    map[name] = Date.now() + API_KEY_COOKIE_DAYS * 24 * 60 * 60 * 1000;
+    localStorage.setItem(COOKIE_EXP_REGISTRY, JSON.stringify(map));
+  }
+  function clearExpiry(name) {
+    const map = getExpiryMap();
+    delete map[name];
+    localStorage.setItem(COOKIE_EXP_REGISTRY, JSON.stringify(map));
+  }
+  function getExpiryTime(name) { return getExpiryMap()[name] || 0; }
+
+  // ==================== 遮罩 ====================
+  function maskValue(v) {
+    if (!v) return "";
+    if (v.length <= 8) return v.slice(0, 2) + "•••";
+    return v.slice(0, 6) + "••••••" + v.slice(-4);
+  }
+
+  // ==================== Provider 卡状态 ====================
+  function refreshProviderStatus() {
+    for (const id of PROVIDER_ORDER) {
+      const cfg = getProviderConfig(id);
+      const key = getProviderApiKey(id);
+      const $status = $("#status-" + id);
+      const $input = $("#" + cfg.cookieName);
+      const $exp = $("#exp-" + id);
+      if (key) {
+        $status.text("✓ " + cfg.shortLabel + " 已配置").attr("class", "provider-status ok");
+        $input.val(key);
+        $input.attr("placeholder", maskValue(key));
+        const t = getExpiryTime(cfg.cookieName);
+        if (t > Date.now()) {
+          const days = Math.max(1, Math.ceil((t - Date.now()) / 86400000));
+          $exp.html(t - Date.now() < 3 * 86400000
+            ? '剩余 <span class="soon">' + days + ' 天</span>（快到期，建议续期）'
+            : "剩余 " + days + " 天");
+        } else {
+          $exp.html('已过期，建议 <b>续期</b> 或重新保存');
+        }
+      } else {
+        $status.text("未配置").attr("class", "provider-status missing");
+        $input.val("");
+        $input.attr("placeholder", "sk-...");
+        $exp.text("");
+      }
+    }
+  }
+
+  function saveProvider(id) {
+    const cfg = getProviderConfig(id);
+    const value = $("#" + cfg.cookieName).val().trim();
+    if (!value) { showToast("请先粘贴 " + cfg.label + " 的 API Key", true); return; }
+    setCookie(cfg.cookieName, value, API_KEY_COOKIE_DAYS);
+    setExpiryNow(cfg.cookieName);
+    refreshProviderStatus();
+    renderAll();
+    const $btn = $("#card-" + id + " .btn-save");
+    const old = $btn.text();
+    $btn.text("✓ 已保存").prop("disabled", true);
+    setTimeout(() => { $btn.text(old).prop("disabled", false); }, 1200);
+  }
+
+  // ==================== 数据管理表格 ====================
+  // guandan_* 为游戏数据；gd_* 为 Key 过期时间登记等页面自身数据
+  const RELATED_LS_PREFIXES = ["guandan_", "gd_"];
+
+  function isRelatedLsKey(key) {
+    return RELATED_LS_PREFIXES.some(p => key.indexOf(p) === 0);
+  }
+
+  // 把内部存储 key 翻译成友好名称（经验按「模型」存储：guandan_exp_<服务商>_<模型>）
+  function friendlyLsKeyLabel(key) {
+    if (key.indexOf("guandan_exp_") === 0) {
+      const rest = key.slice("guandan_exp_".length);
+      const parts = rest.split("_");
+      if (parts.length >= 2) {
+        const cfg = getProviderConfig(parts[0]);
+        const provider = cfg ? cfg.shortLabel : parts[0];
+        return "AI 经验（" + provider + " · " + parts.slice(1).join("_") + "）";
+      }
+      return "AI 经验（" + rest + "）";
+    }
+    if (key === "guandan_seat_config") return "座位配置";
+    if (key === "guandan_challenge_stats") return "对局战绩";
+    if (key === "gd_cookie_expiry_map") return "Key 过期时间登记";
+    return key;
+  }
+
+  // 经验存储 key → 「服务商 · 模型」短标签
+  function expModelShortLabel(key) {
+    const rest = key.slice("guandan_exp_".length);
+    const parts = rest.split("_");
+    if (parts.length >= 2) {
+      const cfg = getProviderConfig(parts[0]);
+      return (cfg ? cfg.shortLabel + " · " : "") + parts.slice(1).join("_");
+    }
+    return rest;
+  }
+
+  // 记忆按服务商归入对应卡内；其余数据（座位配置/战绩等）单独一区
+  function renderAll() {
+    for (const id of PROVIDER_ORDER) {
+      const prefix = "guandan_exp_" + id + "_";
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k.indexOf(prefix) === 0) keys.push(k);
+      }
+      let html = "";
+      for (const k of keys) {
+        const val = localStorage.getItem(k) || "";
+        html += "<div class='mem-item'>"
+          + "<div class='mem-info'><div class='mem-model'>" + escapeHtml(expModelShortLabel(k)) + "</div>"
+          + "<div class='mem-key'>" + escapeHtml(k) + "</div></div>"
+          + "<div class='mem-meta'>" + val.length + " 字符</div>"
+          + "<button class='btn-danger-ghost btn-xs' data-ls='" + escapeHtml(k) + "' data-action='del'>删除</button>"
+          + "</div>";
+      }
+      $("#mem-list-" + id).html(html);
+      $("#mem-empty-" + id).toggle(keys.length === 0);
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  // ==================== 事件绑定 ====================
+  $(function () {
+    // 保存 / 续期 / 清除
+    $(".btn-save").on("click", function () { saveProvider($(this).data("provider")); });
+    $(".btn-touch").on("click", function () {
+      const id = $(this).data("provider");
+      const cfg = getProviderConfig(id);
+      if (touchProviderCookie(id)) {
+        setExpiryNow(cfg.cookieName);
+        showToast(cfg.shortLabel + " 的 Key 已续期，重新满 30 天 ✓");
+      } else {
+        showToast(cfg.shortLabel + " 尚未配置 Key，先保存一个吧", true);
+      }
+      refreshProviderStatus(); renderAll();
+    });
+    $(".btn-clear").on("click", function () {
+      const id = $(this).data("provider");
+      const cfg = getProviderConfig(id);
+      deleteCookie(cfg.cookieName);
+      clearExpiry(cfg.cookieName);
+      showToast(cfg.shortLabel + " 的 Key 已清除");
+      refreshProviderStatus(); renderAll();
+    });
+
+    // 明文切换
+    $(".btn-toggle").on("click", function () {
+      const $input = $("#" + $(this).data("target"));
+      const type = $input.attr("type") === "password" ? "text" : "password";
+      $input.attr("type", type);
+      $(this).text(type === "password" ? "显示" : "隐藏");
+    });
+
+    // 回车保存
+    $(".form-control").on("keydown", function (e) {
+      if (e.key === "Enter") {
+        const $card = $(this).closest(".provider-card");
+        $card.find(".btn-save").trigger("click");
+      }
+    });
+
+    // 记忆删除（事件委托：各家卡内记忆区）
+    $('[id^="mem-list-"]').on("click", "button", function () {
+      const key = $(this).data("ls");
+      lsRemove(key);
+      showToast(friendlyLsKeyLabel(key) + " 已删除");
+      renderAll();
+    });
+
+    // 批量操作
+    $("#refreshAllBtn").on("click", function () {
+      const n = touchAllProviderCookies();
+      for (const id of PROVIDER_ORDER) {
+        const cfg = getProviderConfig(id);
+        if (getProviderApiKey(id)) setExpiryNow(cfg.cookieName);
+      }
+      showToast("已续期 " + n + " 个 API Key（重新满 30 天）✓");
+      refreshProviderStatus(); renderAll();
+    });
+    $("#deleteAllCookiesBtn").on("click", function () {
+      if (!confirm("确定删除全部 Key 缓存吗？（游戏将无法调用大模型，需重新配置）")) return;
+      for (const id of PROVIDER_ORDER) {
+        deleteCookie(getProviderConfig(id).cookieName);
+        clearExpiry(getProviderConfig(id).cookieName);
+      }
+      showToast("已删除全部 Key 缓存");
+      refreshProviderStatus(); renderAll();
+    });
+    $("#deleteAllLsBtn").on("click", function () {
+      if (!confirm("确定清空全部记忆与配置吗？（将删除所有 AI 经验、座位配置、对局战绩）")) return;
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (isRelatedLsKey(k)) keys.push(k);
+      }
+      keys.forEach(k => lsRemove(k));
+      showToast("已清空 " + keys.length + " 项记忆与配置数据");
+      renderAll();
+    });
+
+    // 页面打开：自动续期全部 Key
+    const touched = touchAllProviderCookies();
+    for (const id of PROVIDER_ORDER) {
+      const cfg = getProviderConfig(id);
+      if (getProviderApiKey(id)) setExpiryNow(cfg.cookieName);
+    }
+    if (touched > 0) showToast("打开页面自动续期：" + touched + " 个 Key 已续到 30 天 ✓");
+
+    refreshProviderStatus();
+    renderAll();
+  });
+
+  // 轻量 toast（与牌桌页同款醒目样式，样式由 CSS 提供）
+  let toastTimer = null;
+  function showToast(msg, isError) {
+    let $t = $("#gd-toast");
+    if (!$t.length) {
+      $t = $("<div id='gd-toast'></div>").appendTo("body");
+    }
+    $t.toggleClass("err", !!isError);
+    $t.text(msg).css("opacity", 1);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => $t.css("opacity", 0), 2600);
+  }
+</script>
+</body>
+</html>
