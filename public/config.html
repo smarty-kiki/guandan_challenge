@@ -183,6 +183,7 @@
     .panel h2 { margin: 0 0 0.9rem; font-size: 1.12rem; font-weight: 900; }
 
     /* ---------- 数据存哪里（左侧） ---------- */
+    .diag-row { display: flex; gap: 0.7rem; margin-bottom: 0.7rem; }
     .diag-box {
       border: 1.5px solid var(--line);
       border-radius: 12px;
@@ -192,7 +193,7 @@
       text-align: center;
       background: #fff;
       color: var(--ink);
-      margin-bottom: 0.7rem;
+      flex: 1;
     }
     .diag-box .sub {
       display: block;
@@ -236,14 +237,13 @@
     .diag-note b { color: var(--ink); }
 
     /* ---------- provider 卡 ---------- */
+    .provider-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.9rem; align-items: start; }
     .provider-card {
       border: 1px solid var(--line);
       border-radius: 14px;
       padding: 1.05rem 1.15rem;
-      margin-bottom: 0.9rem;
       background: #fff;
     }
-    .provider-card:last-child { margin-bottom: 0; }
     .provider-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
     .provider-logo {
       width: 34px;
@@ -385,6 +385,9 @@
       .page-head h1 { font-size: 1.6rem; }
       .panel { padding: 1.2rem 1.2rem; }
     }
+    @media (max-width: 640px) {
+      .provider-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -417,15 +420,16 @@
     <div class="panel">
       <h2 data-i18n="数据存哪里？">数据存哪里？</h2>
 
-      <div class="diag-box browser" data-i18n-html="diag.box1">本页（浏览器）
-        <span class="sub">打开网页即用 · 不用注册 · 数据不离开这里</span>
-      </div>
-
-      <div class="diag-box cookie" data-i18n-html="diag.box2">Key 缓存 — 存大模型 API Key
-        <span class="sub">30 天不用记录就清除 · 每次使用自动续期</span>
-      </div>
-      <div class="diag-box ls" data-i18n-html="diag.box3">AI 记忆 — 存经验与页面配置
-        <span class="sub">持久保存 · 想存多久存多久</span>
+      <div class="diag-row">
+        <div class="diag-box browser" data-i18n-html="diag.box1">本页（浏览器）
+          <span class="sub">打开网页即用 · 不用注册 · 数据不离开这里</span>
+        </div>
+        <div class="diag-box cookie" data-i18n-html="diag.box2">Key 缓存 — 存大模型 API Key
+          <span class="sub">30 天不用记录就清除 · 每次使用自动续期</span>
+        </div>
+        <div class="diag-box ls" data-i18n-html="diag.box3">AI 记忆 — 存经验与页面配置
+          <span class="sub">持久保存 · 想存多久存多久</span>
+        </div>
       </div>
 
       <div class="diag-arrow">↓ <span class="txt" data-i18n="浏览器调用官方接口">浏览器调用官方接口</span></div>
@@ -456,6 +460,7 @@
           网站上的 Key 记录就自动清除；每次使用记录都会自动续满 30 天。以下均为官方站点。
         </p>
 
+        <div class="provider-grid">
         <!-- DeepSeek -->
         <div class="provider-card" id="card-deepseek">
           <div class="provider-head">
@@ -570,6 +575,7 @@
             <div id="mem-list-stepfun"></div>
             <div class="mem-empty" id="mem-empty-stepfun" style="display:none;" data-i18n="该服务商暂无 AI 经验记录">该服务商暂无 AI 经验记录</div>
           </div>
+        </div>
         </div>
       </div>
     </div>
