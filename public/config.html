@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>大模型掼蛋挑战赛 — 模型配置与数据管理</title>
+  <title data-i18n="大模型掼蛋挑战赛 — 模型配置与数据管理">大模型掼蛋挑战赛 — 模型配置与数据管理</title>
   <link href="vendor/bootstrap.min.css" rel="stylesheet">
   <style>
     :root {
@@ -388,11 +388,11 @@
 <body>
 <!-- 顶部导航：与首页一致，直接挂在 body 下，同款 page-shell 容器 -->
 <nav class="top-nav page-shell">
-  <a class="brand" href="index.html">
+  <a class="brand" href="index.html" data-i18n-html="brand">
     <span class="mark">♠</span>大模型掼蛋挑战赛
   </a>
   <div class="nav-links">
-    <a class="btn-solid" href="game.html" style="padding:0.5rem 1.2rem;font-size:0.85rem;">进入牌桌</a>
+    <a class="btn-solid" href="game.html" style="padding:0.5rem 1.2rem;font-size:0.85rem;" data-i18n="进入牌桌">进入牌桌</a>
   </div>
 </nav>
 
@@ -400,9 +400,9 @@
 
   <!-- ==================== 页头 ==================== -->
   <header class="page-head">
-    <div class="sec-kicker">模型配置与数据管理</div>
-    <h1>一个 Key 即可开局，四个座位随便配</h1>
-    <p class="lead">
+    <div class="sec-kicker" data-i18n="模型配置与数据管理">模型配置与数据管理</div>
+    <h1 data-i18n="一个 Key 即可开局，四个座位随便配">一个 Key 即可开局，四个座位随便配</h1>
+    <p class="lead" data-i18n="至少配一家服务商，游戏就能跑：四个 AI 座位会自动从已配置的模型中挑选。想细调的话，也可以到游戏页给每个座位单独指定不同的服务商与模型 —— 比如让 DeepSeek 和 Kimi 对打。Key 只存在浏览器缓存里 —— 30 天不用，网站上的记录就自动清除；每次使用或打开页面，记录都会自动续满 30 天。">
       至少配一家服务商，游戏就能跑：四个 AI 座位会自动从已配置的模型中挑选。
       想细调的话，也可以到游戏页给每个座位单独指定不同的服务商与模型 —— 比如让 DeepSeek 和 Kimi 对打。
       Key 只存在浏览器缓存里 —— 30 天不用，网站上的记录就自动清除；每次使用或打开页面，记录都会自动续满 30 天。
@@ -413,27 +413,27 @@
 
     <!-- ==================== 左：数据存哪里 ==================== -->
     <div class="panel">
-      <h2>数据存哪里？</h2>
+      <h2 data-i18n="数据存哪里？">数据存哪里？</h2>
 
-      <div class="diag-box browser">本页（浏览器）
+      <div class="diag-box browser" data-i18n-html="diag.box1">本页（浏览器）
         <span class="sub">打开网页即用 · 不用注册 · 数据不离开这里</span>
       </div>
 
-      <div class="diag-box cookie">Key 缓存 — 存大模型 API Key
+      <div class="diag-box cookie" data-i18n-html="diag.box2">Key 缓存 — 存大模型 API Key
         <span class="sub">30 天不用记录就清除 · 每次使用自动续期</span>
       </div>
-      <div class="diag-box ls">AI 记忆 — 存经验与页面配置
+      <div class="diag-box ls" data-i18n-html="diag.box3">AI 记忆 — 存经验与页面配置
         <span class="sub">持久保存 · 想存多久存多久</span>
       </div>
 
-      <div class="diag-arrow">↓ <span class="txt">浏览器调用官方接口</span></div>
-      <div class="diag-apis">
+      <div class="diag-arrow">↓ <span class="txt" data-i18n="浏览器调用官方接口">浏览器调用官方接口</span></div>
+      <div class="diag-apis" data-i18n-html="diag.apis">
         <span class="suits">♥ ♦ ♠ ♣</span><br>
         DeepSeek / Kimi / MiniMax / StepFun<br>
         四家官方 API 接口
       </div>
 
-      <p class="diag-note">
+      <p class="diag-note" data-i18n-html="diag.note">
         <b>为什么这样分？</b><br>
         · API Key 是「凭据」，只存在本浏览器缓存里，30 天不使用，网站上的 Key 记录就自动清除
         （Key 本身在服务商那边仍然有效）—— 谁拿到也只是暂时有效；每次打开页面或调用模型，记录都会自动续满 30 天。<br>
@@ -447,8 +447,8 @@
     <!-- ==================== 右：API Key 表单 ==================== -->
     <div>
       <div class="panel">
-        <h2>大模型 API Key</h2>
-        <p class="panel-tip">
+        <h2 data-i18n="大模型 API Key">大模型 API Key</h2>
+        <p class="panel-tip" data-i18n="至少配一家即可开局：没单独指定的座位会自动用已配置的模型（默认取第一家已配置的默认模型）；想给每个座位配不同模型，到游戏页的「座位配置」里各自选择即可。Key 只存在浏览器缓存里，30 天不使用，网站上的 Key 记录就自动清除；每次使用记录都会自动续满 30 天。以下均为官方站点。">
           至少配一家即可开局：没单独指定的座位会自动用已配置的模型（默认取第一家已配置的默认模型）；
           想给每个座位配不同模型，到游戏页的「座位配置」里各自选择即可。Key 只存在浏览器缓存里，30 天不使用，
           网站上的 Key 记录就自动清除；每次使用记录都会自动续满 30 天。以下均为官方站点。
@@ -462,24 +462,24 @@
               <div class="provider-name">DeepSeek</div>
               <div class="provider-sub">api.deepseek.com</div>
             </div>
-            <span class="provider-status" id="status-deepseek">未配置</span>
+            <span class="provider-status" id="status-deepseek" data-i18n="未配置">未配置</span>
           </div>
           <div class="input-group mb-2">
             <span class="input-group-text" style="width:88px;">API Key</span>
             <input type="password" class="form-control" id="deepseek_api_key" placeholder="sk-..." autocomplete="off" spellcheck="false">
-            <button class="btn-ghost btn-sm btn-toggle" type="button" data-target="deepseek_api_key" style="border-radius:0 10px 10px 0;border-left:none;">显示</button>
+            <button class="btn-ghost btn-sm btn-toggle" type="button" data-target="deepseek_api_key" style="border-radius:0 10px 10px 0;border-left:none;" data-i18n="显示">显示</button>
           </div>
           <div class="provider-actions">
-            <button class="btn-solid btn-sm btn-save" data-provider="deepseek" type="button">保存</button>
-            <button class="btn-ghost btn-sm btn-touch" data-provider="deepseek" type="button">续期 30 天</button>
-            <button class="btn-danger-ghost btn-sm btn-clear" data-provider="deepseek" type="button">清除</button>
+            <button class="btn-solid btn-sm btn-save" data-provider="deepseek" type="button" data-i18n="保存">保存</button>
+            <button class="btn-ghost btn-sm btn-touch" data-provider="deepseek" type="button" data-i18n="续期 30 天">续期 30 天</button>
+            <button class="btn-danger-ghost btn-sm btn-clear" data-provider="deepseek" type="button" data-i18n="清除">清除</button>
             <span class="cookie-exp" id="exp-deepseek"></span>
           </div>
-          <div class="form-text">默认模型 <b>deepseek-v4-flash</b>；备用 deepseek-v4-pro（Key 相同，任选）。</div>
+          <div class="form-text" data-i18n-html="formtext.deepseek">默认模型 <b>deepseek-v4-flash</b>；备用 deepseek-v4-pro（Key 相同，任选）。</div>
           <div class="mem-block">
-            <div class="mem-head">AI 记忆 <span class="mem-sub">按模型独立保存的跨局经验</span></div>
+            <div class="mem-head" data-i18n-html="mem.head">AI 记忆 <span class="mem-sub">按模型独立保存的跨局经验</span></div>
             <div id="mem-list-deepseek"></div>
-            <div class="mem-empty" id="mem-empty-deepseek" style="display:none;">该服务商暂无 AI 经验记录</div>
+            <div class="mem-empty" id="mem-empty-deepseek" style="display:none;" data-i18n="该服务商暂无 AI 经验记录">该服务商暂无 AI 经验记录</div>
           </div>
         </div>
 
@@ -491,24 +491,24 @@
               <div class="provider-name">Kimi（Moonshot）</div>
               <div class="provider-sub">api.moonshot.cn</div>
             </div>
-            <span class="provider-status" id="status-kimi">未配置</span>
+            <span class="provider-status" id="status-kimi" data-i18n="未配置">未配置</span>
           </div>
           <div class="input-group mb-2">
             <span class="input-group-text" style="width:88px;">API Key</span>
             <input type="password" class="form-control" id="kimi_api_key" placeholder="sk-..." autocomplete="off" spellcheck="false">
-            <button class="btn-ghost btn-sm btn-toggle" type="button" data-target="kimi_api_key" style="border-radius:0 10px 10px 0;border-left:none;">显示</button>
+            <button class="btn-ghost btn-sm btn-toggle" type="button" data-target="kimi_api_key" style="border-radius:0 10px 10px 0;border-left:none;" data-i18n="显示">显示</button>
           </div>
           <div class="provider-actions">
-            <button class="btn-solid btn-sm btn-save" data-provider="kimi" type="button">保存</button>
-            <button class="btn-ghost btn-sm btn-touch" data-provider="kimi" type="button">续期 30 天</button>
-            <button class="btn-danger-ghost btn-sm btn-clear" data-provider="kimi" type="button">清除</button>
+            <button class="btn-solid btn-sm btn-save" data-provider="kimi" type="button" data-i18n="保存">保存</button>
+            <button class="btn-ghost btn-sm btn-touch" data-provider="kimi" type="button" data-i18n="续期 30 天">续期 30 天</button>
+            <button class="btn-danger-ghost btn-sm btn-clear" data-provider="kimi" type="button" data-i18n="清除">清除</button>
             <span class="cookie-exp" id="exp-kimi"></span>
           </div>
-          <div class="form-text">默认模型 <b>moonshot-v1-32k</b>；可选 128k / kimi-latest / kimi-k2-thinking-turbo。</div>
+          <div class="form-text" data-i18n-html="formtext.kimi">默认模型 <b>moonshot-v1-32k</b>；可选 128k / kimi-latest / kimi-k2-thinking-turbo。</div>
           <div class="mem-block">
-            <div class="mem-head">AI 记忆 <span class="mem-sub">按模型独立保存的跨局经验</span></div>
+            <div class="mem-head" data-i18n-html="mem.head">AI 记忆 <span class="mem-sub">按模型独立保存的跨局经验</span></div>
             <div id="mem-list-kimi"></div>
-            <div class="mem-empty" id="mem-empty-kimi" style="display:none;">该服务商暂无 AI 经验记录</div>
+            <div class="mem-empty" id="mem-empty-kimi" style="display:none;" data-i18n="该服务商暂无 AI 经验记录">该服务商暂无 AI 经验记录</div>
           </div>
         </div>
 
@@ -520,24 +520,24 @@
               <div class="provider-name">MiniMax Token Plan</div>
               <div class="provider-sub">api.minimaxi.com</div>
             </div>
-            <span class="provider-status" id="status-minimax">未配置</span>
+            <span class="provider-status" id="status-minimax" data-i18n="未配置">未配置</span>
           </div>
           <div class="input-group mb-2">
             <span class="input-group-text" style="width:88px;">API Key</span>
             <input type="password" class="form-control" id="minimax_token_plan_api_key" placeholder="eyJhbGci..." autocomplete="off" spellcheck="false">
-            <button class="btn-ghost btn-sm btn-toggle" type="button" data-target="minimax_token_plan_api_key" style="border-radius:0 10px 10px 0;border-left:none;">显示</button>
+            <button class="btn-ghost btn-sm btn-toggle" type="button" data-target="minimax_token_plan_api_key" style="border-radius:0 10px 10px 0;border-left:none;" data-i18n="显示">显示</button>
           </div>
           <div class="provider-actions">
-            <button class="btn-solid btn-sm btn-save" data-provider="minimax" type="button">保存</button>
-            <button class="btn-ghost btn-sm btn-touch" data-provider="minimax" type="button">续期 30 天</button>
-            <button class="btn-danger-ghost btn-sm btn-clear" data-provider="minimax" type="button">清除</button>
+            <button class="btn-solid btn-sm btn-save" data-provider="minimax" type="button" data-i18n="保存">保存</button>
+            <button class="btn-ghost btn-sm btn-touch" data-provider="minimax" type="button" data-i18n="续期 30 天">续期 30 天</button>
+            <button class="btn-danger-ghost btn-sm btn-clear" data-provider="minimax" type="button" data-i18n="清除">清除</button>
             <span class="cookie-exp" id="exp-minimax"></span>
           </div>
-          <div class="form-text">Token Plan 用户在 <b>platform.minimaxi.com</b> 的「接口密钥」页创建 Key；默认模型 <b>MiniMax-M2.5-highspeed</b>。</div>
+          <div class="form-text" data-i18n-html="formtext.minimax">Token Plan 用户在 <b>platform.minimaxi.com</b> 的「接口密钥」页创建 Key；默认模型 <b>MiniMax-M2.5-highspeed</b>。</div>
           <div class="mem-block">
-            <div class="mem-head">AI 记忆 <span class="mem-sub">按模型独立保存的跨局经验</span></div>
+            <div class="mem-head" data-i18n-html="mem.head">AI 记忆 <span class="mem-sub">按模型独立保存的跨局经验</span></div>
             <div id="mem-list-minimax"></div>
-            <div class="mem-empty" id="mem-empty-minimax" style="display:none;">该服务商暂无 AI 经验记录</div>
+            <div class="mem-empty" id="mem-empty-minimax" style="display:none;" data-i18n="该服务商暂无 AI 经验记录">该服务商暂无 AI 经验记录</div>
           </div>
         </div>
 
@@ -549,47 +549,49 @@
               <div class="provider-name">StepFun Step Plan</div>
               <div class="provider-sub">api.stepfun.com</div>
             </div>
-            <span class="provider-status" id="status-stepfun">未配置</span>
+            <span class="provider-status" id="status-stepfun" data-i18n="未配置">未配置</span>
           </div>
           <div class="input-group mb-2">
             <span class="input-group-text" style="width:88px;">API Key</span>
             <input type="password" class="form-control" id="stepfun_api_key" placeholder="sk-..." autocomplete="off" spellcheck="false">
-            <button class="btn-ghost btn-sm btn-toggle" type="button" data-target="stepfun_api_key" style="border-radius:0 10px 10px 0;border-left:none;">显示</button>
+            <button class="btn-ghost btn-sm btn-toggle" type="button" data-target="stepfun_api_key" style="border-radius:0 10px 10px 0;border-left:none;" data-i18n="显示">显示</button>
           </div>
           <div class="provider-actions">
-            <button class="btn-solid btn-sm btn-save" data-provider="stepfun" type="button">保存</button>
-            <button class="btn-ghost btn-sm btn-touch" data-provider="stepfun" type="button">续期 30 天</button>
-            <button class="btn-danger-ghost btn-sm btn-clear" data-provider="stepfun" type="button">清除</button>
+            <button class="btn-solid btn-sm btn-save" data-provider="stepfun" type="button" data-i18n="保存">保存</button>
+            <button class="btn-ghost btn-sm btn-touch" data-provider="stepfun" type="button" data-i18n="续期 30 天">续期 30 天</button>
+            <button class="btn-danger-ghost btn-sm btn-clear" data-provider="stepfun" type="button" data-i18n="清除">清除</button>
             <span class="cookie-exp" id="exp-stepfun"></span>
           </div>
-          <div class="form-text">Step Plan 用户须在<b>「计费方式 = Step Plan」</b>下创建 Key；默认模型 <b>step-3.7-flash</b>（旗舰，256K 上下文）。</div>
+          <div class="form-text" data-i18n-html="formtext.stepfun">Step Plan 用户须在<b>「计费方式 = Step Plan」</b>下创建 Key；默认模型 <b>step-3.7-flash</b>（旗舰，256K 上下文）。</div>
           <div class="mem-block">
-            <div class="mem-head">AI 记忆 <span class="mem-sub">按模型独立保存的跨局经验</span></div>
+            <div class="mem-head" data-i18n-html="mem.head">AI 记忆 <span class="mem-sub">按模型独立保存的跨局经验</span></div>
             <div id="mem-list-stepfun"></div>
-            <div class="mem-empty" id="mem-empty-stepfun" style="display:none;">该服务商暂无 AI 经验记录</div>
+            <div class="mem-empty" id="mem-empty-stepfun" style="display:none;" data-i18n="该服务商暂无 AI 经验记录">该服务商暂无 AI 经验记录</div>
           </div>
         </div>
       </div>
 
       <!-- ==================== 全局操作 ==================== -->
       <div class="global-actions">
-        <div class="global-title">全局操作</div>
+        <div class="global-title" data-i18n="全局操作">全局操作</div>
         <div class="storage-actions">
-          <button class="btn-ghost btn-sm" id="refreshAllBtn" type="button">全部续期（重新满 30 天）</button>
-          <button class="btn-danger-ghost btn-sm" id="deleteAllCookiesBtn" type="button">删除全部 Key 缓存</button>
-          <button class="btn-danger-ghost btn-sm" id="deleteAllLsBtn" type="button">清空全部记忆与配置</button>
+          <button class="btn-ghost btn-sm" id="refreshAllBtn" type="button" data-i18n="全部续期（重新满 30 天）">全部续期（重新满 30 天）</button>
+          <button class="btn-danger-ghost btn-sm" id="deleteAllCookiesBtn" type="button" data-i18n="删除全部 Key 缓存">删除全部 Key 缓存</button>
+          <button class="btn-danger-ghost btn-sm" id="deleteAllLsBtn" type="button" data-i18n="清空全部记忆与配置">清空全部记忆与配置</button>
         </div>
       </div>
     </div>
   </div>
 </main>
 
-<footer class="page-footer">
+<footer class="page-footer" data-i18n="大模型掼蛋挑战赛 · 数据只存在你的浏览器里 · Key 记录 30 天不用就清除">
     大模型掼蛋挑战赛 · 数据只存在你的浏览器里 · Key 记录 30 天不用就清除
   </footer>
 
 <script src="vendor/jquery.min.js"></script>
 <script src="vendor/bootstrap.bundle.min.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/i18n.en.js"></script>
 <script src="js/common.js"></script>
 <script>
   // ==================== 常量 ====================
@@ -629,20 +631,20 @@
       const $input = $("#" + cfg.cookieName);
       const $exp = $("#exp-" + id);
       if (key) {
-        $status.text("✓ " + cfg.shortLabel + " 已配置").attr("class", "provider-status ok");
+        $status.text(t("✓ {label} 已配置", { label: cfg.shortLabel })).attr("class", "provider-status ok");
         $input.val(key);
         $input.attr("placeholder", maskValue(key));
-        const t = getExpiryTime(cfg.cookieName);
-        if (t > Date.now()) {
-          const days = Math.max(1, Math.ceil((t - Date.now()) / 86400000));
-          $exp.html(t - Date.now() < 3 * 86400000
-            ? '剩余 <span class="soon">' + days + ' 天</span>（快到期，建议续期）'
-            : "剩余 " + days + " 天");
+        const exp = getExpiryTime(cfg.cookieName);
+        if (exp > Date.now()) {
+          const days = Math.max(1, Math.ceil((exp - Date.now()) / 86400000));
+          $exp.html(exp - Date.now() < 3 * 86400000
+            ? t('剩余 <span class="soon">{days} 天</span>（快到期，建议续期）', { days })
+            : t("剩余 {days} 天", { days }));
         } else {
-          $exp.html('已过期，建议 <b>续期</b> 或重新保存');
+          $exp.html(t('已过期，建议 <b>续期</b> 或重新保存'));
         }
       } else {
-        $status.text("未配置").attr("class", "provider-status missing");
+        $status.text(t("未配置")).attr("class", "provider-status missing");
         $input.val("");
         $input.attr("placeholder", "sk-...");
         $exp.text("");
@@ -653,14 +655,14 @@
   function saveProvider(id) {
     const cfg = getProviderConfig(id);
     const value = $("#" + cfg.cookieName).val().trim();
-    if (!value) { showToast("请先粘贴 " + cfg.label + " 的 API Key", true); return; }
+    if (!value) { showToast(t("请先粘贴 {label} 的 API Key", { label: cfg.label }), true); return; }
     setCookie(cfg.cookieName, value, API_KEY_COOKIE_DAYS);
     setExpiryNow(cfg.cookieName);
     refreshProviderStatus();
     renderAll();
     const $btn = $("#card-" + id + " .btn-save");
     const old = $btn.text();
-    $btn.text("✓ 已保存").prop("disabled", true);
+    $btn.text(t("✓ 已保存")).prop("disabled", true);
     setTimeout(() => { $btn.text(old).prop("disabled", false); }, 1200);
   }
 
@@ -680,13 +682,13 @@
       if (parts.length >= 2) {
         const cfg = getProviderConfig(parts[0]);
         const provider = cfg ? cfg.shortLabel : parts[0];
-        return "AI 经验（" + provider + " · " + parts.slice(1).join("_") + "）";
+        return t("AI 经验（{provider} · {model}）", { provider, model: parts.slice(1).join("_") });
       }
-      return "AI 经验（" + rest + "）";
+      return t("AI 经验（{rest}）", { rest });
     }
-    if (key === "guandan_seat_config") return "座位配置";
-    if (key === "guandan_challenge_stats") return "对局战绩";
-    if (key === "gd_cookie_expiry_map") return "Key 过期时间登记";
+    if (key === "guandan_seat_config") return t("座位配置");
+    if (key === "guandan_challenge_stats") return t("对局战绩");
+    if (key === "gd_cookie_expiry_map") return t("Key 过期时间登记");
     return key;
   }
 
@@ -716,8 +718,8 @@
         html += "<div class='mem-item'>"
           + "<div class='mem-info'><div class='mem-model'>" + escapeHtml(expModelShortLabel(k)) + "</div>"
           + "<div class='mem-key'>" + escapeHtml(k) + "</div></div>"
-          + "<div class='mem-meta'>" + val.length + " 字符</div>"
-          + "<button class='btn-danger-ghost btn-xs' data-ls='" + escapeHtml(k) + "' data-action='del'>删除</button>"
+          + "<div class='mem-meta'>" + t("{n} 字符", { n: val.length }) + "</div>"
+          + "<button class='btn-danger-ghost btn-xs' data-ls='" + escapeHtml(k) + "' data-action='del'>" + t("删除") + "</button>"
           + "</div>";
       }
       $("#mem-list-" + id).html(html);
@@ -738,9 +740,9 @@
       const cfg = getProviderConfig(id);
       if (touchProviderCookie(id)) {
         setExpiryNow(cfg.cookieName);
-        showToast(cfg.shortLabel + " 的 Key 已续期，重新满 30 天 ✓");
+        showToast(t("{label} 的 Key 已续期，重新满 30 天 ✓", { label: cfg.shortLabel }));
       } else {
-        showToast(cfg.shortLabel + " 尚未配置 Key，先保存一个吧", true);
+        showToast(t("{label} 尚未配置 Key，先保存一个吧", { label: cfg.shortLabel }), true);
       }
       refreshProviderStatus(); renderAll();
     });
@@ -749,7 +751,7 @@
       const cfg = getProviderConfig(id);
       deleteCookie(cfg.cookieName);
       clearExpiry(cfg.cookieName);
-      showToast(cfg.shortLabel + " 的 Key 已清除");
+      showToast(t("{label} 的 Key 已清除", { label: cfg.shortLabel }));
       refreshProviderStatus(); renderAll();
     });
 
@@ -758,7 +760,7 @@
       const $input = $("#" + $(this).data("target"));
       const type = $input.attr("type") === "password" ? "text" : "password";
       $input.attr("type", type);
-      $(this).text(type === "password" ? "显示" : "隐藏");
+      $(this).text(type === "password" ? t("显示") : t("隐藏"));
     });
 
     // 回车保存
@@ -773,7 +775,7 @@
     $('[id^="mem-list-"]').on("click", "button", function () {
       const key = $(this).data("ls");
       lsRemove(key);
-      showToast(friendlyLsKeyLabel(key) + " 已删除");
+      showToast(t("{label} 已删除", { label: friendlyLsKeyLabel(key) }));
       renderAll();
     });
 
@@ -784,27 +786,27 @@
         const cfg = getProviderConfig(id);
         if (getProviderApiKey(id)) setExpiryNow(cfg.cookieName);
       }
-      showToast("已续期 " + n + " 个 API Key（重新满 30 天）✓");
+      showToast(t("已续期 {n} 个 API Key（重新满 30 天）✓", { n }));
       refreshProviderStatus(); renderAll();
     });
     $("#deleteAllCookiesBtn").on("click", function () {
-      if (!confirm("确定删除全部 Key 缓存吗？（游戏将无法调用大模型，需重新配置）")) return;
+      if (!confirm(t("确定删除全部 Key 缓存吗？（游戏将无法调用大模型，需重新配置）"))) return;
       for (const id of PROVIDER_ORDER) {
         deleteCookie(getProviderConfig(id).cookieName);
         clearExpiry(getProviderConfig(id).cookieName);
       }
-      showToast("已删除全部 Key 缓存");
+      showToast(t("已删除全部 Key 缓存"));
       refreshProviderStatus(); renderAll();
     });
     $("#deleteAllLsBtn").on("click", function () {
-      if (!confirm("确定清空全部记忆与配置吗？（将删除所有 AI 经验、座位配置、对局战绩）")) return;
+      if (!confirm(t("确定清空全部记忆与配置吗？（将删除所有 AI 经验、座位配置、对局战绩）"))) return;
       const keys = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
         if (isRelatedLsKey(k)) keys.push(k);
       }
       keys.forEach(k => lsRemove(k));
-      showToast("已清空 " + keys.length + " 项记忆与配置数据");
+      showToast(t("已清空 {n} 项记忆与配置数据", { n: keys.length }));
       renderAll();
     });
 
@@ -814,7 +816,7 @@
       const cfg = getProviderConfig(id);
       if (getProviderApiKey(id)) setExpiryNow(cfg.cookieName);
     }
-    if (touched > 0) showToast("打开页面自动续期：" + touched + " 个 Key 已续到 30 天 ✓");
+    if (touched > 0) showToast(t("打开页面自动续期：{n} 个 Key 已续到 30 天 ✓", { n: touched }));
 
     refreshProviderStatus();
     renderAll();

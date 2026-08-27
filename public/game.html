@@ -3,8 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>大模型掼蛋挑战赛 — 牌桌</title>
+  <title data-i18n="大模型掼蛋挑战赛 — 牌桌">大模型掼蛋挑战赛 — 牌桌</title>
   <!-- 共享模块：4 家 Provider 配置 + Cookie/localStorage 工具（见 js/common.js） -->
+  <script src="vendor/jquery.min.js"></script>
+  <!-- i18n：浏览器语言识别 + 英文字典（见 js/i18n.js） -->
+  <script src="js/i18n.js"></script>
+  <script src="js/i18n.en.js"></script>
   <script src="js/common.js"></script>
   <link href="vendor/bootstrap.min.css" rel="stylesheet">
   <style>
@@ -1066,37 +1070,37 @@
 <main class="game-shell">
   <div class="game-topbar">
     <div class="left-col">
-      <h1><a href="index.html" style="text-decoration:none;color:inherit;">大模型掼蛋挑战赛</a> <span class="level-badge" id="levelBadge">本局打 2</span></h1>
+      <h1><a href="index.html" style="text-decoration:none;color:inherit;" data-i18n-html="brand">大模型掼蛋挑战赛</a> <span class="level-badge" id="levelBadge">本局打 2</span></h1>
       <div class="seat-config-row">
-        <span class="config-label">座位配置（每个 AI 座位可独立选不同模型）：</span>
+        <span class="config-label" data-i18n="座位配置（每个 AI 座位可独立选不同模型）：">座位配置（每个 AI 座位可独立选不同模型）：</span>
         <div class="seat-cfg-grid">
-          <label class="seat-cfg-item"><span class="seat-name">南</span>
-            <select id="cfgSeat0" class="form-select form-select-sm seat-cfg-select seat-type"><option value="human">人</option><option value="ai">AI</option></select>
+          <label class="seat-cfg-item"><span class="seat-name" data-i18n="南">南</span>
+            <select id="cfgSeat0" class="form-select form-select-sm seat-cfg-select seat-type"><option value="human" data-i18n="人">人</option><option value="ai">AI</option></select>
             <select id="cfgSeat0Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
             <select id="cfgSeat0Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
           </label>
-          <label class="seat-cfg-item"><span class="seat-name">东</span>
-            <select id="cfgSeat1" class="form-select form-select-sm seat-cfg-select seat-type" disabled title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
+          <label class="seat-cfg-item"><span class="seat-name" data-i18n="东">东</span>
+            <select id="cfgSeat1" class="form-select form-select-sm seat-cfg-select seat-type" disabled data-i18n-title="东/北/西座位只能使用 AI（真人无法操作）" title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
             <select id="cfgSeat1Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
             <select id="cfgSeat1Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
           </label>
-          <label class="seat-cfg-item"><span class="seat-name">北</span>
-            <select id="cfgSeat2" class="form-select form-select-sm seat-cfg-select seat-type" disabled title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
+          <label class="seat-cfg-item"><span class="seat-name" data-i18n="北">北</span>
+            <select id="cfgSeat2" class="form-select form-select-sm seat-cfg-select seat-type" disabled data-i18n-title="东/北/西座位只能使用 AI（真人无法操作）" title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
             <select id="cfgSeat2Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
             <select id="cfgSeat2Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
           </label>
-          <label class="seat-cfg-item"><span class="seat-name">西</span>
-            <select id="cfgSeat3" class="form-select form-select-sm seat-cfg-select seat-type" disabled title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
+          <label class="seat-cfg-item"><span class="seat-name" data-i18n="西">西</span>
+            <select id="cfgSeat3" class="form-select form-select-sm seat-cfg-select seat-type" disabled data-i18n-title="东/北/西座位只能使用 AI（真人无法操作）" title="东/北/西座位只能使用 AI（真人无法操作）"><option value="ai">AI</option></select>
             <select id="cfgSeat3Provider" class="form-select form-select-sm seat-cfg-select seat-provider"></select>
             <select id="cfgSeat3Model" class="form-select form-select-sm seat-cfg-select seat-model"></select>
           </label>
         </div>
       </div>
-      <p class="status-line" id="gameStatus">等待开始</p>
+      <p class="status-line" id="gameStatus" data-i18n="等待开始">等待开始</p>
     </div>
     <div class="right-col">
       <div class="actions">
-        <button id="newGameBtn" class="btn btn-success btn-sm">开始游戏</button>
+        <button id="newGameBtn" class="btn btn-success btn-sm" data-i18n="开始游戏">开始游戏</button>
       </div>
     </div>
   </div>
@@ -1106,7 +1110,7 @@
       <div class="player-name" id="nameTop">北 <span class="team-badge team-a">A组</span></div>
       <div class="player-cards-row" id="cardsTop"></div>
       <div class="player-actions seat-actions" data-position="2" style="display:none">
-        <button class="pass-btn btn btn-outline-light btn-sm" data-position="2" disabled>过牌</button>
+        <button class="pass-btn btn btn-outline-light btn-sm" data-position="2" disabled data-i18n="过牌">过牌</button>
       </div>
     </div>
 
@@ -1114,7 +1118,7 @@
       <div class="player-name" id="nameLeft">西 <span class="team-badge team-b">B组</span></div>
       <div class="player-cards-row" id="cardsLeft"></div>
       <div class="player-actions seat-actions" data-position="3" style="display:none">
-        <button class="pass-btn btn btn-outline-light btn-sm" data-position="3" disabled>过牌</button>
+        <button class="pass-btn btn btn-outline-light btn-sm" data-position="3" disabled data-i18n="过牌">过牌</button>
       </div>
     </div>
 
@@ -1128,7 +1132,7 @@
       <div class="player-name" id="nameRight">东 <span class="team-badge team-b">B组</span></div>
       <div class="player-cards-row" id="cardsRight"></div>
       <div class="player-actions seat-actions" data-position="1" style="display:none">
-        <button class="pass-btn btn btn-outline-light btn-sm" data-position="1" disabled>过牌</button>
+        <button class="pass-btn btn btn-outline-light btn-sm" data-position="1" disabled data-i18n="过牌">过牌</button>
       </div>
     </div>
 
@@ -1136,32 +1140,32 @@
       <div class="player-name" id="nameBottom">南（你） <span class="team-badge team-a">A组</span></div>
       <div class="player-cards-row" id="cardsBottom"></div>
       <div class="player-actions seat-actions" data-position="0">
-        <button class="pass-btn btn btn-outline-light btn-sm" data-position="0" disabled>过牌</button>
-        <button class="play-selected-btn btn btn-outline-light btn-sm" data-position="0" disabled>出牌</button>
-        <button class="pile-btn btn btn-outline-light btn-sm" data-position="0" disabled>理牌</button>
-        <button class="unpile-btn btn btn-outline-light btn-sm" data-position="0" disabled>拆牌</button>
+        <button class="pass-btn btn btn-outline-light btn-sm" data-position="0" disabled data-i18n="过牌">过牌</button>
+        <button class="play-selected-btn btn btn-outline-light btn-sm" data-position="0" disabled data-i18n="出牌">出牌</button>
+        <button class="pile-btn btn btn-outline-light btn-sm" data-position="0" disabled data-i18n="理牌">理牌</button>
+        <button class="unpile-btn btn btn-outline-light btn-sm" data-position="0" disabled data-i18n="拆牌">拆牌</button>
       </div>
     </div>
   </div>
 
   <div class="legend-row">
-    <span><span class="legend-dot level"></span> 级牌（当前等级牌，大于 A 小于小王）</span>
-    <span><span class="legend-dot wild"></span> 逢人配（红心级牌，可当任意牌凑牌型）</span>
+    <span><span class="legend-dot level"></span> <span data-i18n="级牌（当前等级牌，大于 A 小于小王）">级牌（当前等级牌，大于 A 小于小王）</span></span>
+    <span><span class="legend-dot wild"></span> <span data-i18n="逢人配（红心级牌，可当任意牌凑牌型）">逢人配（红心级牌，可当任意牌凑牌型）</span></span>
   </div>
 
   <!-- AI 决策过程浮层 -->
   <div class="ai-conversation-panel" id="aiPanel">
     <div class="ai-panel-header">
-      <span id="aiPanelTitle">AI 决策过程</span>
-      <button class="ai-panel-copy-log" id="aiPanelCopyLog" title="复制操作日志">复制</button>
+      <span id="aiPanelTitle" data-i18n="AI 决策过程">AI 决策过程</span>
+      <button class="ai-panel-copy-log" id="aiPanelCopyLog" data-i18n="复制" data-i18n-title="复制操作日志" title="复制操作日志">复制</button>
       <button class="ai-panel-close" id="aiPanelClose">&times;</button>
     </div>
     <div class="ai-panel-body" id="aiPanelBody">
-      <div class="ai-panel-empty">点击座位旁的 AI 标识查看大模型对话过程</div>
+      <div class="ai-panel-empty" data-i18n="点击座位旁的 AI 标识查看大模型对话过程">点击座位旁的 AI 标识查看大模型对话过程</div>
     </div>
     <div class="ai-panel-chat" id="aiPanelChat">
-      <input type="text" id="aiPanelChatInput" placeholder="向 AI 提问…" maxlength="500" />
-      <button id="aiPanelChatSend">发送</button>
+      <input type="text" id="aiPanelChatInput" placeholder="向 AI 提问…" maxlength="500" data-i18n-ph="向 AI 提问…" />
+      <button id="aiPanelChatSend" data-i18n="发送">发送</button>
     </div>
   </div>
 
@@ -1176,14 +1180,13 @@
       <div class="victory-order" id="victoryOrder"></div>
       <div class="victory-record" id="victoryRecord"></div>
       <div class="victory-btns">
-        <button class="btn btn-success" id="victoryRestartBtn">再来一局</button>
-        <button class="btn btn-outline-light" id="victoryCloseBtn">关闭</button>
+        <button class="btn btn-success" id="victoryRestartBtn" data-i18n="再来一局">再来一局</button>
+        <button class="btn btn-outline-light" id="victoryCloseBtn" data-i18n="关闭">关闭</button>
       </div>
     </div>
   </div>
 </main>
 
-<script src="vendor/jquery.min.js"></script>
 <script>
   // ==================== 掼蛋游戏逻辑 ====================
 
@@ -1193,10 +1196,10 @@
   const LEVEL_RANKS = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
 
   const TYPE_NAMES = {
-    single: "单张", pair: "对子", triple: "三张", triple_plus_2: "三带二",
-    straight: "顺子", consecutive_pairs: "连对", bomb: "炸弹",
-    straight_flush: "同花顺", king_bomb: "天王炸",
-    consecutive_triples: "钢板"
+    single: t("单张"), pair: t("对子"), triple: t("三张"), triple_plus_2: t("三带二"),
+    straight: t("顺子"), consecutive_pairs: t("连对"), bomb: t("炸弹"),
+    straight_flush: t("同花顺"), king_bomb: t("天王炸"),
+    consecutive_triples: t("钢板")
   };
 
   // ==================== Player 玩家基类 ====================
@@ -1252,127 +1255,127 @@
 
   // ==================== LLM AI 系统提示词 ====================
   const GUANDAN_SYSTEM_PROMPT = [
-    "你是掼蛋AI玩家。请根据手牌和场上情况，通过调用工具来探索牌型组合，最终决定出牌或过牌。",
-    "思考要精炼，输出要简洁。不要长篇分析，直接调用工具行动，必要时一两句话点明关键理由即可。",
+    t("你是掼蛋AI玩家。请根据手牌和场上情况，通过调用工具来探索牌型组合，最终决定出牌或过牌。"),
+    t("思考要精炼，输出要简洁。不要长篇分析，直接调用工具行动，必要时一两句话点明关键理由即可。"),
     "",
     "---",
-    "一、基本设定",
-    "- 2副牌共108张，4人对战，对家组队：南(位置0)↔北(位置2)为A组队友，东(位置1)↔西(位置3)为B组队友",
-    "- 队友坐在你对面（position相差2），你的胜负以队伍为单位计算：队友头游你也获胜",
-    "- 每局限定一个级牌（从2到A依次升级）",
-    "- 牌面点数从小到大：2(2),3(3),4(4),5(5),6(6),7(7),8(8),9(9),10(10),J(11),Q(12),K(13),A(14),级牌(15),小王(16),大王(17)",
-    "- 【重要】J、Q、K、A 只是数字11、12、13、14的扑克牌面符号，它们与2~10一样都是纯粹的数字",
-    "- 「连续」指底层的数字依次差1。例如：8,9,10,J,Q（数字8~12）是连续的，10,J,Q,K,A（数字10~14）是连续的，J,Q,K（数字11~13）是连续的",
-    "- 不要把 J=11, Q=12, K=13, A=14 当成不连续的「特殊牌」，JQK 之间的连续关系和 345 之间的连续关系完全一样",
-    "- 判断顺子时，把 J 读作 11、Q 读作 12、K 读作 13、A 读作 14，然后看是否为5个连续数字即可",
-    "- 「同点」指多张牌的牌面点数相同（如两张K、三张7）。大王只能和大王同点，小王只能和小王同点",
-    "- 级牌大小介于小王和A之间：大王(17) > 小王(16) > 级牌(15) > A(14) > K(13) > ... > 2(2)",
-    "- 逢人配：红心级牌，每局最多2张。单独出时代表级牌本身，组合出时可替代任意非王牌凑牌型",
+    t("一、基本设定"),
+    t("- 2副牌共108张，4人对战，对家组队：南(位置0)↔北(位置2)为A组队友，东(位置1)↔西(位置3)为B组队友"),
+    t("- 队友坐在你对面（position相差2），你的胜负以队伍为单位计算：队友头游你也获胜"),
+    t("- 每局限定一个级牌（从2到A依次升级）"),
+    t("- 牌面点数从小到大：2(2),3(3),4(4),5(5),6(6),7(7),8(8),9(9),10(10),J(11),Q(12),K(13),A(14),级牌(15),小王(16),大王(17)"),
+    t("- 【重要】J、Q、K、A 只是数字11、12、13、14的扑克牌面符号，它们与2~10一样都是纯粹的数字"),
+    t("- 「连续」指底层的数字依次差1。例如：8,9,10,J,Q（数字8~12）是连续的，10,J,Q,K,A（数字10~14）是连续的，J,Q,K（数字11~13）是连续的"),
+    t("- 不要把 J=11, Q=12, K=13, A=14 当成不连续的「特殊牌」，JQK 之间的连续关系和 345 之间的连续关系完全一样"),
+    t("- 判断顺子时，把 J 读作 11、Q 读作 12、K 读作 13、A 读作 14，然后看是否为5个连续数字即可"),
+    t("- 「同点」指多张牌的牌面点数相同（如两张K、三张7）。大王只能和大王同点，小王只能和小王同点"),
+    t("- 级牌大小介于小王和A之间：大王(17) > 小王(16) > 级牌(15) > A(14) > K(13) > ... > 2(2)"),
+    t("- 逢人配：红心级牌，每局最多2张。单独出时代表级牌本身，组合出时可替代任意非王牌凑牌型"),
     "",
     "---",
-    "二、牌型（10种）",
-    "1. 单张：任意1张",
-    "2. 对子：同点2张（含对大王/对小王）",
-    "3. 三张：同点3张",
-    "4. 三带二：同点3张 + 一个对子（对子点数必须与三张不同。如 999+QQ 合法，不能是 999+99）",
-    "5. 顺子：5张连续单张（不限花色）。即5张牌的底层数字依次递增1。包括 10JQKA（10~14）和 A2345（A视为1，1~5）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字凑连续",
-    "6. 连对：3对连续对子（不限花色）。即3个对子的点数数字依次递增1。包括 QQKKAA（12~14）和 AA2233（A视为1，1~3）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字凑连续",
-    "7. 钢板：2个连续三同张（不限花色，如333444）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字凑连续",
-    "8. 炸弹：4张及以上同点，张数越多越大",
-    "9. 同花顺：同花色连续5张。即5张同花色牌的底层数字依次递增1。包括 10JQKA（10~14）和 A2345（A视为1，1~5）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字且花色可任意适配凑连续",
-    "10. 天王炸：2大王+2小王，全场最大",
+    t("二、牌型（10种）"),
+    t("1. 单张：任意1张"),
+    t("2. 对子：同点2张（含对大王/对小王）"),
+    t("3. 三张：同点3张"),
+    t("4. 三带二：同点3张 + 一个对子（对子点数必须与三张不同。如 999+QQ 合法，不能是 999+99）"),
+    t("5. 顺子：5张连续单张（不限花色）。即5张牌的底层数字依次递增1。包括 10JQKA（10~14）和 A2345（A视为1，1~5）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字凑连续"),
+    t("6. 连对：3对连续对子（不限花色）。即3个对子的点数数字依次递增1。包括 QQKKAA（12~14）和 AA2233（A视为1，1~3）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字凑连续"),
+    t("7. 钢板：2个连续三同张（不限花色，如333444）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字凑连续"),
+    t("8. 炸弹：4张及以上同点，张数越多越大"),
+    t("9. 同花顺：同花色连续5张。即5张同花色牌的底层数字依次递增1。包括 10JQKA（10~14）和 A2345（A视为1，1~5）。普通级牌（非红心）按本身数字(15)参与连续；逢人配（红心级牌）可替代任意数字且花色可任意适配凑连续"),
+    t("10. 天王炸：2大王+2小王，全场最大"),
     "",
     "---",
-    "三、逢人配规则",
-    "- 逢人配（红心级牌）单独出：单张=级牌本身，2张=级牌对子",
-    "- 1常牌+1配：对子（配当常牌点数用）",
-    "- 2同常牌+1配：三张",
-    "- 1常牌+2配：三张",
-    "- 凑顺子/连对/钢板：默认往大凑（按最大基数方案）",
-    "  例：♥2♥2+66+77 → 667788 而非 556677",
-    "- 凑同花顺：默认往大凑",
-    "- 凑炸弹：逢人配视作与常规牌点数相同（如♥5+5♠+5♣+5♦ = 四个5炸弹）",
+    t("三、逢人配规则"),
+    t("- 逢人配（红心级牌）单独出：单张=级牌本身，2张=级牌对子"),
+    t("- 1常牌+1配：对子（配当常牌点数用）"),
+    t("- 2同常牌+1配：三张"),
+    t("- 1常牌+2配：三张"),
+    t("- 凑顺子/连对/钢板：默认往大凑（按最大基数方案）"),
+    t("  例：♥2♥2+66+77 → 667788 而非 556677"),
+    t("- 凑同花顺：默认往大凑"),
+    t("- 凑炸弹：逢人配视作与常规牌点数相同（如♥5+5♠+5♣+5♦ = 四个5炸弹）"),
     "",
     "---",
-    "四、大小比较",
-    "- 天王炸 > 6张及以上炸弹 > 同花顺 > 5张炸弹 > 4张炸弹 > 其他牌型",
-    "- 炸弹之间：先比张数，张数多的大；同张数比点数",
-    "- 同花顺 vs 炸弹：同花顺算5张档，高于4张炸弹，低于6张及以上炸弹",
-    "- 其他牌型（顺子/钢板/连对/三带二/三张/对子/单张）：只能同类型比大小，不同类型不能互压",
-    "- 同类型比点数：顺子/连对/钢板比最大那张牌的点数；三带二只比三张的点数（对子不参与比较），三张同点则不能压",
-    "- 三张比三张的点数；对子比对子的点数；单张比单张的点数",
+    t("四、大小比较"),
+    t("- 天王炸 > 6张及以上炸弹 > 同花顺 > 5张炸弹 > 4张炸弹 > 其他牌型"),
+    t("- 炸弹之间：先比张数，张数多的大；同张数比点数"),
+    t("- 同花顺 vs 炸弹：同花顺算5张档，高于4张炸弹，低于6张及以上炸弹"),
+    t("- 其他牌型（顺子/钢板/连对/三带二/三张/对子/单张）：只能同类型比大小，不同类型不能互压"),
+    t("- 同类型比点数：顺子/连对/钢板比最大那张牌的点数；三带二只比三张的点数（对子不参与比较），三张同点则不能压"),
+    t("- 三张比三张的点数；对子比对子的点数；单张比单张的点数"),
     "",
     "---",
-    "五、出牌与轮次",
-    "- 领出者可以出任意牌型",
-    "- 跟牌必须出同类型更大，或用炸弹/同花顺/天王炸压制",
-    "- 连续3人过牌，该轮结束，最后出牌者获得新一轮出牌权",
-    "- 头游出完后，后续轮次若一圈人都不要，队友接风",
+    t("五、出牌与轮次"),
+    t("- 领出者可以出任意牌型"),
+    t("- 跟牌必须出同类型更大，或用炸弹/同花顺/天王炸压制"),
+    t("- 连续3人过牌，该轮结束，最后出牌者获得新一轮出牌权"),
+    t("- 头游出完后，后续轮次若一圈人都不要，队友接风"),
     "",
     "---",
-    "六、核心目标与策略",
+    t("六、核心目标与策略"),
     "",
-    "【获胜条件】",
-    "- 你和对家是一个队伍（南北A组、东西B组），你俩中任意一人先把牌出完即为头游，队伍获胜",
-    "- 一切决策的核心目的是让队伍赢，而非单纯压住上家的每一手牌",
-    "- 有时放掉一手牌让队友接，比自己硬压更有利",
+    t("【获胜条件】"),
+    t("- 你和对家是一个队伍（南北A组、东西B组），你俩中任意一人先把牌出完即为头游，队伍获胜"),
+    t("- 一切决策的核心目的是让队伍赢，而非单纯压住上家的每一手牌"),
+    t("- 有时放掉一手牌让队友接，比自己硬压更有利"),
     "",
-    "【队友配合】",
-    "- 局面描述中标记了 [队友] 的玩家就是你的对家。他的胜利就是你的胜利",
-    "- 队友出的牌绝对不要压！即使你有更大的同类牌型或更大的炸弹，也必须过牌。压队友的牌等于帮对手，是严重错误",
-    "- 如果队友领出了牌，你应直接过牌，让队友顺利走牌。队友的炸弹能赢你就让他赢",
-    "- 如果队友手牌很少（即将头游），优先帮他挡住对手的压制，甚至用炸弹清场让他接风（注意：是压对手的牌，不是压队友的牌）",
-    "- 对手领出时，如果你手中有大牌但队友可能有更大的，考虑让队友来压",
-    "- 用炸弹清场 = 当对手出了牌压制了你队友时，你用更大的炸弹反压对手，让队友重新获得出牌权",
+    t("【队友配合】"),
+    t("- 局面描述中标记了 [队友] 的玩家就是你的对家。他的胜利就是你的胜利"),
+    t("- 队友出的牌绝对不要压！即使你有更大的同类牌型或更大的炸弹，也必须过牌。压队友的牌等于帮对手，是严重错误"),
+    t("- 如果队友领出了牌，你应直接过牌，让队友顺利走牌。队友的炸弹能赢你就让他赢"),
+    t("- 如果队友手牌很少（即将头游），优先帮他挡住对手的压制，甚至用炸弹清场让他接风（注意：是压对手的牌，不是压队友的牌）"),
+    t("- 对手领出时，如果你手中有大牌但队友可能有更大的，考虑让队友来压"),
+    t("- 用炸弹清场 = 当对手出了牌压制了你队友时，你用更大的炸弹反压对手，让队友重新获得出牌权"),
     "",
-    "【出牌策略】",
-    "- 领出时：优先出小单张、小对子，把难题抛给对手，保留大牌和炸弹用于关键时刻",
-    "- 跟牌时：先用小牌跟，不要一上来就出大牌；如果代价太大，果断过牌保留实力",
-    "- 对手即将头游时：不惜代价用炸弹或大牌压制，阻止对手先走完",
-    "- 有逢人配时：优先用它凑大炸弹或同花顺，提高压制力",
-    "- 手牌少于8张时：积极用炸弹抢出牌权，准备冲刺头游",
+    t("【出牌策略】"),
+    t("- 领出时：优先出小单张、小对子，把难题抛给对手，保留大牌和炸弹用于关键时刻"),
+    t("- 跟牌时：先用小牌跟，不要一上来就出大牌；如果代价太大，果断过牌保留实力"),
+    t("- 对手即将头游时：不惜代价用炸弹或大牌压制，阻止对手先走完"),
+    t("- 有逢人配时：优先用它凑大炸弹或同花顺，提高压制力"),
+    t("- 手牌少于8张时：积极用炸弹抢出牌权，准备冲刺头游"),
     "",
-    "【组牌策略 — 发牌后第一步】",
-    "- 发牌后应立即用 view_hand 查看手牌，然后用 pile_cards 整理牌型",
-    "- 核心原则：尽量降低出牌手数。27张牌，手数越少越容易抢到头游。每多一手牌就可能多给对手一次压制的机会",
-    "- 炸弹和同花顺是强力压制牌型，可以跨类型压制。但组牌时手数降低同样重要——一个钢板出一手等于6张，两个三张出两手才出完6张",
-    "- 三带二（5张1手）、钢板（6张1手）、顺子（5张1手）、连对（6张1手）等牌型一次能出多张，有效减少手数",
-    "- 规则：有三张时优先搭配对子组成三带二，有三带二就不能拆成三张+对子分两次出",
-    "- 规则：有连续对子（如33 44 55）必须组成连对。连对=6张1手出完，三个独立对子=6张3手才出完。3手变1手是巨大差距，不是可选项",
-    "- 规则：有连续三张（如666 777）必须组成钢板。钢板=6张1手出完，两个独立三张=6张2手才出完。2手变1手是巨大差距，不是可选项",
-    "- 总之：能组成更大牌型的，必须组成大牌型而非拆成小牌型。组牌时从大往小看：钢板 → 连对 → 三带二 → 顺子 → 三张 → 对子",
-    "- 单张和对子留着最后出，作为收尾或者领出时探路",
-    "- 组牌不是一成不变的！出牌时要根据场上情况灵活调整：",
-    "  · 如果领出需要出小的，可以拆一个牌摞",
-    "  · 如果跟牌需要凑特定类型，可能要拆炸弹改组成顺子或对子",
-    "  · 同花顺虽然手数不如炸弹低（5张才出一手），但压制力强，有时值得放弃最低手数",
-    "  · 逢人配可以灵活调配，优先把它用在最关键的大牌型上",
-    "- 权衡原则：一切以配合队友获胜为目的，手数低 + 牌力强 + 灵活应变 = 最优组牌",
+    t("【组牌策略 — 发牌后第一步】"),
+    t("- 发牌后应立即用 view_hand 查看手牌，然后用 pile_cards 整理牌型"),
+    t("- 核心原则：尽量降低出牌手数。27张牌，手数越少越容易抢到头游。每多一手牌就可能多给对手一次压制的机会"),
+    t("- 炸弹和同花顺是强力压制牌型，可以跨类型压制。但组牌时手数降低同样重要——一个钢板出一手等于6张，两个三张出两手才出完6张"),
+    t("- 三带二（5张1手）、钢板（6张1手）、顺子（5张1手）、连对（6张1手）等牌型一次能出多张，有效减少手数"),
+    t("- 规则：有三张时优先搭配对子组成三带二，有三带二就不能拆成三张+对子分两次出"),
+    t("- 规则：有连续对子（如33 44 55）必须组成连对。连对=6张1手出完，三个独立对子=6张3手才出完。3手变1手是巨大差距，不是可选项"),
+    t("- 规则：有连续三张（如666 777）必须组成钢板。钢板=6张1手出完，两个独立三张=6张2手才出完。2手变1手是巨大差距，不是可选项"),
+    t("- 总之：能组成更大牌型的，必须组成大牌型而非拆成小牌型。组牌时从大往小看：钢板 → 连对 → 三带二 → 顺子 → 三张 → 对子"),
+    t("- 单张和对子留着最后出，作为收尾或者领出时探路"),
+    t("- 组牌不是一成不变的！出牌时要根据场上情况灵活调整："),
+    t("  · 如果领出需要出小的，可以拆一个牌摞"),
+    t("  · 如果跟牌需要凑特定类型，可能要拆炸弹改组成顺子或对子"),
+    t("  · 同花顺虽然手数不如炸弹低（5张才出一手），但压制力强，有时值得放弃最低手数"),
+    t("  · 逢人配可以灵活调配，优先把它用在最关键的大牌型上"),
+    t("- 权衡原则：一切以配合队友获胜为目的，手数低 + 牌力强 + 灵活应变 = 最优组牌"),
     "",
-    "【出牌判断优先级】",
-    "1. 自己能否直接出完（头游）？→ 出牌冲刺",
-    "2. 对手是否即将头游？→ 不惜代价压制",
-    "3. 队友是否领出或即将头游？→ 过牌让队友走",
-    "4. 跟牌代价是否合理？→ 代价小就跟，代价大就过",
-    "5. 都没有特殊情况的普通轮次 → 正常应对",
+    t("【出牌判断优先级】"),
+    t("1. 自己能否直接出完（头游）？→ 出牌冲刺"),
+    t("2. 对手是否即将头游？→ 不惜代价压制"),
+    t("3. 队友是否领出或即将头游？→ 过牌让队友走"),
+    t("4. 跟牌代价是否合理？→ 代价小就跟，代价大就过"),
+    t("5. 都没有特殊情况的普通轮次 → 正常应对"),
     "",
-    "【操作提示】",
-    "- 必须先调用 view_hand 查看手牌和索引",
-    "- pile_cards 的 groups 参数是对手牌索引的一次完整分区，各组索引必须互不重叠。每张牌最多归入一组，其余牌为散牌。这不是候选方案列表，不能把同一张牌放在多个组里",
-    "- 可以调用 view_history 查看本局出牌历史，了解哪些大牌和炸弹已经出过，辅助决策",
-    "- 可以调用 read_experience 查看过往对局经验教训。每局开始时应先回顾过往经验，避免重蹈覆辙",
-    "- 最终必须调用 play_cards 或 pass_turn 完成回合",
-    "- 不要在 text 中出牌，必须通过工具调用出牌",
+    t("【操作提示】"),
+    t("- 必须先调用 view_hand 查看手牌和索引"),
+    t("- pile_cards 的 groups 参数是对手牌索引的一次完整分区，各组索引必须互不重叠。每张牌最多归入一组，其余牌为散牌。这不是候选方案列表，不能把同一张牌放在多个组里"),
+    t("- 可以调用 view_history 查看本局出牌历史，了解哪些大牌和炸弹已经出过，辅助决策"),
+    t("- 可以调用 read_experience 查看过往对局经验教训。每局开始时应先回顾过往经验，避免重蹈覆辙"),
+    t("- 最终必须调用 play_cards 或 pass_turn 完成回合"),
+    t("- 不要在 text 中出牌，必须通过工具调用出牌"),
     "",
-    "【任务状态协议 — 必须遵守】",
-    "- 每次回复末尾必须包含一行任务状态 JSON，格式：",
-    '  {"task":"prep","complete":false}  表示组牌尚未完成，还需继续',
-    '  {"task":"prep","complete":true}   表示组牌已全部完成',
-    '  {"task":"play","complete":false}  表示出牌思考尚未完成',
-    '  {"task":"play","complete":true}   表示出牌决策已完成（此时必须有 play_cards 或 pass_turn 工具调用）',
-    "- task 字段：组牌阶段用 prep，出牌阶段用 play",
-    "- 只有 complete: true 时系统才会结束当前阶段，否则会继续调用你",
-    "- 这个状态 JSON 必须独占一行，放在回复的最末尾"
+    t("【任务状态协议 — 必须遵守】"),
+    t("- 每次回复末尾必须包含一行任务状态 JSON，格式："),
+    t('  {"task":"prep","complete":false}  表示组牌尚未完成，还需继续'),
+    t('  {"task":"prep","complete":true}   表示组牌已全部完成'),
+    t('  {"task":"play","complete":false}  表示出牌思考尚未完成'),
+    t('  {"task":"play","complete":true}   表示出牌决策已完成（此时必须有 play_cards 或 pass_turn 工具调用）'),
+    t("- task 字段：组牌阶段用 prep，出牌阶段用 play"),
+    t("- 只有 complete: true 时系统才会结束当前阶段，否则会继续调用你"),
+    t("- 这个状态 JSON 必须独占一行，放在回复的最末尾")
   ].join("\n");
 
   // ==================== LLM AI 工具定义 ====================
@@ -1381,7 +1384,7 @@
       type: "function",
       function: {
         name: "view_hand",
-        description: "查看当前手牌。返回排序后的手牌列表（含索引）、已有牌摞、级牌和逢人配信息。在调用其他工具之前必须先调用此工具获取当前手牌索引。每次理牌或拆牌后手牌索引不变，但牌摞状态会更新。",
+        description: t("查看当前手牌。返回排序后的手牌列表（含索引）、已有牌摞、级牌和逢人配信息。在调用其他工具之前必须先调用此工具获取当前手牌索引。每次理牌或拆牌后手牌索引不变，但牌摞状态会更新。"),
         parameters: { type: "object", properties: {}, required: [] }
       }
     },
@@ -1389,12 +1392,12 @@
       type: "function",
       function: {
         name: "pile_cards",
-        description: "理牌：将手牌组成牌摞。支持单组(indices)或多组(groups，推荐)。【重要】groups 中各组的索引必须互不重叠——每张牌最多出现在一组中，不能跨组重复使用。各组相当于对手牌的一次完整分区，不是多个候选方案。",
+        description: t("理牌：将手牌组成牌摞。支持单组(indices)或多组(groups，推荐)。【重要】groups 中各组的索引必须互不重叠——每张牌最多出现在一组中，不能跨组重复使用。各组相当于对手牌的一次完整分区，不是多个候选方案。"),
         parameters: {
           type: "object",
           properties: {
-            indices: { type: "array", items: { type: "integer" }, description: "（单组模式）要理在一起的手牌索引数组" },
-            groups: { type: "array", items: { type: "array", items: { type: "integer" } }, description: "（多组模式，推荐）手牌索引的分区：每个子数组是一组要理在一起的牌。各组索引必须互不重叠，每张牌只能归入一组。如手牌26张，groups: [[0,1],[3,4,5],[6,7,8,9,10]] 表示索引0-1组对子、3-5组三张、6-10组顺子，其余索引留作散牌。" }
+            indices: { type: "array", items: { type: "integer" }, description: t("（单组模式）要理在一起的手牌索引数组") },
+            groups: { type: "array", items: { type: "array", items: { type: "integer" } }, description: t("（多组模式，推荐）手牌索引的分区：每个子数组是一组要理在一起的牌。各组索引必须互不重叠，每张牌只能归入一组。如手牌26张，groups: [[0,1],[3,4,5],[6,7,8,9,10]] 表示索引0-1组对子、3-5组三张、6-10组顺子，其余索引留作散牌。") }
           },
           required: []
         }
@@ -1404,11 +1407,11 @@
       type: "function",
       function: {
         name: "unpile_cards",
-        description: "拆牌：将一个或多个牌摞拆散，牌回到手牌中。传入牌摞编号（piles），编号来自 view_hand 中显示的「牌摞N」。支持单个牌摞或批量拆散多个牌摞。",
+        description: t("拆牌：将一个或多个牌摞拆散，牌回到手牌中。传入牌摞编号（piles），编号来自 view_hand 中显示的「牌摞N」。支持单个牌摞或批量拆散多个牌摞。"),
         parameters: {
           type: "object",
           properties: {
-            piles: { type: "array", items: { type: "integer" }, description: "要拆散的牌摞编号数组，如 [0] 拆散第0个牌摞，[0,2] 同时拆散牌摞0和牌摞2。编号必须来自 view_hand 中显示的当前牌摞列表。" }
+            piles: { type: "array", items: { type: "integer" }, description: t("要拆散的牌摞编号数组，如 [0] 拆散第0个牌摞，[0,2] 同时拆散牌摞0和牌摞2。编号必须来自 view_hand 中显示的当前牌摞列表。") }
           },
           required: ["piles"]
         }
@@ -1418,11 +1421,11 @@
       type: "function",
       function: {
         name: "play_cards",
-        description: "出牌：从手牌中选择索引出牌（最终动作，调用后回合结束）。牌型必须合法，且必须能压过场上牌（除非你是领出者）。调用此工具后你的回合立即结束。",
+        description: t("出牌：从手牌中选择索引出牌（最终动作，调用后回合结束）。牌型必须合法，且必须能压过场上牌（除非你是领出者）。调用此工具后你的回合立即结束。"),
         parameters: {
           type: "object",
           properties: {
-            indices: { type: "array", items: { type: "integer" }, description: "要出的手牌索引数组" }
+            indices: { type: "array", items: { type: "integer" }, description: t("要出的手牌索引数组") }
           },
           required: ["indices"]
         }
@@ -1432,7 +1435,7 @@
       type: "function",
       function: {
         name: "pass_turn",
-        description: "过牌：选择不出牌（最终动作，调用后回合结束）。只有当你不是领出者时才能过牌。调用此工具后你的回合立即结束。",
+        description: t("过牌：选择不出牌（最终动作，调用后回合结束）。只有当你不是领出者时才能过牌。调用此工具后你的回合立即结束。"),
         parameters: { type: "object", properties: {}, required: [] }
       }
     },
@@ -1440,7 +1443,7 @@
       type: "function",
       function: {
         name: "view_history",
-        description: "查看本局所有轮的出牌历史。返回每一轮各家出牌情况（牌型、点数、power），帮助判断哪些大牌和炸弹已经出过。在任何时候都可以调用，不消耗回合。",
+        description: t("查看本局所有轮的出牌历史。返回每一轮各家出牌情况（牌型、点数、power），帮助判断哪些大牌和炸弹已经出过。在任何时候都可以调用，不消耗回合。"),
         parameters: { type: "object", properties: {}, required: [] }
       }
     },
@@ -1448,7 +1451,7 @@
       type: "function",
       function: {
         name: "read_experience",
-        description: "读取过往经验：查看之前所有对局中你（当前模型）记录的经验教训。包括关键教训、策略调整、常见错误等。每局开始时应先调用此工具回顾过往经验。",
+        description: t("读取过往经验：查看之前所有对局中你（当前模型）记录的经验教训。包括关键教训、策略调整、常见错误等。每局开始时应先调用此工具回顾过往经验。"),
         parameters: { type: "object", properties: {}, required: [] }
       }
     },
@@ -1456,11 +1459,11 @@
       type: "function",
       function: {
         name: "record_experience",
-        description: "记录经验：复盘后将本局提炼出的打牌原则和博弈规律保存到记忆中。不要记录具体牌型和轮次，要抽象出可迁移的策略准则。经验按模型独立存储（同一模型换座位，经验会跟随）。每局结束复盘时使用。",
+        description: t("记录经验：复盘后将本局提炼出的打牌原则和博弈规律保存到记忆中。不要记录具体牌型和轮次，要抽象出可迁移的策略准则。经验按模型独立存储（同一模型换座位，经验会跟随）。每局结束复盘时使用。"),
         parameters: {
           type: "object",
           properties: {
-            content: { type: "string", description: "要记录的经验内容。不要记具体的某手牌，应从策略层面总结：组牌优先级、出牌节奏、博弈判断准则、逢人配使用原则等可复用的规律。" }
+            content: { type: "string", description: t("要记录的经验内容。不要记具体的某手牌，应从策略层面总结：组牌优先级、出牌节奏、博弈判断准则、逢人配使用原则等可复用的规律。" ) }
           },
           required: ["content"]
         }
@@ -1500,7 +1503,7 @@
     }
 
     _alertBug(msg) {
-      const fullMsg = `[疑似 BUG] ${this.name}：${msg}`;
+      const fullMsg = t("[疑似 BUG] {name}：{msg}", { name: this.name, msg });
       addLog(fullMsg);
       alert(fullMsg);
     }
@@ -1546,7 +1549,7 @@
       const removed = keepFrom - 1;
       const summary = {
         role: "user",
-        content: `[上下文压缩] 此前 ${removed} 条对话已省略。当前打 ${game.levelRank}，红心${game.levelRank} 是逢人配。你仍在掼蛋游戏中，请继续按规则决策。`
+        content: t("[上下文压缩] 此前 {removed} 条对话已省略。当前打 {rank}，红心{rank} 是逢人配。你仍在掼蛋游戏中，请继续按规则决策。", { removed, rank: game.levelRank })
       };
 
       // 记录压缩信息供面板展示
@@ -1611,7 +1614,7 @@
       for (const idx of sorted) {
         this.messages.splice(idx, 1);
       }
-      addLog(`[LLM AI] ${this.name} 自修复：移除 ${toRemove.size} 条不匹配的 tool 消息`);
+      addLog(t("[LLM AI] {name} 自修复：移除 {n} 条不匹配的 tool 消息", { name: this.name, n: toRemove.size }));
       this._lastCompression = null;
       return toRemove.size;
     }
@@ -1646,13 +1649,13 @@
 
       const initMsg = reason === "initial"
         ? [
-            "发牌已完成。请用 view_hand 查看手牌，按你自己的想法整理牌型。",
-            "当前打 " + game.levelRank + "，红心" + game.levelRank + " 是逢人配。手牌共 " + this.cards.length + " 张。",
-            "提示：你可以先调用 read_experience 工具查看过往对局的经验记录，帮助本局决策。",
-            "【重要】组牌完成后必须明确回复文字确认（如'组牌完成'或总结组牌结果），在此之前系统会一直等待你完成组牌。",
-            "组牌阶段不要调用 play_cards 或 pass_turn。"
+            t("发牌已完成。请用 view_hand 查看手牌，按你自己的想法整理牌型。"),
+            t("当前打 {rank}，红心{rank} 是逢人配。手牌共 {n} 张。", { rank: game.levelRank, n: this.cards.length }),
+            t("提示：你可以先调用 read_experience 工具查看过往对局的经验记录，帮助本局决策。"),
+            t("【重要】组牌完成后必须明确回复文字确认（如'组牌完成'或总结组牌结果），在此之前系统会一直等待你完成组牌。"),
+            t("组牌阶段不要调用 play_cards 或 pass_turn。")
           ].join("\n")
-        : "【后台理牌】你刚出完牌/过牌，可以利用等待时间重新审视手牌组织。用 pile_cards（推荐 groups）或 unpile_cards 调整牌摞。完成后回复 {\"task\":\"prep\",\"complete\":true}。";
+        : t("【后台理牌】你刚出完牌/过牌，可以利用等待时间重新审视手牌组织。用 pile_cards（推荐 groups）或 unpile_cards 调整牌摞。完成后回复 {\"task\":\"prep\",\"complete\":true}。");
 
       this.messages.push({ role: "user", content: initMsg });
       updateSeatInfo();
@@ -1680,13 +1683,13 @@
               if (fnName === "play_cards" || fnName === "pass_turn") {
                 this.messages.push({
                   role: "tool", tool_call_id: tc.id,
-                  content: JSON.stringify({ error: "组牌阶段不能出牌或过牌" })
+                  content: JSON.stringify({ error: t("组牌阶段不能出牌或过牌") })
                 });
               } else {
                 let args = {};
                 try { args = JSON.parse(tc.function.arguments || "{}"); } catch (e) {}
                 let result;
-                try { result = await this._dispatchTool(fnName, args, game); } catch (e) { result = { error: "工具异常：" + e.message }; }
+                try { result = await this._dispatchTool(fnName, args, game); } catch (e) { result = { error: t("工具异常：{e}", { e: e.message }) }; }
                 this.messages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(result) });
               }
             }
@@ -1703,22 +1706,22 @@
           if (status && status.task === "play") {
             this.messages.push({
               role: "user",
-              content: "当前是组牌阶段，不是出牌阶段。请使用 {\"task\":\"prep\",\"complete\":true} 格式。组牌阶段不要调用 play_cards 或 pass_turn。"
+              content: t("当前是组牌阶段，不是出牌阶段。请使用 {\"task\":\"prep\",\"complete\":true} 格式。组牌阶段不要调用 play_cards 或 pass_turn。")
             });
             notifyAIPanel(this.position);
             continue;
           }
 
           if (status && status.complete) {
-            addLog(this.name + " 组牌完成");
+            addLog(t("{name} 组牌完成", { name: this.name }));
             notifyAIPanel(this.position);
             renderPlayerCards(this.position);
             return;
           }
 
           const hint = status
-            ? "收到，任务状态为未完成。请继续整理牌型，完成后将 complete 设为 true。"
-            : "未找到任务状态 JSON。请继续组牌，并在回复末尾添加：{\"task\":\"prep\",\"complete\":true}。";
+            ? t("收到，任务状态为未完成。请继续整理牌型，完成后将 complete 设为 true。")
+            : t("未找到任务状态 JSON。请继续组牌，并在回复末尾添加：{\"task\":\"prep\",\"complete\":true}。");
           this.messages.push({ role: "user", content: hint });
           notifyAIPanel(this.position);
         } catch (e) {
@@ -1726,25 +1729,25 @@
           if (this._isToolIdError(e.message)) {
             const removed = this._fixupToolCalls();
             if (removed > 0) {
-              addLog(this.name + " 组牌时检测到 tool call ID 不匹配，已清理 " + removed + " 条孤立的 tool 消息");
+              addLog(t("{name} 组牌时检测到 tool call ID 不匹配，已清理 {n} 条孤立的 tool 消息", { name: this.name, n: removed }));
               this.messages.push({
                 role: "user",
-                content: "检测到上下文 tool call 不匹配，已自动清理 " + removed + " 条孤立的 tool 消息。请继续组牌，用 view_hand 查看手牌。完成后回复 {\"task\":\"prep\",\"complete\":true}。"
+                content: t("检测到上下文 tool call 不匹配，已自动清理 {n} 条孤立的 tool 消息。请继续组牌，用 view_hand 查看手牌。完成后回复 {\"task\":\"prep\",\"complete\":true}。", { n: removed })
               });
               notifyAIPanel(this.position);
               continue;
             }
           }
           consecutiveErrors++;
-          addLog(this.name + " 组牌出错（第" + consecutiveErrors + "次）：" + e.message);
+          addLog(t("{name} 组牌出错（第{n}次）：{e}", { name: this.name, n: consecutiveErrors, e: e.message }));
           if (consecutiveErrors >= 5) {
-            addLog(this.name + " 连续出错超过5次，放弃组牌");
+            addLog(t("{name} 连续出错超过5次，放弃组牌", { name: this.name }));
             return;
           }
           await new Promise(r => setTimeout(r, 2000));
           this.messages.push({
             role: "user",
-            content: "刚才请求出错（" + e.message + "），请继续组牌。用 view_hand 查看手牌，用 pile_cards 整理。完成后回复 {\"task\":\"prep\",\"complete\":true}。"
+            content: t("刚才请求出错（{e}），请继续组牌。用 view_hand 查看手牌，用 pile_cards 整理。完成后回复 {\"task\":\"prep\",\"complete\":true}。", { e: e.message })
           });
           notifyAIPanel(this.position);
         }
@@ -1802,7 +1805,7 @@
               let args = {};
               try { args = JSON.parse(tc.function.arguments || "{}"); } catch (e) {}
               let result;
-              try { result = await this._dispatchTool(fnName, args, game); } catch (e) { result = { error: "工具异常：" + e.message }; }
+              try { result = await this._dispatchTool(fnName, args, game); } catch (e) { result = { error: t("工具异常：{e}", { e: e.message }) }; }
               this.messages.push({
                 role: "tool",
                 tool_call_id: tc.id,
@@ -1826,7 +1829,7 @@
           if (status && status.task === "prep") {
             this.messages.push({
               role: "user",
-              content: "当前是出牌阶段，不是组牌阶段。请使用 {\"task\":\"play\",\"complete\":true} 格式。调用 play_cards 或 pass_turn 工具来完成回合。"
+              content: t("当前是出牌阶段，不是组牌阶段。请使用 {\"task\":\"play\",\"complete\":true} 格式。调用 play_cards 或 pass_turn 工具来完成回合。")
             });
             notifyAIPanel(this.position);
             continue;
@@ -1846,7 +1849,7 @@
             // complete but no valid action → must use tools
             this.messages.push({
               role: "user",
-              content: "任务标记为完成，但没有有效的出牌动作。请调用 play_cards 或 pass_turn 工具来完成回合。"
+              content: t("任务标记为完成，但没有有效的出牌动作。请调用 play_cards 或 pass_turn 工具来完成回合。")
             });
             notifyAIPanel(this.position);
             continue;
@@ -1854,8 +1857,8 @@
 
           // Not complete or no status: prompt to continue
           const hint = status
-            ? "收到，任务状态为未完成。请继续思考并调用工具（view_hand/pile_cards/play_cards/pass_turn），完成后将 complete 设为 true。"
-            : "未找到任务状态 JSON。请继续思考，在回复末尾添加状态：{\"task\":\"play\",\"complete\":true} 配合工具调用完成出牌，或 {\"task\":\"play\",\"complete\":false} 表示还需思考。";
+            ? t("收到，任务状态为未完成。请继续思考并调用工具（view_hand/pile_cards/play_cards/pass_turn），完成后将 complete 设为 true。")
+            : t("未找到任务状态 JSON。请继续思考，在回复末尾添加状态：{\"task\":\"play\",\"complete\":true} 配合工具调用完成出牌，或 {\"task\":\"play\",\"complete\":false} 表示还需思考。");
           this.messages.push({ role: "user", content: hint });
           notifyAIPanel(this.position);
         } catch (e) {
@@ -1863,16 +1866,16 @@
           if (this._isToolIdError(e.message)) {
             const removed = this._fixupToolCalls();
             if (removed > 0) {
-              addLog(`[LLM AI] ${this.name} 出牌时检测到 tool call ID 不匹配，已清理 ${removed} 条孤立的 tool 消息`);
+              addLog(t("[LLM AI] {name} 出牌时检测到 tool call ID 不匹配，已清理 {n} 条孤立的 tool 消息", { name: this.name, n: removed }));
               this.messages.push({
                 role: "user",
-                content: "检测到上下文 tool call 不匹配，已自动清理 " + removed + " 条孤立的 tool 消息。请继续出牌决策。调用 play_cards 或 pass_turn 工具来完成回合。"
+                content: t("检测到上下文 tool call 不匹配，已自动清理 {n} 条孤立的 tool 消息。请继续出牌决策。调用 play_cards 或 pass_turn 工具来完成回合。", { n: removed })
               });
               notifyAIPanel(this.position);
               continue;
             }
           }
-          addLog(`[LLM AI] ${this.name} 出错：${e.message}`);
+          addLog(t("[LLM AI] {name} 出错：{e}", { name: this.name, e: e.message }));
           if (game.lastPlay && game.lastPlay.playerIdx !== this.position) {
             game.pass(this.position);
           }
@@ -1881,7 +1884,7 @@
       }
 
       // 超过最大轮次，强制出牌或过牌
-      addLog(`[LLM AI] ${this.name} 超过思考轮次上限，强制出牌/过牌`);
+      addLog(t("[LLM AI] {name} 超过思考轮次上限，强制出牌/过牌", { name: this.name }));
       if (game.lastPlay && game.lastPlay.playerIdx !== this.position) {
         game.pass(this.position);
       } else {
@@ -1913,45 +1916,44 @@
           // 如果是 GUANDAN_TOOLS 中定义的工具但未被 switch 处理 → BUG
           const knownTools = GUANDAN_TOOLS.map(t => t.function.name);
           if (knownTools.includes(fnName)) {
-            this._alertBug("工具 " + fnName + " 已在 GUANDAN_TOOLS 中定义但 _dispatchTool 未处理");
+            this._alertBug(t("工具 {name} 已在 GUANDAN_TOOLS 中定义但 _dispatchTool 未处理", { name: fnName }));
           }
-          return { error: `未知工具: ${fnName}` };
+          return { error: t("未知工具: {name}", { name: fnName }) };
       }
     }
 
     // ---------- view_hand ----------
     _handleViewHand(game) {
       if (this.cards.length > 0 && game.finishedOrder.indexOf(this.position) >= 0) {
-        this._alertBug("手牌有" + this.cards.length + "张但已在完成列表中（位置" + game.finishedOrder.indexOf(this.position) + "）");
+        this._alertBug(t("手牌有{n}张但已在完成列表中（位置{p}）", { n: this.cards.length, p: game.finishedOrder.indexOf(this.position) }));
       }
       const sorted = game.sortCards(this.cards);
       if (sorted.length !== this.cards.length) {
-        this._alertBug("sortCards 返回数量(" + sorted.length + ")与手牌数量(" + this.cards.length + ")不一致");
+        this._alertBug(t("sortCards 返回数量({a})与手牌数量({b})不一致", { a: sorted.length, b: this.cards.length }));
       }
       const handLines = sorted.map((c, i) => {
         let label = `${i}: ${c.suit||""}${c.rank}`;
-        if (game.isWildCard(c)) label += " (逢人配)";
-        else if (game.isLevelCard(c)) label += " (级牌)";
+        if (game.isWildCard(c)) label += " " + t("(逢人配)");
+        else if (game.isLevelCard(c)) label += " " + t("(级牌)");
         return label;
       });
 
-      let pilesDesc = "无";
+      let pilesDesc = t("无");
       if (this.piles.length > 0) {
         pilesDesc = this.piles.map((p, pi) => {
           const pileCards = p.cardIds.map(id => this.cards.find(c => c.id === id)).filter(c => c);
           const sortedPile = game.sortCards(pileCards);
           const cardDesc = sortedPile.map(c => `${c.suit||""}${c.rank}`).join(" ");
           const analysis = game.analyzeCards(pileCards);
-          const typeDesc = analysis ? TYPE_NAMES[analysis.type] || analysis.type : "未知";
-          return `牌摞${pi}: 索引 [${p.cardIds.map(id => {
-            const idx = sorted.findIndex(c => c.id === id);
-            return idx;
-          }).join(", ")}] → ${cardDesc} (${typeDesc})`;
+          const typeDesc = analysis ? TYPE_NAMES[analysis.type] || analysis.type : t("未知");
+          const idxs = p.cardIds.map(id => sorted.findIndex(c => c.id === id)).join(", ");
+          return t("牌摞{pi}: 索引 [{indices}] → {cards} ({type})", { pi, indices: idxs, cards: cardDesc, type: typeDesc });
         }).join("\n");
       }
 
       const wilds = this.cards.filter(c => game.isWildCard(c));
-      const levelInfo = `级牌: ${game.levelRank}，逢人配: ${wilds.length}张（${wilds.map(c => c.suit+c.rank).join(", ") || "无"}）`;
+      const wildList = wilds.map(c => c.suit + c.rank).join(", ") || t("无");
+      const levelInfo = t("级牌: {rank}，逢人配: {n}张（{list}）", { rank: game.levelRank, n: wilds.length, list: wildList });
 
       return {
         hand: handLines.join("\n"),
@@ -1960,7 +1962,7 @@
         level_rank: game.levelRank,
         wild_count: wilds.length,
         info: levelInfo,
-        _reminder: "注意：每次 pile/unpile/play 之后，手牌排序会变化，索引会失效。下次操作前请重新调用 view_hand。"
+        _reminder: t("注意：每次 pile/unpile/play 之后，手牌排序会变化，索引会失效。下次操作前请重新调用 view_hand。")
       };
     }
 
@@ -1978,7 +1980,7 @@
       } else if (indices && indices.length > 0) {
         groupList = [indices]; // single-group mode
       } else {
-        return { error: "请提供 indices（单组）或 groups（多组）参数。推荐使用 groups 一次完成全部组牌，如 groups: [[0,1],[3,4,5],[7,8,9,10,11]]" };
+        return { error: t("请提供 indices（单组）或 groups（多组）参数。推荐使用 groups 一次完成全部组牌，如 groups: [[0,1],[3,4,5],[7,8,9,10,11]]") };
       }
 
       const sorted = game.sortCards(this.cards);
@@ -1993,12 +1995,12 @@
         if (!idxList || idxList.length === 0) continue;
         // 单张牌不能组牌——不要传单张索引到 groups 里，散牌直接留在手牌中即可
         if (idxList.length === 1) {
-          return { error: `第${g + 1}组只有1张牌（索引 ${idxList[0]}）。单张牌不需要理牌，请从 groups 中移除所有单张。散牌留在手牌中即可，只有多张组成的牌型才需要放进 groups。` };
+          return { error: t("第{g}组只有1张牌（索引 {idx}）。单张牌不需要理牌，请从 groups 中移除所有单张。散牌留在手牌中即可，只有多张组成的牌型才需要放进 groups。", { g: g + 1, idx: idxList[0] }) };
         }
         for (const idx of idxList) {
           if (seenIndices.has(idx)) {
             return {
-              error: `索引 ${idx} 同时出现在第${seenIndices.get(idx) + 1}组和第${g + 1}组中。groups 各组索引必须互不重叠——每张牌只能归入一组。请重新规划，确保各组的索引完全不重复。`,
+              error: t("索引 {idx} 同时出现在第{a}组和第{b}组中。groups 各组索引必须互不重叠——每张牌只能归入一组。请重新规划，确保各组的索引完全不重复。", { idx, a: seenIndices.get(idx) + 1, b: g + 1 }),
               overlap: true,
               conflictingIndex: idx,
               group1: seenIndices.get(idx),
@@ -2007,7 +2009,7 @@
           }
           // 验证索引范围
           if (idx < 0 || idx >= sorted.length) {
-            return { error: `索引 ${idx} 超出范围（当前手牌共 ${sorted.length} 张，有效索引 0~${sorted.length - 1}）`, invalidIndex: true };
+            return { error: t("索引 {idx} 超出范围（当前手牌共 {n} 张，有效索引 0~{m}）", { idx, n: sorted.length, m: sorted.length - 1 }), invalidIndex: true };
           }
           seenIndices.set(idx, g);
         }
@@ -2018,13 +2020,13 @@
         // 容错：单个元素若不是数组则包裹
         const idxList = Array.isArray(raw) ? raw : [raw];
         if (!idxList || idxList.length === 0) {
-          results.push({ group: g, error: "第" + (g + 1) + "组索引为空" });
+          results.push({ group: g, error: t("第{n}组索引为空", { n: g + 1 }) });
           continue;
         }
         const cards = idxList.map(i => sorted[i]).filter(c => c);
         if (cards.length !== idxList.length) {
-          const mapped = idxList.map(i => sorted[i] ? `${i}:${sorted[i].suit||""}${sorted[i].rank}` : `${i}:无效`);
-          results.push({ group: g, error: `第${g + 1}组部分索引无效：[${mapped.join(", ")}]` });
+          const mapped = idxList.map(i => sorted[i] ? `${i}:${sorted[i].suit||""}${sorted[i].rank}` : `${i}:${t("无效")}`);
+          results.push({ group: g, error: t("第{n}组部分索引无效：[{list}]", { n: g + 1, list: mapped.join(", ") }) });
           continue;
         }
         const analysis = game.analyzeCards(cards);
@@ -2032,25 +2034,25 @@
           if (cards.length >= 2) {
             const allSameRank = cards.every(c => c.rank === cards[0].rank);
             if (allSameRank) {
-              this._alertBug(`${cards.length}张同点数牌(${cards[0].rank})analyzeCards返回null`);
+              this._alertBug(t("{n}张同点数牌({rank})analyzeCards返回null", { n: cards.length, rank: cards[0].rank }));
             }
           }
           const cardDesc = cards.map(c => `${c.suit||""}${c.rank}`).join(" ");
-          results.push({ group: g, error: `第${g + 1}组 [${cardDesc}] 无法组成合法牌型` });
+          results.push({ group: g, error: t("第{n}组 [{cards}] 无法组成合法牌型", { n: g + 1, cards: cardDesc }) });
           continue;
         }
         if (analysis.type === "single") {
-          results.push({ group: g, error: `第${g + 1}组是单张，无需组牌` });
+          results.push({ group: g, error: t("第{n}组是单张，无需组牌", { n: g + 1 }) });
           continue;
         }
         const cardIds = cards.map(c => c.id);
         this.pileCards(cardIds);
         const created = this.piles.find(p => p.cardIds.length === cardIds.length && p.cardIds.every(id => cardIds.includes(id)));
         if (!created) {
-          this._alertBug("pileCards 调用后未找到新建的牌摞（cardIds: " + JSON.stringify(cardIds) + "）");
+          this._alertBug(t("pileCards 调用后未找到新建的牌摞（cardIds: {ids}）", { ids: JSON.stringify(cardIds) }));
         }
         const typeName = TYPE_NAMES[analysis.type] || analysis.type;
-        results.push({ group: g, success: true, message: `第${g + 1}组：${typeName}（${cards.length}张）`, type: typeName, power: analysis.power });
+        results.push({ group: g, success: true, message: t("第{n}组：{type}（{m}张）", { n: g + 1, type: typeName, m: cards.length }), type: typeName, power: analysis.power });
         allCardIds.push(...cardIds);
       }
 
@@ -2064,7 +2066,9 @@
       const successCount = results.filter(r => r.success).length;
       const failCount = results.filter(r => r.error).length;
       const summary = groupList.length > 1
-        ? `共${groupList.length}组：${successCount}组成功${failCount > 0 ? "，" + failCount + "组失败" : ""}`
+        ? (failCount > 0
+            ? t("共{n}组：{a}组成功，{b}组失败", { n: groupList.length, a: successCount, b: failCount })
+            : t("共{n}组：{a}组成功", { n: groupList.length, a: successCount }))
         : (results[0] && results[0].success ? results[0].message : "");
       if (successCount > 0) renderPlayerCards(this.position);
       const ret = { success: failCount === 0, summary, details: results };
@@ -2077,20 +2081,20 @@
       // 容错：单个数字转为数组
       if (typeof piles === "number") piles = [piles];
       if (!piles || !Array.isArray(piles) || piles.length === 0) {
-        return { error: "请提供要拆散的牌摞编号（piles 参数，如 [0] 或 [0,2]）。牌摞编号来自 view_hand 中显示的「牌摞N」。", invalidPiles: true };
+        return { error: t("请提供要拆散的牌摞编号（piles 参数，如 [0] 或 [0,2]）。牌摞编号来自 view_hand 中显示的「牌摞N」。"), invalidPiles: true };
       }
 
       // 前置验证：所有编号是否有效
       for (const pi of piles) {
         if (typeof pi !== "number" || pi < 0 || pi >= this.piles.length) {
-          return { error: `牌摞编号 ${pi} 无效。当前共 ${this.piles.length} 个牌摞（编号 0~${this.piles.length - 1}）。请先调用 view_hand 查看当前牌摞列表。`, invalidPiles: true };
+          return { error: t("牌摞编号 {pi} 无效。当前共 {n} 个牌摞（编号 0~{m}）。请先调用 view_hand 查看当前牌摞列表。", { pi, n: this.piles.length, m: this.piles.length - 1 }), invalidPiles: true };
         }
       }
 
       // 检查是否有重复编号
       const unique = new Set(piles);
       if (unique.size !== piles.length) {
-        return { error: "piles 中有重复的牌摞编号，请去重后重新提交。" };
+        return { error: t("piles 中有重复的牌摞编号，请去重后重新提交。") };
       }
 
       // 从大到小排序，先拆后面的摞避免编号偏移
@@ -2102,14 +2106,14 @@
         const pileCards = pile.cardIds.map(id => this.cards.find(c => c.id === id)).filter(c => c);
         const cardDesc = pileCards.map(c => `${c.suit||""}${c.rank}`).join(" ");
         this.unpileCards(pile.cardIds);
-        results.push({ success: true, message: `牌摞${pi} [${cardDesc}]（${pileCards.length}张）已拆散` });
+        results.push({ success: true, message: t("牌摞{pi} [{cards}]（{n}张）已拆散", { pi, cards: cardDesc, n: pileCards.length }) });
       }
 
       renderPlayerCards(this.position);
 
       const ret = {
         success: true,
-        summary: `共拆散 ${piles.length} 个牌摞`,
+        summary: t("共拆散 {n} 个牌摞", { n: piles.length }),
         details: results
       };
       this._logDecision("unpile_cards", { piles }, ret);
@@ -2120,23 +2124,23 @@
     _handlePlayCards(game, indices) {
       // 容错：LLM 可能传单个数字而非数组
       if (typeof indices === "number") indices = [indices];
-      if (!Array.isArray(indices) || indices.length === 0) return { error: "请提供要出牌的索引数组" };
+      if (!Array.isArray(indices) || indices.length === 0) return { error: t("请提供要出牌的索引数组") };
       const sorted = game.sortCards(this.cards);
       const cards = indices.map(i => sorted[i]).filter(c => c);
       if (cards.length !== indices.length) {
-        const mapped = indices.map(i => sorted[i] ? `${i}:${sorted[i].suit||""}${sorted[i].rank}` : `${i}:无效`);
-        return { error: `部分索引无效。手牌共${this.cards.length}张(索引0-${this.cards.length-1})。你提供的索引对应的牌: [${mapped.join(", ")}]。请先调用 view_hand 重新确认。` };
+        const mapped = indices.map(i => sorted[i] ? `${i}:${sorted[i].suit||""}${sorted[i].rank}` : `${i}:${t("无效")}`);
+        return { error: t("部分索引无效。手牌共{n}张(索引0-{m})。你提供的索引对应的牌: [{list}]。请先调用 view_hand 重新确认。", { n: this.cards.length, m: this.cards.length - 1, list: mapped.join(", ") }) };
       }
 
       const analysis = game.analyzeCards(cards);
       if (!analysis) {
         const cardDesc = cards.map(c => `${c.suit||""}${c.rank}`).join(" ");
-        return { error: `所选牌 [${cardDesc}] 无法组成合法牌型。可能原因: 1) 索引过时(手牌排序在理牌/出牌后可能变化) 2) 牌型不合法。请先调用 view_hand 重新确认索引。`, indices };
+        return { error: t("所选牌 [{cards}] 无法组成合法牌型。可能原因: 1) 索引过时(手牌排序在理牌/出牌后可能变化) 2) 牌型不合法。请先调用 view_hand 重新确认索引。", { cards: cardDesc }), indices };
       }
 
       if (game.lastPlay && game.lastPlay.playerIdx !== this.position) {
         if (!game.canBeat(analysis, game.lastPlay.analysis)) {
-          return { error: `所选牌型（${TYPE_NAMES[analysis.type]}）打不过场上牌（${TYPE_NAMES[game.lastPlay.type]}），请重新选择或过牌` };
+          return { error: t("所选牌型（{a}）打不过场上牌（{b}），请重新选择或过牌", { a: TYPE_NAMES[analysis.type], b: TYPE_NAMES[game.lastPlay.type] }) };
         }
       }
 
@@ -2146,38 +2150,38 @@
         if (game.lastPlay && game.lastPlay.playerIdx !== this.position) {
           const canBeat = game.canBeat(analysis, game.lastPlay.analysis);
           if (canBeat) {
-            this._alertBug("牌型可打过场上牌但 game.play 返回 false：" + (TYPE_NAMES[analysis.type] || analysis.type));
+            this._alertBug(t("牌型可打过场上牌但 game.play 返回 false：{type}", { type: TYPE_NAMES[analysis.type] || analysis.type }));
           }
         } else if (!game.lastPlay || game.lastPlay.playerIdx === this.position) {
-          this._alertBug("是领出者且牌型合法但 game.play 返回 false：" + (TYPE_NAMES[analysis.type] || analysis.type));
+          this._alertBug(t("是领出者且牌型合法但 game.play 返回 false：{type}", { type: TYPE_NAMES[analysis.type] || analysis.type }));
         }
-        return { error: "出牌失败，请重试" };
+        return { error: t("出牌失败，请重试") };
       }
       // 验证出牌后手牌是否减少
       const remainingIds = new Set(this.cards.map(c => c.id));
       const stillPresent = cards.filter(c => remainingIds.has(c.id));
       if (stillPresent.length > 0) {
-        this._alertBug("出牌成功后仍有" + stillPresent.length + "张牌留在手牌中");
+        this._alertBug(t("出牌成功后仍有{n}张牌留在手牌中", { n: stillPresent.length }));
       }
-      return { success: true, message: `已出${cards.length}张牌：${TYPE_NAMES[analysis.type] || analysis.type}` };
+      return { success: true, message: t("已出{n}张牌：{type}", { n: cards.length, type: TYPE_NAMES[analysis.type] || analysis.type }) };
     }
 
     // ---------- pass_turn ----------
     _handlePassTurn(game) {
-      if (!game.lastPlay) return { error: "你是领出者，不能过牌。请出牌。" };
-      if (game.lastPlay.playerIdx === this.position) return { error: "当前你是领出者，不能过牌。" };
+      if (!game.lastPlay) return { error: t("你是领出者，不能过牌。请出牌。") };
+      if (game.lastPlay.playerIdx === this.position) return { error: t("当前你是领出者，不能过牌。") };
       const ok = game.pass(this.position);
       if (!ok) {
-        this._alertBug("game.pass 返回 false，但 lastPlay 存在且非本人（lastPlay.playerIdx=" + game.lastPlay.playerIdx + ", this.position=" + this.position + "）");
-        return { error: "过牌失败" };
+        this._alertBug(t("game.pass 返回 false，但 lastPlay 存在且非本人（lastPlay.playerIdx={a}, this.position={b}）", { a: game.lastPlay.playerIdx, b: this.position }));
+        return { error: t("过牌失败") };
       }
-      return { success: true, message: "已过牌" };
+      return { success: true, message: t("已过牌") };
     }
 
     // ---------- view_history ----------
     _handleViewHistory(game) {
       if (game.roundHistory.length === 0) {
-        return { rounds: [], summary: "本局尚无出牌记录" };
+        return { rounds: [], summary: t("本局尚无出牌记录") };
       }
 
       // 按轮分组（newRoundAfter 标记一轮结束）
@@ -2197,13 +2201,14 @@
       const rounds = roundGroups.map((entries, ri) => {
         const roundDesc = entries.map(e => {
           if (e.cards === null) {
-            return `${e.playerName} 过牌`;
+            return t("{who} 过牌", { who: e.playerName });
           }
           const sorted = game.sortCards(e.cards);
           const analysis = game.analyzeCards(sorted);
           const typeName = analysis ? TYPE_NAMES[analysis.type] || analysis.type : "?";
           const cardsDesc = sorted.map(c => `${c.suit||""}${c.rank}`).join(" ");
-          return `${e.playerName} 出 ${typeName}：${cardsDesc}${analysis ? " (power:" + analysis.power + ")" : ""}`;
+          const power = analysis ? " (power:" + analysis.power + ")" : "";
+          return t("{who} 出 {type}：{cards}{power}", { who: e.playerName, type: typeName, cards: cardsDesc, power });
         });
         return { round: ri + 1, plays: roundDesc };
       });
@@ -2214,7 +2219,7 @@
         total_rounds: totalRounds,
         total_plays: totalPlays,
         rounds,
-        _reminder: "power 越小牌越小。注意哪些大牌和炸弹已出，据此判断对手剩余实力。"
+        _reminder: t("power 越小牌越小。注意哪些大牌和炸弹已出，据此判断对手剩余实力。")
       };
     }
 
@@ -2229,25 +2234,25 @@
       try {
         const content = localStorage.getItem(key) || "";
         if (!content.trim()) {
-          return { content: "", summary: "尚无过往经验记录。" };
+          return { content: "", summary: t("尚无过往经验记录。") };
         }
-        return { content, summary: "过往经验已加载（共 " + content.length + " 字符）。" };
+        return { content, summary: t("过往经验已加载（共 {n} 字符）。", { n: content.length }) };
       } catch (e) {
-        return { error: "读取经验失败：" + e.message };
+        return { error: t("读取经验失败：{e}", { e: e.message }) };
       }
     }
 
     // ---------- record_experience ----------
     _handleRecordExperience(content) {
       if (!content || typeof content !== "string" || content.trim().length === 0) {
-        return { error: "请提供要记录的经验内容（content 参数不能为空）。" };
+        return { error: t("请提供要记录的经验内容（content 参数不能为空）。") };
       }
       const key = this._expMemoryKey();
       try {
         localStorage.setItem(key, content.trim());
-        return { success: true, message: "经验已保存（全量覆盖，共 " + content.trim().length + " 字符）。" };
+        return { success: true, message: t("经验已保存（全量覆盖，共 {n} 字符）。", { n: content.trim().length }) };
       } catch (e) {
-        return { error: "记录经验失败：" + e.message };
+        return { error: t("记录经验失败：{e}", { e: e.message }) };
       }
     }
 
@@ -2265,19 +2270,19 @@
         this.messages.push({
           role: "user",
           content: [
-            "【复盘】本局已结束。请回顾本局的表现，从策略层面反思经验教训。",
-            "你可以调用 view_history 回顾本局出牌过程，调用 read_experience 查看之前的经验记录。",
+            t("【复盘】本局已结束。请回顾本局的表现，从策略层面反思经验教训。"),
+            t("你可以调用 view_history 回顾本局出牌过程，调用 read_experience 查看之前的经验记录。"),
             "",
-            "【复盘要求 — 不要记具体的某手牌，要抽象出原则】",
-            "不要记录「第X轮我出了XXX，队友出了XXX」这类具体细节。要从整局博弈中提炼出可迁移的打牌原则和博弈规律。",
-            "请重点思考以下问题：",
-            "1. 组牌思路：是否因为组牌策略不对，导致某手牌迟迟打不出去？比如把本该拆开跟牌的牌硬组成了大牌型，或者把本该保留的炸弹拆散了？应该以什么为优先——是优先组顺子/连对以便跟牌，还是优先保留炸弹/大牌型以便压牌？",
-            "2. 出牌节奏：自己和队友是否出现「牌出不去」的情况——手里有能打的牌但因为组牌方式导致没有合适的牌型去跟？队友是否因为你的出牌选择（比如过早打出大牌、没有及时喂牌）而陷入被动？",
-            "3. 博弈判断：在关键轮次中，选择「压牌抢出牌权」还是「放牌让队友接」的判断准则是什么？考虑当前局势（是否头游在望、对手剩余牌数）时，决策有什么可以改进的地方？",
-            "4. 逢人配使用：逢人配（红心级牌）有没有被浪费在低价值的牌型上？应该优先用来凑炸弹还是凑同花顺？在什么情况下应该保留逢人配而不是急于用掉？",
+            t("【复盘要求 — 不要记具体的某手牌，要抽象出原则】"),
+            t("不要记录「第X轮我出了XXX，队友出了XXX」这类具体细节。要从整局博弈中提炼出可迁移的打牌原则和博弈规律。"),
+            t("请重点思考以下问题："),
+            t("1. 组牌思路：是否因为组牌策略不对，导致某手牌迟迟打不出去？比如把本该拆开跟牌的牌硬组成了大牌型，或者把本该保留的炸弹拆散了？应该以什么为优先——是优先组顺子/连对以便跟牌，还是优先保留炸弹/大牌型以便压牌？"),
+            t("2. 出牌节奏：自己和队友是否出现「牌出不去」的情况——手里有能打的牌但因为组牌方式导致没有合适的牌型去跟？队友是否因为你的出牌选择（比如过早打出大牌、没有及时喂牌）而陷入被动？"),
+            t("3. 博弈判断：在关键轮次中，选择「压牌抢出牌权」还是「放牌让队友接」的判断准则是什么？考虑当前局势（是否头游在望、对手剩余牌数）时，决策有什么可以改进的地方？"),
+            t("4. 逢人配使用：逢人配（红心级牌）有没有被浪费在低价值的牌型上？应该优先用来凑炸弹还是凑同花顺？在什么情况下应该保留逢人配而不是急于用掉？"),
             "",
-            "【重要】record_experience 是全量覆盖式保存——新内容会替换所有旧经验。",
-            "请先 read_experience 读取旧经验，整合新旧内容后用 record_experience 保存。如果觉得没什么可记录的，直接回复「无」即可。"
+            t("【重要】record_experience 是全量覆盖式保存——新内容会替换所有旧经验。"),
+            t("请先 read_experience 读取旧经验，整合新旧内容后用 record_experience 保存。如果觉得没什么可记录的，直接回复「无」即可。")
           ].join("\n")
         });
         notifyAIPanel(this.position);
@@ -2298,10 +2303,10 @@
                 let args = {};
                 try { args = JSON.parse(tc.function.arguments || "{}"); } catch (e) {}
                 let result;
-                try { result = await this._dispatchTool(fnName, args, game); } catch (e) { result = { error: "工具异常：" + e.message }; }
+                try { result = await this._dispatchTool(fnName, args, game); } catch (e) { result = { error: t("工具异常：{e}", { e: e.message }) }; }
                 this.messages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(result) });
                 if (fnName === "record_experience" && result.success) {
-                  addLog(this.name + " 复盘完成，经验已记录");
+                  addLog(t("{name} 复盘完成，经验已记录", { name: this.name }));
                 }
               }
               notifyAIPanel(this.position);
@@ -2309,7 +2314,7 @@
             }
 
             this.messages.push(msg);
-            addLog(this.name + " 复盘完成");
+            addLog(t("{name} 复盘完成", { name: this.name }));
             notifyAIPanel(this.position);
             return;
           } catch (e) {
@@ -2317,16 +2322,16 @@
             if (this._isToolIdError(e.message)) {
               const removed = this._fixupToolCalls();
               if (removed > 0) {
-                addLog(this.name + " 复盘时检测到 tool call ID 不匹配，已清理 " + removed + " 条孤立的 tool 消息");
+                addLog(t("{name} 复盘时检测到 tool call ID 不匹配，已清理 {n} 条孤立的 tool 消息", { name: this.name, n: removed }));
                 this.messages.push({
                   role: "user",
-                  content: "检测到上下文 tool call 不匹配，已自动清理 " + removed + " 条孤立的 tool 消息。请继续复盘思考。"
+                  content: t("检测到上下文 tool call 不匹配，已自动清理 {n} 条孤立的 tool 消息。请继续复盘思考。", { n: removed })
                 });
                 notifyAIPanel(this.position);
                 continue;
               }
             }
-            addLog(this.name + " 复盘出错：" + e.message);
+            addLog(t("{name} 复盘出错：{e}", { name: this.name, e: e.message }));
             return;
           }
         }
@@ -2342,22 +2347,23 @@
       let desc = "";
 
       // --- 各玩家状态 ---
-      desc += "【玩家状态】\n";
+      desc += t("【玩家状态】") + "\n";
       for (let i = 0; i < 4; i++) {
         const p = game.players[i];
         const finished = game.finishedOrder.indexOf(i) >= 0;
-        const placeNames = ["", "头游", "二游", "三游", "末游"];
+        const placeNames = ["", t("头游"), t("二游"), t("三游"), t("末游")];
         const place = game.finishedOrder.indexOf(i);
-        const status = finished ? "（已" + (placeNames[place + 1] || "完成") + "）" : "";
-        const teammate = (this.position + 2) % 4 === i ? " [队友]" : "";
-        const isMe = i === this.position ? " ← 你" : "";
-        desc += `  ${p.name}：${finished ? "0 张" + status : p.cards.length + " 张"}${teammate}${isMe}\n`;
+        const status = finished ? t("（已{place}）", { place: placeNames[place + 1] || t("完成") }) : "";
+        const teammate = (this.position + 2) % 4 === i ? " " + t("[队友]") : "";
+        const isMe = i === this.position ? " " + t("← 你") : "";
+        const cardsDesc2 = finished ? t("0 张") : t("{n} 张", { n: p.cards.length });
+        desc += `  ${p.name}：${cardsDesc2}${status}${teammate}${isMe}\n`;
       }
 
       // --- 本轮出牌记录（之前的轮次已在对话历史中） ---
-      desc += "\n【本轮出牌记录】\n";
+      desc += "\n" + t("【本轮出牌记录】") + "\n";
       if (game.roundHistory.length === 0) {
-        desc += "  （本局尚未有人出牌）\n";
+        desc += t("  （本局尚未有人出牌）") + "\n";
       } else {
         let roundStart = 0;
         for (let i = game.roundHistory.length - 2; i >= 0; i--) {
@@ -2370,32 +2376,32 @@
         for (const entry of currentRound) {
           const who = entry.playerName;
           if (entry.cards === null) {
-            desc += `  ${who} 过牌\n`;
+            desc += "  " + t("{who} 过牌", { who }) + "\n";
           } else {
             const cardsDesc = entry.cards.map(c => `${c.suit||""}${c.rank}`).join(" ");
             const analysis = game.analyzeCards(entry.cards);
             const typeName = analysis ? (TYPE_NAMES[analysis.type] || analysis.type) : "?";
-            desc += `  ${who} 出了 ${typeName}：${cardsDesc}\n`;
+            desc += "  " + t("{who} 出了 {type}：{cards}", { who, type: typeName, cards: cardsDesc }) + "\n";
           }
         }
       }
 
       // --- 当前局面 ---
-      desc += "\n【当前局面】\n";
+      desc += "\n" + t("【当前局面】") + "\n";
       if (shouldLead) {
-        desc += "你是领出者，可以出任意合法牌型。\n";
+        desc += t("你是领出者，可以出任意合法牌型。") + "\n";
       } else {
         const lp = game.lastPlay;
         const who = game.players[lp.playerIdx].name;
         const cardsDesc = lp.cards.map(c => `${c.suit||""}${c.rank}`).join(" ");
-        desc += `上家 ${who} 出了 ${TYPE_NAMES[lp.type] || lp.type}：${cardsDesc}。\n`;
-        desc += "你必须出同类型更大的牌，或用炸弹/同花顺/天王炸压制，或过牌。\n";
+        desc += t("上家 {who} 出了 {type}：{cards}。", { who, type: TYPE_NAMES[lp.type] || lp.type, cards: cardsDesc }) + "\n";
+        desc += t("你必须出同类型更大的牌，或用炸弹/同花顺/天王炸压制，或过牌。") + "\n";
       }
-      desc += `当前打 ${game.levelRank}。红心${game.levelRank} 是逢人配。\n`;
-      desc += `你的手牌共 ${this.cards.length} 张。\n`;
-      desc += "请先调用 view_hand 工具查看手牌和索引，然后决定如何出牌。\n";
-      desc += "你可以多次调用 pile_cards 和 unpile_cards 来探索不同组合。\n";
-      desc += '回复末尾必须包含任务状态 JSON：{"task":"play","complete":true}（已完成出牌决策）或 {"task":"play","complete":false}（还需思考）。';
+      desc += t("当前打 {rank}。红心{rank} 是逢人配。", { rank: game.levelRank }) + "\n";
+      desc += t("你的手牌共 {n} 张。", { n: this.cards.length }) + "\n";
+      desc += t("请先调用 view_hand 工具查看手牌和索引，然后决定如何出牌。") + "\n";
+      desc += t("你可以多次调用 pile_cards 和 unpile_cards 来探索不同组合。") + "\n";
+      desc += t('回复末尾必须包含任务状态 JSON：{"task":"play","complete":true}（已完成出牌决策）或 {"task":"play","complete":false}（还需思考）。');
       return desc;
     }
   }
@@ -2482,14 +2488,14 @@
     // ---------- Game init ----------
     startNewGame() {
       const deck = this.shuffle(this.createDeck());
-      const seatNames = ["南", "东", "北", "西"];
+      const seatNames = [t("南"), t("东"), t("北"), t("西")];
       const seatTeams = ["A", "B", "A", "B"];
 
       this.players = [];
       for (let i = 0; i < 4; i++) {
         const seatCfg = seatConfig[i] || { type: "human" };
         const isHuman = seatCfg.type === "human";
-        const name = seatNames[i] + (isHuman ? "（你）" : "");
+        const name = seatNames[i] + (isHuman ? t("（你）") : "");
         if (isHuman) {
           this.players[i] = new Player(name, seatTeams[i], i, true);
         } else {
@@ -2499,7 +2505,7 @@
             const factory = new LLMAIPlayerFactory(aiCfg.providerId, aiCfg.modelName, GUANDAN_SYSTEM_PROMPT);
             this.players[i] = factory.createPlayer(name, seatTeams[i], i);
           } else {
-            addLog("座位 " + seatNames[i] + " 配置为 AI 但没有可用大模型，该座位按真人处理");
+            addLog(t("座位 {name} 配置为 AI 但没有可用大模型，该座位按真人处理", { name: seatNames[i] }));
             this.players[i] = new Player(name, seatTeams[i], i, true);
           }
         }
@@ -2517,11 +2523,12 @@
       this.roundHistory = [];
 
       const humanIdx = this.players.findIndex(p => p.isHuman);
+      const levelDesc = t("当前打 {rank}，级牌 {rank} 大于 A 小于小王。", { rank: this.levelRank });
       if (humanIdx >= 0) {
         const wildCount = this.players[humanIdx].cards.filter(c => this.isWildCard(c)).length;
-        addLog(`新一局开始！当前打 ${this.levelRank}，级牌 ${this.levelRank} 大于 A 小于小王。${this.players[humanIdx].name} 有 ${wildCount} 张逢人配（红心${this.levelRank}）。`);
+        addLog(t("新一局开始！{level}{name} 有 {n} 张逢人配（红心{rank}）。", { level: levelDesc, name: this.players[humanIdx].name, n: wildCount, rank: this.levelRank }));
       } else {
-        addLog(`新一局开始！当前打 ${this.levelRank}，级牌 ${this.levelRank} 大于 A 小于小王。全部 AI 自动对战。`);
+        addLog(t("新一局开始！{level}全部 AI 自动对战。", { level: levelDesc }));
       }
 
       return this;
@@ -2935,15 +2942,15 @@
       this.passCount = 0;
       this.round++;
 
-      const wildNote = analysis.wildUsed ? `（使用逢人配 ${analysis.wildUsed} 张）` : "";
-      addLog(`${player.name} 出了 ${TYPE_NAMES[analysis.type] || analysis.type}（${cards.length}张）${wildNote}`);
+      const wildNote = analysis.wildUsed ? t("（使用逢人配 {n} 张）", { n: analysis.wildUsed }) : "";
+      addLog(t("{name} 出了 {type}（{n}张）{note}", { name: player.name, type: TYPE_NAMES[analysis.type] || analysis.type, n: cards.length, note: wildNote }));
 
       // Check win
       if (player.cards.length === 0) {
         this.finishedOrder.push(playerIdx);
         const place = this.finishedOrder.length;
-        const placeNames = ["", "头游", "二游", "三游", "末游"];
-        addLog(`${player.name} 成为${placeNames[place]}！`);
+        const placeNames = ["", t("头游"), t("二游"), t("三游"), t("末游")];
+        addLog(t("{name} 成为{place}！", { name: player.name, place: placeNames[place] }));
 
         if (place === 1) {
           const remaining = this.players.filter(p => p.cards.length > 0);
@@ -2961,7 +2968,7 @@
         } else if (place === 2) {
           const headPlayer = this.players[this.finishedOrder[0]];
           if (player.team === headPlayer.team) {
-            addLog(`${player.team === "A" ? "A组" : "B组"}双上！`);
+            addLog(t("{team}双上！", { team: player.team === "A" ? t("A组") : t("B组") }));
             this.endGame();
             return true;
           }
@@ -2984,7 +2991,7 @@
       if (!this.lastPlay) return false;
       if (this.lastPlay.playerIdx === playerIdx) return false;
       this.passCount++;
-      addLog(`${this.players[playerIdx].name} 过牌`);
+      addLog(t("{name} 过牌", { name: this.players[playerIdx].name }));
       this.roundHistory.push({ playerIdx, cards: null, playerName: this.players[playerIdx].name });
       this.nextPlayer();
       renderAll();
@@ -2998,13 +3005,13 @@
           const teammate = (winner + 2) % 4;
           if (this.players[teammate].cards.length > 0) {
             winner = teammate;
-            addLog(`${this.players[teammate].name} 接风！`);
+            addLog(t("{name} 接风！", { name: this.players[teammate].name }));
           } else {
             this.endGame();
             return true;
           }
         }
-        addLog(`${this.players[winner].name} 获得新一轮出牌权`);
+        addLog(t("{name} 获得新一轮出牌权", { name: this.players[winner].name }));
         this.lastPlay = null;
         this.passCount = 0;
         this.currentPlayer = winner;
@@ -3031,7 +3038,7 @@
         if (!this.finishedOrder.includes(i)) this.finishedOrder.push(i);
       }
 
-      const placeNames = ["头游", "二游", "三游", "末游"];
+      const placeNames = [t("头游"), t("二游"), t("三游"), t("末游")];
       const teamAPlaces = [];
       const teamBPlaces = [];
 
@@ -3044,7 +3051,7 @@
 
       const headPlayer = this.players[this.finishedOrder[0]];
       const winTeam = headPlayer.team;
-      const winTeamLabel = winTeam === "A" ? "A组" : "B组";
+      const winTeamLabel = winTeam === "A" ? t("A组") : t("B组");
 
       let upgradeLevels = 1;
       if (winTeam === "A") {
@@ -3060,12 +3067,12 @@
       this.levelRank = LEVEL_RANKS[newLevelIdx];
 
       const resultMsg = this.finishedOrder.map((pIdx, i) =>
-        `${placeNames[i]}: ${this.players[pIdx].name}（${this.players[pIdx].team}组）`
-      ).join("，");
+        t("{place}: {name}（{team}组）", { place: placeNames[i], name: this.players[pIdx].name, team: this.players[pIdx].team })
+      ).join(t("，"));
 
-      addLog(`========== 本局结束 ==========`);
-      addLog(`结果：${resultMsg}`);
-      addLog(`${winTeamLabel}获胜！连升 ${upgradeLevels} 级，当前打 ${this.levelRank}`);
+      addLog(t("========== 本局结束 =========="));
+      addLog(t("结果：{msg}", { msg: resultMsg }));
+      addLog(t("{team}获胜！连升 {n} 级，当前打 {rank}", { team: winTeamLabel, n: upgradeLevels, rank: this.levelRank }));
 
       // 记录对局战绩（localStorage，首页「本机战绩」展示用）
       const statsKey = "guandan_challenge_stats";
@@ -3094,7 +3101,7 @@
       lsSetJSON(statsKey, stats);
 
       const statusColor = winTeam === "A" ? "#0f8a5f" : "#c06d2b";
-      $("#gameStatus").text(`游戏结束 - ${winTeamLabel}胜（升${upgradeLevels}级 → 打${this.levelRank}）`).css("color", statusColor);
+      $("#gameStatus").text(t("游戏结束 - {team}胜（升{n}级 → 打{rank}）", { team: winTeamLabel, n: upgradeLevels, rank: this.levelRank })).css("color", statusColor);
       // Hide all seat action buttons
       $(".seat-actions").hide();
       renderLevelBadge();
@@ -3109,7 +3116,7 @@
       setTimeout(() => {
         this.players.forEach(p => {
           if (p instanceof LLMAIPlayer) {
-            p.reviewGame(this).catch(e => addLog(p.name + " 复盘失败：" + e.message));
+            p.reviewGame(this).catch(e => addLog(t("{name} 复盘失败：{e}", { name: p.name, e: e.message })));
           }
         });
       }, 2000);
@@ -3149,15 +3156,15 @@
   }
 
   function showVictoryModal(game, winTeam, upgradeLevels) {
-    const winTeamLabel = winTeam === "A" ? "A组" : "B组";
+    const winTeamLabel = winTeam === "A" ? t("A组") : t("B组");
 
     // 标题：有真人对局时以「你」的视角祝贺/安慰
     const humanOnWinTeam = game.players[0] && game.players[0].isHuman && winTeam === "A";
     const hasHuman = game.players.some(p => p.isHuman);
     $("#victoryTitle").text(
-      !hasHuman ? "本局结束"
-        : humanOnWinTeam ? "🎉 恭喜你获胜！"
-        : "本局结束，对手获胜"
+      !hasHuman ? t("本局结束")
+        : humanOnWinTeam ? t("🎉 恭喜你获胜！")
+        : t("本局结束，对手获胜")
     );
 
     $("#victoryTeamBadge")
@@ -3168,17 +3175,17 @@
       .filter(i => game.players[i].team === winTeam)
       .map(i => game.players[i].name);
     const headPlayer = game.players[game.finishedOrder[0]];
-    $("#victoryHeadline").text(winNames.join(" · ") + " 联手拿下本局，" + headPlayer.name + " 率先出完牌");
+    $("#victoryHeadline").text(t("{names} 联手拿下本局，{head} 率先出完牌", { names: winNames.join(" · "), head: headPlayer.name }));
 
-    $("#victoryLevel").text("连升 " + upgradeLevels + " 级 → 下一局打 " + game.levelRank);
+    $("#victoryLevel").text(t("连升 {n} 级 → 下一局打 {rank}", { n: upgradeLevels, rank: game.levelRank }));
 
-    const placeNames = ["头游", "二游", "三游", "末游"];
+    const placeNames = [t("头游"), t("二游"), t("三游"), t("末游")];
     $("#victoryOrder").html(game.finishedOrder.map((pIdx, i) =>
       '<div><span class="place">' + placeNames[i] + '</span>' + game.players[pIdx].name + '</div>'
     ).join(""));
 
     const stats = lsGetJSON("guandan_challenge_stats", { games: 0, teamA: 0, teamB: 0 });
-    $("#victoryRecord").text("本机战绩：A组 " + (stats.teamA || 0) + " 胜 · B组 " + (stats.teamB || 0) + " 胜 · 共 " + (stats.games || 0) + " 局");
+    $("#victoryRecord").text(t("本机战绩：A组 {a} 胜 · B组 {b} 胜 · 共 {n} 局", { a: stats.teamA || 0, b: stats.teamB || 0, n: stats.games || 0 }));
 
     $("#victoryOverlay").addClass("show");
     spawnConfetti();
@@ -3192,7 +3199,7 @@
   // seatConfig[i] = { type: "human"|"ai", providerId, modelName }  for i=0(南),1(东),2(北),3(西)
   // 每个 AI 座位可独立选择不同服务商/模型（本项目的核心亮点），配置存入 localStorage
   const SEAT_CONFIG_KEY = "guandan_seat_config";
-  const SEAT_NAMES = ["南", "东", "北", "西"];
+  const SEAT_NAMES = [t("南"), t("东"), t("北"), t("西")];
 
   function defaultSeatConfig() {
     return {
@@ -3257,33 +3264,33 @@
   }
 
   function updateSeatInfo() {
-    const seatNames = ["南", "东", "北", "西"];
+    const seatNames = [t("南"), t("东"), t("北"), t("西")];
     const nameIds = ["#nameBottom", "#nameRight", "#nameTop", "#nameLeft"];
     const teamBadges = [
-      '<span class="team-badge team-a">A组</span>',
-      '<span class="team-badge team-b">B组</span>',
-      '<span class="team-badge team-a">A组</span>',
-      '<span class="team-badge team-b">B组</span>'
+      '<span class="team-badge team-a">' + t("A组") + '</span>',
+      '<span class="team-badge team-b">' + t("B组") + '</span>',
+      '<span class="team-badge team-a">' + t("A组") + '</span>',
+      '<span class="team-badge team-b">' + t("B组") + '</span>'
     ];
     for (let i = 0; i < 4; i++) {
       const isHuman = seatConfig[i] && seatConfig[i].type === "human";
-      const name = seatNames[i] + (isHuman ? "（你）" : "");
+      const name = seatNames[i] + (isHuman ? t("（你）") : "");
       const aiBadge = (!isHuman && getSeatAiConfig(i))
-        ? ' <span class="ai-badge" data-position="' + i + '" title="查看 AI 对话过程">AI</span>'
+        ? ' <span class="ai-badge" data-position="' + i + '" title="' + t("查看 AI 对话过程") + '">AI</span>'
         : '';
       const player = game.players[i];
       let countStr = "";
       if (player && game.started) {
-        countStr = " " + player.cards.length + " 张";
+        countStr = " " + t("{n} 张", { n: player.cards.length });
         if (player instanceof LLMAIPlayer && player.preparing) {
-          countStr += " · 组牌中…";
+          countStr += " · " + t("组牌中…");
         } else if (player instanceof LLMAIPlayer && player.thinking) {
-          countStr += " · 思考中…";
+          countStr += " · " + t("思考中…");
         } else if (player instanceof LLMAIPlayer && player.chatting) {
-          countStr += " · 讨论中…";
+          countStr += " · " + t("讨论中…");
         }
       } else {
-        countStr = " 27 张";
+        countStr = " " + t("27 张");
       }
       // Order: 组名 座位名 AI 张数 状态
       $(nameIds[i]).html(teamBadges[i] + " " + name + aiBadge + countStr);
@@ -3368,7 +3375,7 @@
           const tcHtml = toolCalls.map(tc => {
             let argsPreview = "";
             try { argsPreview = JSON.stringify(JSON.parse(tc.function.arguments || "{}")); } catch (e) { argsPreview = tc.function.arguments || ""; }
-            return '<div style="margin-top:2px"><span class="tool-call-name">工具：' + escapeHtml(tc.function.name) + '</span>(' + escapeHtml(argsPreview) + ')</div>';
+            return '<div style="margin-top:2px"><span class="tool-call-name">' + t("工具：") + escapeHtml(tc.function.name) + '</span>(' + escapeHtml(argsPreview) + ')</div>';
           }).join("");
           chatStreamingMsgEl.querySelector(".streaming-tools").innerHTML = tcHtml;
         }
@@ -3406,7 +3413,7 @@
           let args = {};
           try { args = JSON.parse(tc.function.arguments || "{}"); } catch (e) {}
           let toolResult;
-          try { toolResult = await player._dispatchTool(fnName, args, game); } catch (e) { toolResult = { error: "工具异常：" + e.message }; }
+          try { toolResult = await player._dispatchTool(fnName, args, game); } catch (e) { toolResult = { error: t("工具异常：{e}", { e: e.message }) }; }
           player.messages.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(toolResult) });
         }
         // 立即渲染工具结果，让用户实时看到 pile_cards 等操作的反馈
@@ -3455,10 +3462,10 @@
       if (player._isToolIdError && player._isToolIdError(e.message)) {
         const removed = player._fixupToolCalls();
         if (removed > 0) {
-          addLog(`[Chat] ${player.name} 检测到 tool call ID 不匹配，已清理 ${removed} 条孤立的 tool 消息`);
+          addLog(t("[Chat] {name} 检测到 tool call ID 不匹配，已清理 {n} 条孤立的 tool 消息", { name: player.name, n: removed }));
           player.messages.push({
             role: "user",
-            content: "[Chat] 检测到上下文 tool call 不匹配，已自动清理 " + removed + " 条孤立的 tool 消息。如果你刚才的提问还没被完全回答，请重新提问。"
+            content: t("[Chat] 检测到上下文 tool call 不匹配，已自动清理 {n} 条孤立的 tool 消息。如果你刚才的提问还没被完全回答，请重新提问。", { n: removed })
           });
           fixed = true;
         }
@@ -3472,12 +3479,12 @@
       // 把已收集的结果渲染出来，并在面板中显示错误
       if (aiPanelPlayerIdx === playerIdx) {
         renderAIPanel();
-        const $err = $('<div class="ai-msg ai-msg-tool"><div class="role-label">Error</div>' + escapeHtml(e.message) + (fixed ? ' (已自动修复上下文)' : '') + '</div>');
+        const $err = $('<div class="ai-msg ai-msg-tool"><div class="role-label">Error</div>' + escapeHtml(e.message) + (fixed ? " " + t("(已自动修复上下文)") : '') + '</div>');
         $("#aiPanelBody").append($err);
         const $body = $("#aiPanelBody");
         $body.scrollTop($body[0].scrollHeight);
       }
-      addLog(`[Chat] ${player.name} 提问处理失败：${e.message}` + (fixed ? " (已自动修复上下文)" : ""));
+      addLog(t("[Chat] {name} 提问处理失败：{e}", { name: player.name, e: e.message }) + (fixed ? " " + t("(已自动修复上下文)") : ""));
     }
     // 解锁聊天，允许 decidePlay/prepareHand 继续
     player.chatting = false;
@@ -3501,7 +3508,7 @@
 
     // 先显示在面板中（排队中或立即发送），后续由 processChatItem 清理并正式渲染
     const $msg = $('<div class="ai-msg ai-msg-user-chat ai-msg-pending">'
-      + '<div class="role-label">你' + (isBusy ? ' <span class="pending-badge">排队中</span>' : '') + '</div>'
+      + '<div class="role-label">' + t("你") + (isBusy ? ' <span class="pending-badge">' + t("排队中") + '</span>' : '') + '</div>'
       + escapeHtml(text) + '</div>');
     $("#aiPanelBody").append($msg);
     const $body = $("#aiPanelBody");
@@ -3521,7 +3528,7 @@
     if (!player || !(player instanceof LLMAIPlayer)) return;
     // 重置压缩分隔线状态（全量重新渲染）
     if (player._lastCompression) player._lastCompression._shown = false;
-    $("#aiPanelTitle").text(player.name + " 决策过程");
+    $("#aiPanelTitle").text(t("{name} 决策过程", { name: player.name }));
     $("#aiPanel").css("display", "flex");
     $("#aiPanelBody").empty();
     renderAIPanel();
@@ -3567,7 +3574,7 @@
       const tcHtml = toolCalls.map(tc => {
         let argsPreview = "";
         try { argsPreview = JSON.stringify(JSON.parse(tc.function.arguments || "{}")); } catch (e) { argsPreview = tc.function.arguments || ""; }
-        return '<div style="margin-top:2px"><span class="tool-call-name">工具：' + escapeHtml(tc.function.name) + '</span>(' + escapeHtml(argsPreview) + ')</div>';
+        return '<div style="margin-top:2px"><span class="tool-call-name">' + t("工具：") + escapeHtml(tc.function.name) + '</span>(' + escapeHtml(argsPreview) + ')</div>';
       }).join("");
       aiStreamingMsgEl.querySelector(".streaming-tools").innerHTML = tcHtml;
     }
@@ -3596,7 +3603,7 @@
     const msgs = player.messages;
     if (msgs.length === 0) {
       if (aiPanelMsgCount === 0) {
-        $("#aiPanelBody").html('<div class="ai-panel-empty">等待 AI 开始思考…</div>');
+        $("#aiPanelBody").html('<div class="ai-panel-empty">' + t("等待 AI 开始思考…") + '</div>');
       }
       return;
     }
@@ -3605,7 +3612,7 @@
     for (let i = aiPanelMsgCount; i < msgs.length; i++) {
       // 上下文压缩分隔线
       if (player._lastCompression && !player._lastCompression._shown && i === player._lastCompression.keptFrom) {
-        html += '<div class="ai-msg ai-msg-compress">━━━ 上下文压缩：此前 ' + player._lastCompression.removed + ' 条消息已省略 ━━━</div>';
+        html += '<div class="ai-msg ai-msg-compress">' + t("━━━ 上下文压缩：此前 {n} 条消息已省略 ━━━", { n: player._lastCompression.removed }) + '</div>';
         player._lastCompression._shown = true;
       }
       const msg = msgs[i];
@@ -3615,10 +3622,10 @@
         content = content.map(p => typeof p === "string" ? p : (p.text || "")).join("");
       }
       if (role === "system") {
-        html += '<div class="ai-msg ai-msg-system"><div class="role-label">System</div>系统提示词已加载（游戏规则 + 策略指导）</div>';
+        html += '<div class="ai-msg ai-msg-system"><div class="role-label">System</div>' + t("系统提示词已加载（游戏规则 + 策略指导）") + '</div>';
       } else if (role === "user") {
         if (content.startsWith("[Chat] ")) {
-          html += '<div class="ai-msg ai-msg-user-chat"><div class="role-label">你</div>' + escapeHtml(content.slice(7)) + '</div>';
+          html += '<div class="ai-msg ai-msg-user-chat"><div class="role-label">' + t("你") + '</div>' + escapeHtml(content.slice(7)) + '</div>';
         } else {
           html += '<div class="ai-msg ai-msg-user"><div class="role-label">Game State</div>' + escapeHtml(content) + '</div>';
         }
@@ -3628,7 +3635,7 @@
           tcHtml = msg.tool_calls.map(tc => {
             let argsPreview = "";
             try { argsPreview = JSON.stringify(JSON.parse(tc.function.arguments || "{}")); } catch (e) { argsPreview = tc.function.arguments || ""; }
-            return '<div style="margin-top:2px"><span class="tool-call-name">工具：' + tc.function.name + '</span>(' + escapeHtml(argsPreview) + ')</div>';
+            return '<div style="margin-top:2px"><span class="tool-call-name">' + t("工具：") + tc.function.name + '</span>(' + escapeHtml(argsPreview) + ')</div>';
           }).join("");
         }
         const textContent = content ? renderContentWithThink(String(content)) : '';
@@ -3638,11 +3645,11 @@
         try {
           const parsed = JSON.parse(content);
           if (parsed.error && parsed.overlap) {
-            toolContent = "✗ 索引重叠：" + parsed.error;
+            toolContent = t("✗ 索引重叠：") + parsed.error;
           } else if (parsed.error && parsed.invalidIndex) {
-            toolContent = "✗ 索引越界：" + parsed.error;
+            toolContent = t("✗ 索引越界：") + parsed.error;
           } else if (parsed.error) {
-            toolContent = "✗ " + parsed.error;
+            toolContent = t("✗ ") + parsed.error;
           } else if (parsed.success !== undefined) {
             const icon = parsed.success ? "✓" : "✗";
             // groups mode: show summary + details
@@ -3656,7 +3663,7 @@
               toolContent = icon + " " + (parsed.summary || parsed.message || parsed.error || "");
             }
           } else if (parsed.hand) {
-            toolContent = "手牌共 " + parsed.hand_size + " 张\n" + parsed.info + "\n牌摞: " + parsed.piles;
+            toolContent = t("手牌共 {n} 张\n{info}\n牌摞: {piles}", { n: parsed.hand_size, info: parsed.info, piles: parsed.piles });
           } else if (parsed.content !== undefined && parsed.summary) {
             // read_experience result
             if (!parsed.content) {
@@ -3666,9 +3673,9 @@
             }
           } else if (parsed.rounds) {
             // view_history result
-            const header = "共 " + parsed.total_rounds + " 轮 · " + parsed.total_plays + " 次出牌\n";
+            const header = t("共 {n} 轮 · {m} 次出牌\n", { n: parsed.total_rounds, m: parsed.total_plays });
             const body = parsed.rounds.map(r => {
-              return "第" + r.round + "轮\n" + r.plays.map(p => "  " + p).join("\n");
+              return t("第{n}轮\n", { n: r.round }) + r.plays.map(p => "  " + p).join("\n");
             }).join("\n\n");
             const footer = parsed._reminder ? "\n\n" + parsed._reminder : "";
             toolContent = header + "\n" + body + footer;
@@ -3755,14 +3762,14 @@
         // Streaming: closing tag not yet received
         const partialThink = remaining.substring(thinkStart + 7).trim();
         html += '<div class="ai-think-block streaming">';
-        html += '<div class="ai-think-label">思考中…</div>';
+        html += '<div class="ai-think-label">' + t("思考中…") + '</div>';
         html += '<div class="ai-think-content">' + (partialThink ? renderMarkdown(partialThink) : '') + '</div>';
         html += '</div>';
         break;
       }
       const thinkContent = remaining.substring(thinkStart + 7, thinkEnd).trim();
       html += '<div class="ai-think-block">';
-      html += '<div class="ai-think-label">思考</div>';
+      html += '<div class="ai-think-label">' + t("思考") + '</div>';
       html += '<div class="ai-think-content">' + renderMarkdown(thinkContent) + '</div>';
       html += '</div>';
       remaining = remaining.substring(thinkEnd + 8);
@@ -3789,11 +3796,11 @@
       .replace(/```(?:json)?/gi, "")
       .replace(/```/g, "")
       .trim();
-    if (!raw) throw new Error("模型返回为空");
+    if (!raw) throw new Error(t("模型返回为空"));
     try { return JSON.parse(raw); } catch (e) {
       const start = raw.indexOf("{");
       const end = raw.lastIndexOf("}");
-      if (start < 0 || end <= start) throw new Error("模型返回不是 JSON");
+      if (start < 0 || end <= start) throw new Error(t("模型返回不是 JSON"));
       return JSON.parse(raw.slice(start, end + 1));
     }
   }
@@ -3809,10 +3816,10 @@
 
   async function callLLMWithMessages(messages, tools, providerId, modelName, onChunk) {
     const providerKey = getProviderApiKey(providerId);
-    if (!providerKey) throw new Error("API Key 缺失");
+    if (!providerKey) throw new Error(t("API Key 缺失"));
 
     const config = getProviderConfig(providerId);
-    if (!config) throw new Error("未知 Provider: " + providerId);
+    if (!config) throw new Error(t("未知 Provider: {name}", { name: providerId }));
 
     // 始终流式请求；是否实时显示由 onChunk 决定（面板未打开时丢弃块，
     // 中途打开面板也能从下一块接上完整内容，因为每块都带累计全文）
@@ -3837,7 +3844,7 @@
 
       if (!response.ok) {
         const errText = await response.text();
-        throw new Error(config.shortLabel + " 请求失败(" + response.status + "): " + errText.slice(0, 180));
+        throw new Error(t("{label} 请求失败({status}): {err}", { label: config.shortLabel, status: response.status, err: errText.slice(0, 180) }));
       }
 
       // 使用即续期：本次调用成功，把该服务商的 API Key Cookie 有效期重新延长到 30 天
@@ -3908,8 +3915,8 @@
   function buildCardDescription(card) {
     if (!card.suit) return card.rank;
     let desc = card.suit + card.rank;
-    if (game.isWildCard(card)) desc += "(逢人配)";
-    else if (game.isLevelCard(card)) desc += "(级牌)";
+    if (game.isWildCard(card)) desc += t("(逢人配)");
+    else if (game.isLevelCard(card)) desc += t("(级牌)");
     return desc;
   }
 
@@ -3933,16 +3940,16 @@
     const cls = sizeClass || "";
     if (!card) return "";
     if (card.rank === "大王") {
-      return `<span class="card ${cls} joker-red" title="大王" data-card-id="${card.id}"><span class="rank">大<br>王</span></span>`;
+      return `<span class="card ${cls} joker-red" title="${t("大王")}" data-card-id="${card.id}"><span class="rank">大<br>王</span></span>`;
     }
     if (card.rank === "小王") {
-      return `<span class="card ${cls} joker-black" title="小王" data-card-id="${card.id}"><span class="rank">小<br>王</span></span>`;
+      return `<span class="card ${cls} joker-black" title="${t("小王")}" data-card-id="${card.id}"><span class="rank">小<br>王</span></span>`;
     }
     const extraCls = cardClasses(card);
     const wildTag = game.isWildCard(card) ? '<span class="wild-tag">配</span>' : '';
     const isWild = game.isWildCard(card);
     const isLvl = game.isLevelCard(card) && !isWild;
-    return `<span class="card ${cls} ${extraCls}" title="${card.suit}${card.rank}${isWild ? ' 逢人配' : ''}${isLvl ? ' 级牌' : ''}" data-card-id="${card.id}"><span class="rank">${card.rank}</span><span class="suit">${card.suit||''}</span>${wildTag}</span>`;
+    return `<span class="card ${cls} ${extraCls}" title="${card.suit}${card.rank}${isWild ? ' ' + t('逢人配') : ''}${isLvl ? ' ' + t('级牌') : ''}" data-card-id="${card.id}"><span class="rank">${card.rank}</span><span class="suit">${card.suit||''}</span>${wildTag}</span>`;
   }
 
   function renderCardBack(sizeClass) {
@@ -4000,17 +4007,17 @@
 
   function renderMiniCard(card) {
     if (card.rank === "大王") {
-      return `<span class="play-card-mini joker-red" title="大王"><span class="rank">大</span></span>`;
+      return `<span class="play-card-mini joker-red" title="${t("大王")}"><span class="rank">大</span></span>`;
     }
     if (card.rank === "小王") {
-      return `<span class="play-card-mini joker-black" title="小王"><span class="rank">小</span></span>`;
+      return `<span class="play-card-mini joker-black" title="${t("小王")}"><span class="rank">小</span></span>`;
     }
     const colorCls = (card.suit === "♥" || card.suit === "♦") ? "red" : "black";
     let extraCls = "";
     if (game.isWildCard(card)) extraCls = " wild-card";
     else if (game.isLevelCard(card)) extraCls = " level-card";
     const isWild = game.isWildCard(card);
-    return `<span class="play-card-mini ${colorCls}${extraCls}" title="${card.suit}${card.rank}${isWild ? ' 逢人配' : ''}"><span class="rank">${card.rank}</span><span class="suit">${card.suit||''}</span></span>`;
+    return `<span class="play-card-mini ${colorCls}${extraCls}" title="${card.suit}${card.rank}${isWild ? ' ' + t('逢人配') : ''}"><span class="rank">${card.rank}</span><span class="suit">${card.suit||''}</span></span>`;
   }
 
   function renderRoundHistory() {
@@ -4038,7 +4045,7 @@
       for (const entry of rounds[r]) {
         const who = game.players[entry.playerIdx].name;
         if (entry.cards === null) {
-          html += `<div class="round-play-entry pass-entry"><span class="play-who">${who}</span><span class="play-pass">不要</span></div>`;
+          html += `<div class="round-play-entry pass-entry"><span class="play-who">${who}</span><span class="play-pass">${t("不要")}</span></div>`;
         } else {
           const cardsHtml = entry.cards.map(c => renderMiniCard(c)).join("");
           html += `<div class="round-play-entry"><span class="play-who">${who}</span><span class="play-cards">${cardsHtml}</span></div>`;
@@ -4051,7 +4058,7 @@
   }
 
   function renderLevelBadge() {
-    $("#levelBadge").text("本局打 " + game.levelRank);
+    $("#levelBadge").text(t("本局打 {rank}", { rank: game.levelRank }));
   }
 
   function updateCurrentPlayerIndicator() {
@@ -4093,7 +4100,7 @@
 
   // ---------- Logging ----------
   function addLog(msg) {
-    console.log("[掼蛋]", msg);
+    console.log("[" + t("掼蛋") + "]", msg);
   }
 
   // ---------- Human actions ----------
@@ -4190,8 +4197,8 @@
 
       $prov.empty();
       if (!available.length) {
-        $prov.append('<option value="">无可用 Key</option>');
-        $model.empty().append('<option value="">先去配置 Key</option>');
+        $prov.append('<option value="">' + t("无可用 Key") + '</option>');
+        $model.empty().append('<option value="">' + t("先去配置 Key") + '</option>');
         $prov.prop("disabled", true);
         $model.prop("disabled", true);
         continue;
@@ -4253,12 +4260,12 @@
       }
       if (aiSeatIdx.length > 0) {
         if (!getAvailableProviders().length) {
-          showToast("AI 座位需要大模型才能运行。请先到「配置页」填写至少一家服务商的 API Key。", { seconds: 4, suffix: "" });
+          showToast(t("AI 座位需要大模型才能运行。请先到「配置页」填写至少一家服务商的 API Key。"), { seconds: 4, suffix: "" });
           return;
         }
         for (const i of aiSeatIdx) {
           if (!getSeatAiConfig(i)) {
-            showToast("座位「" + SEAT_NAMES[i] + "」配置为 AI，但没有可用的模型配置，请检查其服务商选择。", { seconds: 4, suffix: "" });
+            showToast(t("座位「{name}」配置为 AI，但没有可用的模型配置，请检查其服务商选择。", { name: SEAT_NAMES[i] }), { seconds: 4, suffix: "" });
             return;
           }
         }
@@ -4266,19 +4273,19 @@
       updateSeatInfo();
       selectedCards = [];
       game.startNewGame();
-      $("#gameStatus").text("游戏中").css("color", "");
-      $("#newGameBtn").text("新一局").prop("disabled", false);
+      $("#gameStatus").text(t("游戏中")).css("color", "");
+      $("#newGameBtn").text(t("新一局")).prop("disabled", false);
       renderLevelBadge();
       renderAll();
 
       // 通知所有 AI 玩家开始组牌（后台进行，不阻塞游戏开始）
       const aiPlayers = game.players.filter(p => p instanceof LLMAIPlayer);
       if (aiPlayers.length > 0) {
-        addLog("AI 玩家开始组牌…");
+        addLog(t("AI 玩家开始组牌…"));
         aiPlayers.forEach(p => {
           p.prepareHand(game, "initial").then(() => {
             if (!p.preparing) {
-              addLog(p.name + " 组牌完成");
+              addLog(t("{name} 组牌完成", { name: p.name }));
             }
           });
         });
@@ -4316,29 +4323,29 @@
       if (aiPanelPlayerIdx < 0) return;
       const player = game.players[aiPanelPlayerIdx];
       if (!player || !(player instanceof LLMAIPlayer) || player.decisionLog.length === 0) {
-        showToast("暂无操作日志", { seconds: 2, suffix: "" });
+        showToast(t("暂无操作日志"), { seconds: 2, suffix: "" });
         return;
       }
-      let text = `=== ${player.name} 操作日志 ===\n`;
-      text += `手牌数量: ${player.cards.length}\n`;
+      let text = t("=== {name} 操作日志 ===\n", { name: player.name });
+      text += t("手牌数量: {n}\n", { n: player.cards.length });
       if (player.piles.length > 0) {
-        text += "当前牌摞:\n";
+        text += t("当前牌摞:\n");
         player.piles.forEach((p, i) => {
           const cards = p.cardIds.map(id => player.cards.find(c => c.id === id)).filter(c => c);
-          text += `  摞${i}: ${cards.map(c => c.suit + c.rank).join(" ")}\n`;
+          text += t("  摞{i}: {cards}\n", { i, cards: cards.map(c => c.suit + c.rank).join(" ") });
         });
       }
-      text += "\n--- 操作记录 ---\n";
+      text += t("\n--- 操作记录 ---\n");
       player.decisionLog.forEach((entry, i) => {
         text += `\n[${entry.time}] ${entry.action}\n`;
-        text += `  参数: ${JSON.stringify(entry.params)}\n`;
-        text += `  结果: ${JSON.stringify(entry.result)}\n`;
+        text += t("  参数: {v}\n", { v: JSON.stringify(entry.params) });
+        text += t("  结果: {v}\n", { v: JSON.stringify(entry.result) });
       });
       navigator.clipboard.writeText(text).then(() => {
         const $btn = $("#aiPanelCopyLog");
         $btn.text("✓");
-        setTimeout(() => $btn.text("复制"), 1500);
-      }).catch(() => showToast("复制失败", { seconds: 2, suffix: "" }));
+        setTimeout(() => $btn.text(t("复制")), 1500);
+      }).catch(() => showToast(t("复制失败"), { seconds: 2, suffix: "" }));
     });
 
     // Chat send button
@@ -4379,12 +4386,12 @@
       if (cards.length === 0) return;
       const analysis = game.analyzeCards(cards);
       if (!analysis) {
-        addLog("无效的牌型组合，请重新选择（提示：逢人配可以帮你凑牌型）");
+        addLog(t("无效的牌型组合，请重新选择（提示：逢人配可以帮你凑牌型）"));
         return;
       }
       if (game.lastPlay && game.lastPlay.playerIdx !== pos &&
           !game.canBeat(analysis, game.lastPlay.analysis)) {
-        addLog("所选牌型打不过上家的牌，请重新选择或过牌");
+        addLog(t("所选牌型打不过上家的牌，请重新选择或过牌"));
         return;
       }
       selectedCards = [];
@@ -4449,7 +4456,7 @@
       if (cards.length === 0) return;
       const analysis = game.analyzeCards(cards);
       if (!analysis || analysis.type === "single") {
-        addLog(!analysis ? "所选牌无法组成有效牌型" : "单张牌无需理牌");
+        addLog(!analysis ? t("所选牌无法组成有效牌型") : t("单张牌无需理牌"));
         return;
       }
       player.pileCards(cards.map(c => c.id));
@@ -4458,7 +4465,7 @@
       updatePileButtons();
       updatePlayButton();
       renderPlayerCards(pos);
-      addLog(`理牌：将 ${cards.length} 张牌组成一摞（${TYPE_NAMES[analysis.type]}）`);
+      addLog(t("理牌：将 {n} 张牌组成一摞（{type}）", { n: cards.length, type: TYPE_NAMES[analysis.type] }));
     });
 
     // Unpile button
@@ -4485,7 +4492,7 @@
     renderSeatConfigControls();
     if (!getAvailableProviders().length) {
       // 一个模型都没配置：toast 提示（带倒计时），几秒后自动跳转配置页
-      showToast("还没有配置任何模型 Key —— ", {
+      showToast(t("还没有配置任何模型 Key —— "), {
         seconds: 5,
         onDone: function () { location.href = "config.html"; }
       });
@@ -4513,7 +4520,7 @@
     let left = seconds;
     const $count = $('<span class="gd-count"></span>').text(left);
     $t.empty().append(document.createTextNode(text)).append($count)
-      .append(document.createTextNode(opts.suffix !== undefined ? opts.suffix : " 秒后自动前往配置页"))
+      .append(document.createTextNode(opts.suffix !== undefined ? opts.suffix : t(" 秒后自动前往配置页")))
       .append('<div class="gd-bar" style="animation-duration:' + seconds + 's"></div>')
       .addClass("show");
 
