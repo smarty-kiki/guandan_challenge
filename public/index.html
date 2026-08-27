@@ -576,6 +576,25 @@
     .stat-item .suit { display: block; font-size: 0.95rem; color: var(--gold); margin-bottom: 0.2rem; }
     .stat-item .num { font-size: 1.55rem; font-weight: 900; color: var(--ink); line-height: 1.2; }
     .stat-item .label { font-size: 0.72rem; color: var(--ink-soft); margin-top: 0.25rem; }
+    .stats-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 0.6rem;
+      margin: 0 0 0.6rem;
+    }
+    .stats-head h2 { font-size: 1.3rem; font-weight: 900; margin: 0; }
+    .clear-stats-btn {
+      background: none;
+      border: none;
+      padding: 2px 4px;
+      color: var(--ink-soft);
+      font-size: 0.75rem;
+      text-decoration: underline;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .clear-stats-btn:hover { color: var(--red); }
     .stats-empty { color: #b4ac99; font-size: 0.82rem; margin-top: 0.9rem; }
     .note { font-size: 0.78rem; color: #9aa293; margin-top: 1rem; }
 
@@ -977,7 +996,10 @@
       </div>
 
       <div>
-        <h2 style="font-size:1.3rem;font-weight:900;margin:0 0 0.6rem;">本机战绩</h2>
+        <div class="stats-head">
+          <h2>本机战绩</h2>
+          <button class="clear-stats-btn" id="clearStatsBtn" title="清空本机全部战绩统计（AI 经验与 Key 不受影响）">清空战绩</button>
+        </div>
         <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 1rem;">
           只属于这台浏览器的战报——赢了算你的，输了怪模型。
         </p>
@@ -1094,6 +1116,13 @@
 
   $(function () {
     renderStats();
+
+    // 清空战绩（换新模型重新比，先清掉旧账）
+    $("#clearStatsBtn").on("click", function () {
+      if (!confirm("确定清空本机战绩吗？将删除全部对局统计（胜率、模型胜场、最长对局等）。\nAI 经验记忆、座位配置和 API Key 不受影响。")) return;
+      localStorage.removeItem(STATS_KEY);
+      renderStats();
+    });
 
     // 参赛阵容：标记已配置的模型
     const available = getAvailableProviders();
